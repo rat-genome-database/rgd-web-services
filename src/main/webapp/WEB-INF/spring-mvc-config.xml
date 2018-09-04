@@ -1,0 +1,47 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd ">
+ 
+	<context:component-scan base-package="edu.mcw.rgd.web" />
+
+	<context:annotation-config />
+	<mvc:default-servlet-handler/>
+
+
+	<!-- to pick up the bundled spring configuration-->
+	<context:component-scan base-package="basaki;basaki.service;basaki.service.controller;basaki.service.impl;basaki.data"/>
+
+
+
+	<!--<bean id="documentationConfig" class="com.mangofactory.swagger.configuration.SpringSwaggerConfig"/>-->
+	<bean id="documentationConfig" class="edu.mcw.rgd.swagger.SwaggerConfiguration"/>
+
+
+
+	<context:property-placeholder location="classpath:/swagger.properties" />
+
+	<mvc:view-controller path="/" view-name="index"/>
+
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/views/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<mvc:resources mapping="/api/**" location="/api/" />
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
+
+	<mvc:annotation-driven />
+ 
+</beans>

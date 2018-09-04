@@ -1,0 +1,1 @@
+<meta http-equiv="refresh" content="0; url=/rgdws/api/index.html" />
