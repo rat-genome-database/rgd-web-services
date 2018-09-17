@@ -24,7 +24,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping(value = "/agr")
-
 public class AGRWebService {
 
 
@@ -201,13 +200,7 @@ public class AGRWebService {
 
         returnMap.put("data",geneList);
 
-        HashMap metadata = new HashMap();
-        String date = getDateProduced();
-
-        metadata.put("dateProduced", date);
-        metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.3");
-        returnMap.put("metaData", metadata);
+        returnMap.put("metaData", getMetaData());
 
         return returnMap;
     }
@@ -280,13 +273,7 @@ public class AGRWebService {
 
         returnMap.put("data", alleleList);
 
-        HashMap metadata = new HashMap();
-        String date = getDateProduced();
-
-        metadata.put("dateProduced", date);
-        metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.3");
-        returnMap.put("metaData", metadata);
+        returnMap.put("metaData", getMetaData());
 
         return returnMap;
     }
@@ -313,14 +300,10 @@ public class AGRWebService {
         AnnotationDAO adao = new AnnotationDAO();
         XdbIdDAO xdao = new XdbIdDAO();
 
-        List<Annotation> annots = adao.getAnnotationsBySpecies(speciesTypeKey, aspect);
+        List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "RGD");
         for( Annotation a: annots ) {
             // handle only GENES
             if( a.getRgdObjectKey()!=RgdId.OBJECT_KEY_GENES ) {
-                continue;
-            }
-            // handle only manual annotations
-            if( !a.getDataSrc().equals("RGD") ) {
                 continue;
             }
 
@@ -356,9 +339,10 @@ public class AGRWebService {
 
             phenotype.put("phenotypeStatement", a.getTerm());
 
-            phenotype.put("pubModId", "RGD:"+a.getRefRgdId());
-
-            phenotype.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
+            HashMap evidenceMap = new HashMap();
+            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
+            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
+            phenotype.put("evidence",evidenceMap);
 
             phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
 
@@ -368,19 +352,116 @@ public class AGRWebService {
 
         returnMap.put("data", phenotypes);
 
-        HashMap metadata = new HashMap();
-        String date = getDateProduced();
-
-        metadata.put("dateProduced", date);
-        metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.3");
-        returnMap.put("metaData", metadata);
+        returnMap.put("metaData", getMetaData());
 
         return returnMap;
     }
 
-    List getDataProviderForMetaData() {
-        List dataProviderArray = new ArrayList();
+    @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
+    @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getExpressionForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+
+        HashMap returnMap = new HashMap();
+
+        int speciesTypeKey = SpeciesType.parse("taxon:"+taxonId);
+
+        ArrayList records = new ArrayList();
+
+        AnnotationDAO adao = new AnnotationDAO();
+        List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, "C", "RGD");
+        XdbIdDAO xdao = new XdbIdDAO();
+
+        for( Annotation a: annots ) {
+            // handle only GENES
+            if( a.getRgdObjectKey()!=RgdId.OBJECT_KEY_GENES ) {
+                continue;
+            }
+            // process only original annotations - WITH_INFO must be NULL
+            if( a.getWithInfo()!=null ) {
+                continue;
+            }
+            // allowed evidence codes: IDA, IMP, IPI
+            if( !(a.getEvidence().equals("IDA") || a.getEvidence().equals("IMP") || a.getEvidence().equals("IPI")) ) {
+                continue;
+            }
+            // the only qualifier we support is 'colocalizes_with'
+            String qualifier = a.getQualifier();
+            if( !Utils.isStringEmpty(qualifier) ) {
+                if( !qualifier.equals("colocalizes_with") ) {
+                    continue;
+                }
+                qualifier = "RO:0002325";
+            }
+
+            // get pubmed id
+            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
+            if( pmedIds.isEmpty() ) {
+                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
+                continue;
+            }
+
+            // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
+            // the default assay term
+
+            HashMap record = new HashMap();
+
+            // gene id
+            String geneId;
+            if( speciesTypeKey==SpeciesType.RAT ) {
+                geneId = "RGD:"+a.getAnnotatedObjectRgdId();
+            } else {
+                List<XdbId> hgncIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_HGNC, a.getAnnotatedObjectRgdId());
+                if( hgncIds.size()!=1 ) {
+                    continue;
+                }
+                geneId = hgncIds.get(0).getAccId();
+            }
+            record.put("geneId", geneId);
+
+            record.put("dateAssigned", formatDate(a.getCreatedDate()));
+
+            // evidence
+            HashMap evidenceMap = new HashMap();
+            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
+            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
+            record.put("evidence",evidenceMap);
+
+            // expression ids
+            String assay = "MMO:0000640"; // expression assay
+            HashMap whereExpressed = new HashMap();
+            whereExpressed.put("cellularComponentTermId", a.getTermAcc());
+            if( !Utils.isStringEmpty(qualifier) ) {
+                whereExpressed.put("cellularComponentQualifierTermId", qualifier);
+            }
+            String whereExpressedStmt = a.getTerm();
+            if( !Utils.isStringEmpty(a.getNotes()) ) {
+                if( a.getNotes().startsWith("MMO:") ) {
+                    assay = a.getNotes().trim();
+                } else {
+                    whereExpressedStmt += "; "+a.getNotes();
+                }
+            }
+            whereExpressed.put("whereExpressedStatement", whereExpressedStmt);
+
+            record.put("whereExpressed", whereExpressed);
+
+            HashMap whenExpressed = new HashMap();
+            whenExpressed.put("stageName", "N/A");
+            record.put("whenExpressed", whenExpressed);
+
+            record.put("assay", assay);
+
+            records.add(record);
+        }
+
+        returnMap.put("data", records);
+
+        returnMap.put("metaData", getMetaData());
+
+        return returnMap;
+    }
+
+    HashMap getDataProviderForMetaData() {
 
         HashMap crossReference = new HashMap();
         crossReference.put("id", "RGD");
@@ -392,8 +473,17 @@ public class AGRWebService {
         dataProvider.put("type", "curated");
         dataProvider.put("crossReference", crossReference);
 
-        dataProviderArray.add(dataProvider);
-        return dataProviderArray;
+        return dataProvider;
+    }
+
+    HashMap getMetaData() {
+        HashMap metadata = new HashMap();
+        String date = getDateProduced();
+
+        metadata.put("dateProduced", date);
+        metadata.put("dataProvider", getDataProviderForMetaData());
+        metadata.put("release", "RGD-1.0.0.7");
+        return metadata;
     }
 
     String getDateProduced() {
