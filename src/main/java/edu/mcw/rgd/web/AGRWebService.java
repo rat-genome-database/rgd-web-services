@@ -262,7 +262,11 @@ public class AGRWebService {
             HashMap crossRef = new HashMap();
             List<String> pages = new ArrayList<>();
             pages.add("allele");
+<<<<<<< HEAD
             crossRef.put("id", "RGD:"+parentGenes.get(0).getRgdId());
+=======
+            crossRef.put("id", "RGD:"+g.getRgdId());
+>>>>>>> dev
             crossRef.put("pages", pages);
             crossList.add(crossRef);
             map.put("crossReferences", crossList);
