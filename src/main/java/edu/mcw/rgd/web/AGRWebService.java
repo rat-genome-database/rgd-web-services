@@ -160,13 +160,18 @@ public class AGRWebService {
 
 				// 2) HGNC id used in the species section of the page to link back to HGNC gene page
 				crossRef = new HashMap();
-				crossRef.put("id", "HGNC:"+hgncId);
+				crossRef.put("id", hgncId);
 				pages = new ArrayList<>();
 				pages.add("gene");
 				crossRef.put("pages", pages);
 				crossList.add(crossRef);
 
-			}else { //rat taxon : 10116
+				// 3) RGD id (without pages) default_url page
+				crossRef = new HashMap();
+				crossRef.put("id", "RGD:"+g.getRgdId());
+				crossList.add(crossRef);
+
+				}else { //rat taxon : 10116
                 map.put("primaryId", "RGD:"+g.getRgdId());
                 if (hgncId != null) {
                     List secondaryIds = new ArrayList();
