@@ -52,7 +52,7 @@ public class AGRWebService {
         crossRefPagesForGeneRgdId.add("gene");
         crossRefPagesForGeneRgdId.add("gene/references");
 
-        int mapKey = -1;
+		int mapKey = -1;
         if (taxonId.equals("9606")) {
             mapKey=38;
         }else if (taxonId.equals("10116")) {
@@ -149,20 +149,42 @@ public class AGRWebService {
                 secondaryIds.add("RGD:" + rgdId);
                 map.put("secondaryIds", secondaryIds);
 
-            }else { //rat taxon : 10116
+				// add a cross-references for human genes:
+				// 1) RGD id mapped to 'gene/references' page (to link back to RGD via Literature link an AGR page)
+				HashMap crossRef = new HashMap();
+				crossRef.put("id", "RGD:"+g.getRgdId());
+				List<String> pages = new ArrayList<>();
+				pages.add("gene/references");
+				crossRef.put("pages", pages);
+				crossList.add(crossRef);
+
+				// 2) HGNC id used in the species section of the page to link back to HGNC gene page
+				crossRef = new HashMap();
+				crossRef.put("id", hgncId);
+				pages = new ArrayList<>();
+				pages.add("gene");
+				crossRef.put("pages", pages);
+				crossList.add(crossRef);
+
+				// 3) RGD id (without pages) default_url page
+				crossRef = new HashMap();
+				crossRef.put("id", "RGD:"+g.getRgdId());
+				crossList.add(crossRef);
+
+				}else { //rat taxon : 10116
                 map.put("primaryId", "RGD:"+g.getRgdId());
                 if (hgncId != null) {
                     List secondaryIds = new ArrayList();
                     secondaryIds.add(hgncId);
                     map.put("secondaryIds", secondaryIds);
                 }
-            }
 
-            // add a cross-reference object for gene rgd id
-            HashMap crossRef = new HashMap();
-            crossRef.put("id", "RGD:"+g.getRgdId());
-            crossRef.put("pages", crossRefPagesForGeneRgdId);
-            crossList.add(crossRef);
+				// add a cross-reference object for gene rgd id
+				HashMap crossRef = new HashMap();
+				crossRef.put("id", "RGD:"+g.getRgdId());
+				crossRef.put("pages", crossRefPagesForGeneRgdId);
+				crossList.add(crossRef);
+            }
 
 
             map.put("name", g.getName());
