@@ -30,7 +30,7 @@ public class GeneWebService {
     }
 
     @RequestMapping(value="/orthologs", method=RequestMethod.POST)
-    @ApiOperation(value="Return a list of gene ortholocp s", tags="Gene")
+    @ApiOperation(value="Return a list of gene orthologs", tags="Gene")
     public HashMap<String, List<Gene>> getOrthologsByList(
             @RequestBody(required = true) OrthologRequest orthologRequest
 
