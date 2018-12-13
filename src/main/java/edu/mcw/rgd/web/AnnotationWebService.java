@@ -1,17 +1,18 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
+import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.domain.AnnotatedGeneRequest;
+import edu.mcw.rgd.domain.AnnotationRequest;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Tag;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +22,24 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/annotations")
 public class AnnotationWebService {
+
+
+
+    @RequestMapping(value="/", method=RequestMethod.POST)
+    @ApiOperation(value="Return a list of genes annotated to an ontology term", tags="Annotation")
+    public List<Annotation> getAnnotations(
+            @RequestBody(required = false) AnnotationRequest data
+
+    ) throws Exception{
+
+
+        AnnotationDAO adao = new AnnotationDAO();
+        List<Annotation> annotations = adao.getAnnotations(data.termAcc, data.ids,data.speciesTypeKeys,data.evidenceCodes);
+
+        return annotations;
+    }
+
+
 
     @RequestMapping(value="/reference/{refRgdId}", method= RequestMethod.GET)
     @ApiOperation(value="Returns a list of annotations for a reference",tags = "Annotation")
