@@ -458,7 +458,7 @@ public class AGRWebService {
             String whereExpressedStmt = a.getTerm();
             if( !Utils.isStringEmpty(a.getNotes()) ) {
 				int mmoTermPos = a.getNotes().indexOf("MMO:");
-				if( mmoTermPos>=0 && mmoTermPos+11<=a.getNotes().length() ) {}
+				if( mmoTermPos>=0 && mmoTermPos+11<=a.getNotes().length() ) {
                     assay = a.getNotes().substring(mmoTermPos, mmoTermPos+11);
                 } else {
                     whereExpressedStmt += "; "+a.getNotes();
