@@ -27,7 +27,7 @@ public class EnrichmentWebService {
     OntologyXDAO oDao = new OntologyXDAO();
     @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}/{aspect}", method = RequestMethod.GET)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public HashMap getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+    public ArrayList getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                             @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes,
                             @ApiParam(value = "List of ontology groups", required = true) @PathVariable(value = "aspect") String aspect) throws Exception {
 
@@ -43,7 +43,7 @@ public class EnrichmentWebService {
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
 
-        HashMap result = new HashMap();
+        ArrayList result = new ArrayList();
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneIds.length;
         BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
@@ -58,7 +58,7 @@ public class EnrichmentWebService {
             data.put("pvalue", pvalue);
             BigDecimal bonferroni = process.calculateBonferroni(pvalue,numberOfTerms);
             data.put("correctedpvalue",bonferroni);
-            result.put(acc,data);
+            result.add(data);
         }
 
 
