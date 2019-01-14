@@ -51,6 +51,7 @@ public class EnrichmentWebService {
         while (tit.hasNext() ) {
             HashMap data = new HashMap();
             String acc = (String) tit.next();
+            data.put("term",acc);
             int refs = geneCounts.get(acc);
             data.put("count",refs);
             BigDecimal pvalue =  process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
