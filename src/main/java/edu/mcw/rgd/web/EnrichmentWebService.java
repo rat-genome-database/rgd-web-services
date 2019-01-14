@@ -41,9 +41,9 @@ public class EnrichmentWebService {
             geneRgdIds.add(Integer.parseInt(geneIds[i]));
         }
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
-        HashMap<String,BigDecimal> pvalues = new HashMap<String,BigDecimal>();
-        HashMap<String,BigDecimal> correctedpvalues = new HashMap<String,BigDecimal>();
-       HashMap counts = new HashMap();
+
+       HashMap data = new HashMap();
+        HashMap result = new HashMap();
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneIds.length;
         BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
@@ -51,17 +51,16 @@ public class EnrichmentWebService {
         while (tit.hasNext() ) {
             String acc = (String) tit.next();
             int refs = geneCounts.get(acc);
-            counts.put(acc,refs);
+            data.put("count",refs);
             BigDecimal pvalue =  process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
-            pvalues.put(acc, pvalue);
+            data.put("pvalue", pvalue);
             BigDecimal bonferroni = process.calculateBonferroni(pvalue,numberOfTerms);
-            correctedpvalues.put(acc,bonferroni);
+            data.put("correctedpvalue",bonferroni);
+            result.put(acc,data);
         }
 
-        HashMap result = new HashMap();
-        result.put("pvalues",pvalues);
-        result.put("correctedPvalues",correctedpvalues);
-        result.put("counts",counts);
+
+
         return result;
     }
 
