@@ -80,7 +80,7 @@ public class EnrichmentWebService {
                 data.put("correctedpvalue", bonferroni);
                 arr.add(data);
             }
-            result.put(Aspect.getFriendlyName(aspects.get(i)), arr);
+            result.put((aspects.get(i)), arr);
         }
 
         return result;
