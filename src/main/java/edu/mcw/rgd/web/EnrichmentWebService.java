@@ -29,7 +29,7 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
-    @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}/{aspect}", method = RequestMethod.GET)
+    @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}", method = RequestMethod.GET)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public HashMap getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                             @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes)
