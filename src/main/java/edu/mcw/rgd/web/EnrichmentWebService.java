@@ -55,14 +55,15 @@ public class EnrichmentWebService {
         aspects.add(Aspect.PATHWAY);
         aspects.add(Aspect.MAMMALIAN_PHENOTYPE);
         aspects.add(Aspect.CHEBI);
-
+        int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
+        int inputGenes = geneRgdIds.size();
 
         for(int i=0;i<aspects.size();i++) {
             List<String> aspect = new ArrayList<>();
+            List arr = new ArrayList<>();
             aspect.add(aspects.get(i));
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspect);
-            int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
-            int inputGenes = geneRgdIds.size();
+
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
             while (tit.hasNext()) {
@@ -77,9 +78,9 @@ public class EnrichmentWebService {
                 data.put("pvalue", pvalue);
                 BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
                 data.put("correctedpvalue", bonferroni);
-                result.put(Aspect.getFriendlyName(aspects.get(i)), data);
+                arr.add(data);
             }
-
+            result.put(Aspect.getFriendlyName(aspects.get(i)), arr);
         }
 
         return result;
