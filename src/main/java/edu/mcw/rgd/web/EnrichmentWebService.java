@@ -42,8 +42,10 @@ public class EnrichmentWebService {
         HashMap result = new HashMap();
 
         for (int i = 0; i < geneSymbols.length; i++) {
-            Gene g = gdao.getGenesBySymbol(geneSymbols[i],speciesTypeKey);
-            geneRgdIds.add(g.getRgdId());
+            Gene g = new Gene();
+            g = gdao.getGenesBySymbol(geneSymbols[i],speciesTypeKey);
+            if(g != null)
+                geneRgdIds.add(g.getRgdId());
         }
 
 
