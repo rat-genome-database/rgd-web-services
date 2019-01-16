@@ -1,8 +1,10 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -22,6 +24,7 @@ import java.util.*;
 public class EnrichmentWebService {
 
     GeneEnrichmentDAO dao = new GeneEnrichmentDAO();
+    GeneDAO gdao = new GeneDAO();
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
@@ -31,21 +34,22 @@ public class EnrichmentWebService {
                             @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes,
                             @ApiParam(value = "List of ontology groups", required = true) @PathVariable(value = "aspect") String aspect) throws Exception {
 
-        String[] geneIds = genes.split(",");
+        String[] geneSymbols = genes.split(",");
 
         List<Integer> geneRgdIds = new ArrayList<>();
         List<String> termSet = new ArrayList<>();
         List<String> aspects = new ArrayList<>();
         aspects.add(aspect);
-        for (int i = 0; i < geneIds.length; i++) {
-            geneRgdIds.add(Integer.parseInt(geneIds[i]));
+        for (int i = 0; i < geneSymbols.length; i++) {
+            Gene g = gdao.getGenesBySymbol(geneSymbols[i],speciesTypeKey);
+            geneRgdIds.add(g.getRgdId());
         }
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
 
         ArrayList result = new ArrayList();
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
-        int inputGenes = geneIds.length;
+        int inputGenes = geneRgdIds.size();
         BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
         Iterator tit = geneCounts.keySet().iterator();
         while (tit.hasNext() ) {
