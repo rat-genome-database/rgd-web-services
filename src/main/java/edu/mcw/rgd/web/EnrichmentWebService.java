@@ -55,7 +55,9 @@ public class EnrichmentWebService {
         while (tit.hasNext() ) {
             HashMap data = new HashMap();
             String acc = (String) tit.next();
-            data.put("term",acc);
+            String term = oDao.getTermByAccId(acc).getTerm();
+            data.put("acc",acc);
+            data.put("term",term);
             int refs = geneCounts.get(acc);
             data.put("count",refs);
             BigDecimal pvalue =  process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
