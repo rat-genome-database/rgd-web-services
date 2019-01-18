@@ -18,6 +18,7 @@ import java.util.List;
  */
 
 @RestController
+@Api(tags="Rat Strain")
 @RequestMapping(value = "/strains")
 public class StrainWebService {
 

@@ -18,6 +18,7 @@ import java.util.Map;
  * Created by jdepons on 5/31/2016.
  */
 @RestController
+@Api(tags="Gene")
 @RequestMapping(value = "/genes")
 public class GeneWebService {
 
