@@ -3,6 +3,7 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.stats.ScoreBoardManager;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import java.util.Map;
  * Created by mtutaj on 10/4/2016.
  */
 @RestController
+@Api(tags="Statistics")
 @RequestMapping(value = "/stats")
 public class StatsWebService {
 

@@ -9,6 +9,7 @@ import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.domain.AnnotatedGeneRequest;
 import edu.mcw.rgd.domain.AnnotationRequest;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.Tag;
@@ -20,6 +21,7 @@ import java.util.List;
  * Created by jdepons on 5/31/2016.
  */
 @RestController
+@Api(tags="Annotation")
 @RequestMapping(value = "/annotations")
 public class AnnotationWebService {
 
