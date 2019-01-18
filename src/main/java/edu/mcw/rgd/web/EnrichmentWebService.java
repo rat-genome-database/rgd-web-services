@@ -29,17 +29,18 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
-    @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}", method = RequestMethod.GET)
+    @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}/{aspect}", method = RequestMethod.GET)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public HashMap getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
-                            @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes)
+    public List getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+                            @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes,
+                            @ApiParam(value = "List of ontology groups", required = true) @PathVariable(value = "aspect") String aspect)
                              throws Exception {
 
         String[] geneSymbols = genes.split(",");
 
         List<Integer> geneRgdIds = new ArrayList<>();
         List<String> termSet = new ArrayList<>();
-        HashMap result = new HashMap();
+        List result = new ArrayList<>();
 
         for (int i = 0; i < geneSymbols.length; i++) {
             Gene g = new Gene();
@@ -50,21 +51,14 @@ public class EnrichmentWebService {
 
 
         ArrayList<String> aspects = new ArrayList<>();
-        aspects.add(Aspect.DISEASE);
-        aspects.add(Aspect.BIOLOGICAL_PROCESS);
-        aspects.add(Aspect.CELLULAR_COMPONENT);
-        aspects.add(Aspect.MOLECULAR_FUNCTION);
-        aspects.add(Aspect.PATHWAY);
-        aspects.add(Aspect.MAMMALIAN_PHENOTYPE);
-        aspects.add(Aspect.CHEBI);
+        aspects.add(aspect);
+
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
 
-        for(int i=0;i<aspects.size();i++) {
-            List<String> aspect = new ArrayList<>();
+
             List arr = new ArrayList<>();
-            aspect.add(aspects.get(i));
-            LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspect);
+            LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
@@ -82,8 +76,8 @@ public class EnrichmentWebService {
                 data.put("correctedpvalue", bonferroni);
                 arr.add(data);
             }
-            result.put((aspects.get(i)), arr);
-        }
+            result.add(arr);
+
 
         return result;
     }
