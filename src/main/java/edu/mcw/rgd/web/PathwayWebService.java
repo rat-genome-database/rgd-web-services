@@ -3,6 +3,7 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.PathwayDAO;
 import edu.mcw.rgd.datamodel.Pathway;
 import edu.mcw.rgd.process.Utils;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import java.util.List;
  * Created by mtutaj on 11/1/2016.
  */
 @RestController
+@Api(tags="Pathway")
 @RequestMapping(value = "/pathways")
 public class PathwayWebService {
 

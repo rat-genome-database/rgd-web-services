@@ -8,6 +8,7 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.process.Utils;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import java.util.*;
  * Created by mtutaj on 11/1/2016.
  */
 @RestController
+@Api(tags="Quantitative Phenotype")
 @RequestMapping(value = "/phenotype")
 public class PhenotypeWebService {
 
