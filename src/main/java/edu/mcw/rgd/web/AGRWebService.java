@@ -191,7 +191,16 @@ public class AGRWebService {
 
             map.put("name", g.getName());
             map.put("symbol", g.getSymbol());
-            map.put("geneSynopsis", Utils.getGeneDescription(g));
+			String geneSynopsis;
+			// emit merged-descriptions (AGR automated desc merged with RGD automated desc) for rat genes
+			if( mapKey==360 ) {
+				geneSynopsis = g.getMergedDescription();
+			} else { // and RGD automated desc for human genes
+				geneSynopsis = Utils.getGeneDescription(g);
+			}
+			if( !Utils.isStringEmpty(geneSynopsis) ) {
+				map.put("geneSynopsis", geneSynopsis);
+			}
 
             //get out of gene types
             map.put("soTermId", mg.getGene().getSoAccId());
