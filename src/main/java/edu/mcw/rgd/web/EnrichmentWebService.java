@@ -6,13 +6,11 @@ import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.ontologyx.Aspect;
+import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -29,13 +27,13 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
-    @RequestMapping(value = "/enrichment/chart/{speciesTypeKey}/{genes}/{aspect}", method = RequestMethod.POST)
+    @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public List getChart(@ApiParam(value = "Species Type Key - 3=rat ", required = true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
-                            @ApiParam(value = "List of RGDids", required = true) @PathVariable(value = "genes") String genes,
-                            @ApiParam(value = "List of ontology groups", required = true) @PathVariable(value = "aspect") String aspect)
+    public List getChart( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
                              throws Exception {
-
+        String genes = enrichmentRequest.genes;
+        int speciesTypeKey = enrichmentRequest.speciesTypeKey;
+        String aspect = enrichmentRequest.aspect;
         List<String> geneSymbols = Arrays.asList(genes.split(","));
 
 
