@@ -31,10 +31,10 @@ public class EnrichmentWebService {
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public List getChart( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
                              throws Exception {
-        String genes = enrichmentRequest.genes;
+        List<String> geneSymbols = enrichmentRequest.genes;
         int speciesTypeKey = enrichmentRequest.speciesTypeKey;
         String aspect = enrichmentRequest.aspect;
-        List<String> geneSymbols = Arrays.asList(genes.split(","));
+       
 
 
         List<Integer> geneRgdIds = new ArrayList<>();

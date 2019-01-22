@@ -7,6 +7,6 @@ import java.util.List;
  */
 public class EnrichmentRequest {
     public int speciesTypeKey;
-    public String genes;
+    public List<String> genes;
     public String aspect;
 }
