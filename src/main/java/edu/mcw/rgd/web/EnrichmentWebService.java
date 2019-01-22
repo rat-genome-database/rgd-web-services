@@ -40,7 +40,7 @@ public class EnrichmentWebService {
 
         List<Integer> geneRgdIds = new ArrayList<>();
         List<String> termSet = new ArrayList<>();
-        List result = new ArrayList<>();
+
 
         for (int i = 0; i < geneSymbols.length; i++) {
             Gene g = new Gene();
@@ -55,12 +55,14 @@ public class EnrichmentWebService {
 
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
+int count =0;
 
+            List result = new ArrayList<>();
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
-            while (tit.hasNext()) {
+            while (tit.hasNext()  && count++ < 200) {
                 HashMap data = new HashMap();
                 String acc = (String) tit.next();
                 String term = oDao.getTermByAccId(acc).getTerm();
@@ -74,7 +76,7 @@ public class EnrichmentWebService {
                 data.put("correctedpvalue", bonferroni);
                 result.add(data);
             }
-            
+
 
 
         return result;
