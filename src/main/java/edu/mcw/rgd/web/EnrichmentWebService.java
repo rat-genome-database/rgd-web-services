@@ -36,18 +36,23 @@ public class EnrichmentWebService {
                             @ApiParam(value = "List of ontology groups", required = true) @PathVariable(value = "aspect") String aspect)
                              throws Exception {
 
-        String[] geneSymbols = genes.split(",");
+        List<String> geneSymbols = Arrays.asList(genes.split(","));
+
 
         List<Integer> geneRgdIds = new ArrayList<>();
         List<String> termSet = new ArrayList<>();
 
+        geneSymbols.parallelStream().forEach(i-> {
 
-        for (int i = 0; i < geneSymbols.length; i++) {
-            Gene g = new Gene();
-            g = gdao.getGenesBySymbol(geneSymbols[i],speciesTypeKey);
-            if(g != null)
-                geneRgdIds.add(g.getRgdId());
-        }
+            try {
+                Gene g = new Gene();
+                g = gdao.getGenesBySymbol(i, speciesTypeKey);
+                if (g != null)
+                    geneRgdIds.add(g.getRgdId());
+            }catch(Exception e){
+                throw new RuntimeException(e);
+            }
+        });
 
 
         ArrayList<String> aspects = new ArrayList<>();
@@ -62,7 +67,8 @@ int count =0;
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
-            while (tit.hasNext()  && count++ < 200) {
+        geneCounts.keySet().parallelStream().forEach(i->  {
+            try {
                 HashMap data = new HashMap();
                 String acc = (String) tit.next();
                 String term = oDao.getTermByAccId(acc).getTerm();
@@ -75,7 +81,10 @@ int count =0;
                 BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
                 data.put("correctedpvalue", bonferroni);
                 result.add(data);
+            }catch (Exception e){
+                throw new RuntimeException(e);
             }
+        });
 
 
 
