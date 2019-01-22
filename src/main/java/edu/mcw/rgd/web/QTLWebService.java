@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by jdepons on 5/31/2016.
  */
 @RestController
+@Api(tags="QTL")
 @RequestMapping(value = "/qtls")
 public class QTLWebService {
 

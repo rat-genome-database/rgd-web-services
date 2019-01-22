@@ -8,6 +8,7 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import java.util.*;
  */
 
 @RestController
+@Api(tags="AGR")
 @RequestMapping(value = "/agr")
 public class AGRWebService {
 
@@ -189,7 +191,16 @@ public class AGRWebService {
 
             map.put("name", g.getName());
             map.put("symbol", g.getSymbol());
-            map.put("geneSynopsis", Utils.getGeneDescription(g));
+			String geneSynopsis;
+			// emit merged-descriptions (AGR automated desc merged with RGD automated desc) for rat genes
+			if( mapKey==360 ) {
+				geneSynopsis = g.getMergedDescription();
+			} else { // and RGD automated desc for human genes
+				geneSynopsis = Utils.getGeneDescription(g);
+			}
+			if( !Utils.isStringEmpty(geneSynopsis) ) {
+				map.put("geneSynopsis", geneSynopsis);
+			}
 
             //get out of gene types
             map.put("soTermId", mg.getGene().getSoAccId());
