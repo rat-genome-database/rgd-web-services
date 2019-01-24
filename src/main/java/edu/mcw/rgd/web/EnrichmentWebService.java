@@ -34,30 +34,14 @@ public class EnrichmentWebService {
         List<String> geneSymbols = enrichmentRequest.genes;
         int speciesTypeKey = enrichmentRequest.speciesTypeKey;
         String aspect = enrichmentRequest.aspect;
-
-
-
-        List<Integer> geneRgdIds = new ArrayList<>();
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneSymbols,speciesTypeKey);
         List<String> termSet = new ArrayList<>();
-
-        geneSymbols.stream().forEach(i-> {
-
-            try {
-                Gene g = gdao.getGenesBySymbol(i, speciesTypeKey);
-                if (g != null)
-                    geneRgdIds.add(g.getRgdId());
-            }catch(Exception e){
-                throw new RuntimeException(e);
-            }
-        });
-
-
         ArrayList<String> aspects = new ArrayList<>();
         aspects.add(aspect);
 
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-int count =0;
+int     count =0;
 
             List result = new ArrayList<>();
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
