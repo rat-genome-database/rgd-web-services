@@ -34,17 +34,16 @@ public class EnrichmentWebService {
         List<String> geneSymbols = enrichmentRequest.genes;
         int speciesTypeKey = enrichmentRequest.speciesTypeKey;
         String aspect = enrichmentRequest.aspect;
-       
+
 
 
         List<Integer> geneRgdIds = new ArrayList<>();
         List<String> termSet = new ArrayList<>();
 
-        geneSymbols.parallelStream().forEach(i-> {
+        geneSymbols.stream().forEach(i-> {
 
             try {
-                Gene g = new Gene();
-                g = gdao.getGenesBySymbol(i, speciesTypeKey);
+                Gene g = gdao.getGenesBySymbol(i, speciesTypeKey);
                 if (g != null)
                     geneRgdIds.add(g.getRgdId());
             }catch(Exception e){
