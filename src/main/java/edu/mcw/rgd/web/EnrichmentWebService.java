@@ -41,14 +41,14 @@ public class EnrichmentWebService {
 
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-int     count =0;
+int count =0;
 
             List result = new ArrayList<>();
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
-        geneCounts.keySet().parallelStream().forEach(i->  {
+        while(tit.hasNext() && count++ < 200 ) {
             try {
                 HashMap data = new HashMap();
                 String acc = (String) tit.next();
@@ -65,7 +65,7 @@ int     count =0;
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
-        });
+        }
 
 
 
