@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by hsnalabolu on 1/8/2019.
@@ -50,7 +51,7 @@ int count =0;
             Iterator tit = geneCounts.keySet().iterator();
         geneCounts.keySet().parallelStream().forEach(i-> {
             try {
-                HashMap data = new HashMap();
+                ConcurrentHashMap data = new ConcurrentHashMap();
                 String acc = (String) tit.next();
                 String term = oDao.getTermByAccId(acc).getTerm();
                 data.put("acc", acc);
