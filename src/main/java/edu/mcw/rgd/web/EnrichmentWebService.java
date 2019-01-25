@@ -48,7 +48,7 @@ int count =0;
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
-        while(tit.hasNext() && count++ < 200 ) {
+        geneCounts.keySet().parallelStream().forEach(i-> {
             try {
                 HashMap data = new HashMap();
                 String acc = (String) tit.next();
@@ -65,7 +65,7 @@ int count =0;
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
-        }
+        });
 
 
 
