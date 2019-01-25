@@ -44,25 +44,27 @@ public class EnrichmentWebService {
         int inputGenes = geneRgdIds.size();
 int count =0;
 
-            List result = new ArrayList<>();
+            List result = Collections.synchronizedList(new ArrayList<>());
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
             BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
             Iterator tit = geneCounts.keySet().iterator();
         geneCounts.keySet().parallelStream().forEach(i-> {
             try {
-                ConcurrentHashMap data = new ConcurrentHashMap();
-                String acc = (String) tit.next();
-                String term = oDao.getTermByAccId(acc).getTerm();
-                data.put("acc", acc);
-                data.put("term", term);
-                int refs = geneCounts.get(acc);
-                data.put("count", refs);
-                BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
-                data.put("pvalue", pvalue);
-                BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-                data.put("correctedpvalue", bonferroni);
-                result.add(data);
+                synchronized(result) {
+                    ConcurrentHashMap data = new ConcurrentHashMap();
+                    String acc = (String) tit.next();
+                    String term = oDao.getTermByAccId(acc).getTerm();
+                    data.put("acc", acc);
+                    data.put("term", term);
+                    int refs = geneCounts.get(acc);
+                    data.put("count", refs);
+                    BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
+                    data.put("pvalue", pvalue);
+                    BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+                    data.put("correctedpvalue", bonferroni);
+                    result.add(data);
+                }
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
