@@ -70,9 +70,20 @@ int count =0;
             }
         });
 
-
+        Collections.sort(result, new SortbyPvalue());
 
         return result;
     }
 
+}
+
+class SortbyPvalue implements Comparator<ConcurrentHashMap>
+{
+
+    public int compare(ConcurrentHashMap s1, ConcurrentHashMap s2) {
+        if(( (BigDecimal)s1.get("pvalue")).compareTo((BigDecimal)s2.get("pvalue")) == 0)
+            return ((BigDecimal)s1.get("count")).compareTo((BigDecimal)s2.get("count"));
+        else
+            return ( (BigDecimal)s1.get("pvalue")).compareTo((BigDecimal)s2.get("pvalue"));
+    }
 }
