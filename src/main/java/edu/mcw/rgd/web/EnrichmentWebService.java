@@ -82,10 +82,12 @@ int count =0;
 
     @RequestMapping(value = "/annotatedGenes", method = RequestMethod.POST)
     @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
-    public List getEnrichmentData( @RequestBody(required = true) EnrichmentGeneRequest geneRequest)
+    public Map getEnrichmentData( @RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
+        Map result = new ConcurrentHashMap();
+        List geneData = Collections.synchronizedList(new ArrayList<>());
+        List genes = Collections.synchronizedList(new ArrayList<>());
 
-        List result = Collections.synchronizedList(new ArrayList<>());
         List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols,geneRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         termSet.add(geneRequest.accId);
@@ -106,8 +108,12 @@ int count =0;
             }
             data.put("gene",gw.getGene().getSymbol());
             data.put("terms",terms);
-            result.add(data);
+            geneData.add(data);
+            genes.add(gw.getGene().getSymbol());
         }
+
+        result.put("geneData",geneData);
+        result.put("genes",genes);
         return result;
     }
 
