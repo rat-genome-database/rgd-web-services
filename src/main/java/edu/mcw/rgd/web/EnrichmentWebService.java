@@ -5,7 +5,12 @@ import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
+import edu.mcw.rgd.datamodel.annotation.OntologyEnrichment;
+import edu.mcw.rgd.datamodel.annotation.TermWrapper;
 import edu.mcw.rgd.datamodel.ontologyx.Aspect;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
 import io.swagger.annotations.ApiOperation;
@@ -28,19 +33,18 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
+
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public List getChart( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
+    public List getEnrichmentData( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
                              throws Exception {
-        List<String> geneSymbols = enrichmentRequest.genes;
-        int speciesTypeKey = enrichmentRequest.speciesTypeKey;
-        String aspect = enrichmentRequest.aspect;
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneSymbols,speciesTypeKey);
+
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        aspects.add(aspect);
+        aspects.add(enrichmentRequest.aspect);
 
-        int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
+        int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
 int count =0;
 
@@ -55,13 +59,14 @@ int count =0;
                     ConcurrentHashMap data = new ConcurrentHashMap();
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
+                    int refs = geneCounts.get(acc);
+                    BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
+                    BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+
                     data.put("acc", acc);
                     data.put("term", term);
-                    int refs = geneCounts.get(acc);
                     data.put("count", refs);
-                    BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
-                    data.put("pvalue", pvalue);
-                    BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+                    data.put("pvalue",pvalue);
                     data.put("correctedpvalue", bonferroni);
                     result.add(data);
                 }
@@ -74,6 +79,45 @@ int count =0;
 
         return result;
     }
+
+    @RequestMapping(value = "/annotatedGenes", method = RequestMethod.POST)
+    @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
+    public List getEnrichmentData( @RequestBody(required = true) EnrichmentGeneRequest geneRequest)
+            throws Exception {
+
+        List result = Collections.synchronizedList(new ArrayList<>());
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols,geneRequest.speciesTypeKey);
+        List<String> termSet = new ArrayList<>();
+        termSet.add(geneRequest.accId);
+        ArrayList<String> aspects = new ArrayList<>();
+        OntologyEnrichment oe = adao.getOntologyEnrichment(geneRgdIds, termSet, aspects);
+        TermWrapper tw = null;
+        tw = (TermWrapper) oe.termMap.get(geneRequest.accId);
+        Iterator git = tw.refs.iterator();
+        boolean first = true;
+        while (git.hasNext()) {
+            ConcurrentHashMap data = new ConcurrentHashMap();
+            GeneWrapper gw = (GeneWrapper) git.next();
+            Iterator bIt = gw.getRoots(tw).iterator();
+            String terms = "";
+            while (bIt.hasNext()) {
+                Term baseTerm = (Term) bIt.next();
+                if (first) {
+                    terms += baseTerm.getTerm() + "";
+                    first = false;
+                } else {
+                    terms += "&nbsp;:&nbsp; " + baseTerm.getTerm();
+                }
+
+            }
+
+            data.put("gene",gw.getGene().getSymbol());
+            data.put("terms",terms);
+            result.add(data);
+        }
+        return result;
+    }
+
 
 }
 
