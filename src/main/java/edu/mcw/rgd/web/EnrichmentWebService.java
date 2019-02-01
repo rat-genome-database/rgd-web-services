@@ -99,18 +99,11 @@ int count =0;
             ConcurrentHashMap data = new ConcurrentHashMap();
             GeneWrapper gw = (GeneWrapper) git.next();
             Iterator bIt = gw.getRoots(tw).iterator();
-            String terms = "";
+            String[] terms = {};
             while (bIt.hasNext()) {
                 Term baseTerm = (Term) bIt.next();
-                if (first) {
-                    terms += baseTerm.getTerm() + "";
-                    first = false;
-                } else {
-                    terms += "&nbsp;:&nbsp; " + baseTerm.getTerm();
-                }
-
+                termSet.add(baseTerm.getTerm());
             }
-
             data.put("gene",gw.getGene().getSymbol());
             data.put("terms",terms);
             result.add(data);
