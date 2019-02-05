@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,8 +47,8 @@ public class EnrichmentWebService {
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-int count =0;
-
+int precision = 7;
+MathContext mc = new MathContext(precision);
             List result = Collections.synchronizedList(new ArrayList<>());
             LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
@@ -66,8 +67,8 @@ int count =0;
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue",pvalue);
-                    data.put("correctedpvalue", bonferroni);
+                    data.put("pvalue",pvalue.round(mc));
+                    data.put("correctedpvalue", bonferroni.round(mc));
                     result.add(data);
                 }
             }catch (Exception e){
