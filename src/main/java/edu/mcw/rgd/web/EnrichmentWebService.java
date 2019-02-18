@@ -136,7 +136,7 @@ class SortbyPvalue implements Comparator<ConcurrentHashMap>
 {
 
     public int compare(ConcurrentHashMap s1, ConcurrentHashMap s2) {
-        if(( (BigDecimal)s1.get("pvalue")).compareTo((BigDecimal)s2.get("pvalue")) == 0)
+        if(( new BigDecimal((String)s1.get("pvalue"))).compareTo(new BigDecimal((String)s2.get("pvalue"))) == 0)
             return Integer.compare(((int)s2.get("count")),((int)s1.get("count")));
         else
             return ( (BigDecimal)s1.get("pvalue")).compareTo((BigDecimal)s2.get("pvalue"));
