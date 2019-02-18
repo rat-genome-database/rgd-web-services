@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,11 +66,12 @@ public class EnrichmentWebService {
                     int refs = geneCounts.get(acc);
                     BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
                     BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue",new BigDecimal(pvalue.toString()).setScale(4, RoundingMode.UNNECESSARY));
-                    data.put("correctedpvalue", new BigDecimal(bonferroni.toString()).setScale(4,RoundingMode.UNNECESSARY));
+                    data.put("pvalue",format(pvalue,8));
+                    data.put("correctedpvalue", format(bonferroni,8));
                     result.add(data);
                 }
             }catch (Exception e){
@@ -120,8 +123,14 @@ public class EnrichmentWebService {
         return result;
     }
 
-
+    private static String format(BigDecimal x, int scale) {
+        NumberFormat formatter = new DecimalFormat("0.0E0");
+        formatter.setRoundingMode(RoundingMode.HALF_UP);
+        formatter.setMinimumFractionDigits(scale);
+        return formatter.format(x);
+    }
 }
+
 
 class SortbyPvalue implements Comparator<ConcurrentHashMap>
 {
