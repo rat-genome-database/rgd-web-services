@@ -38,22 +38,24 @@ public class EnrichmentWebService {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public List getEnrichmentData( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
-                             throws Exception {
+            throws Exception {
 
         List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        aspects.add(enrichmentRequest.aspect);
+        if(enrichmentRequest.aspect == "N" && enrichmentRequest.speciesTypeKey == 1)
+        aspects.add("H");
+        else aspects.add(enrichmentRequest.aspect);
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-int precision = 7;
-MathContext mc = new MathContext(precision);
-            List result = Collections.synchronizedList(new ArrayList<>());
-            LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
+        int precision = 4;
+        MathContext mc = new MathContext(precision);
+        List result = Collections.synchronizedList(new ArrayList<>());
+        LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
-            BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
-            Iterator tit = geneCounts.keySet().iterator();
+        BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
+        Iterator tit = geneCounts.keySet().iterator();
         geneCounts.keySet().parallelStream().forEach(i-> {
             try {
                 synchronized(result) {
@@ -107,6 +109,8 @@ MathContext mc = new MathContext(precision);
                 Term baseTerm = (Term) bIt.next();
                 terms.add(baseTerm.getTerm());
             }
+            if(terms.size() == 0)
+                terms.add((oDao.getTermByAccId(geneRequest.accId)).getTerm());
             data.put("gene",gw.getGene().getSymbol());
             data.put("terms",terms);
             geneData.add(data);
