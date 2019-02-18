@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,13 +64,11 @@ public class EnrichmentWebService {
                     int refs = geneCounts.get(acc);
                     BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
                     BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-                    pvalue.setScale(3,BigDecimal.ROUND_HALF_UP);
-                    bonferroni.setScale(3);
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue",pvalue);
-                    data.put("correctedpvalue", bonferroni);
+                    data.put("pvalue",new BigDecimal(pvalue.toString()).setScale(4, RoundingMode.HALF_UP));
+                    data.put("correctedpvalue", new BigDecimal(bonferroni.toString()).setScale(4,RoundingMode.HALF_UP));
                     result.add(data);
                 }
             }catch (Exception e){
