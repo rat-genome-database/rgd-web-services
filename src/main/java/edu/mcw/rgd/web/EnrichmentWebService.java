@@ -67,8 +67,8 @@ public class EnrichmentWebService {
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue",new BigDecimal(pvalue.toString()).setScale(4, RoundingMode.HALF_UP));
-                    data.put("correctedpvalue", new BigDecimal(bonferroni.toString()).setScale(4,RoundingMode.HALF_UP));
+                    data.put("pvalue",new BigDecimal(pvalue.toString()).setScale(4, RoundingMode.UNNECESSARY));
+                    data.put("correctedpvalue", new BigDecimal(bonferroni.toString()).setScale(4,RoundingMode.UNNECESSARY));
                     result.add(data);
                 }
             }catch (Exception e){
