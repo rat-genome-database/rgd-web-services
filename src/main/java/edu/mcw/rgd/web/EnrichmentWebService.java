@@ -63,7 +63,7 @@ public class EnrichmentWebService {
                     int refs = geneCounts.get(acc);
                     BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
                     BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-                    pvalue.setScale(3);
+                    pvalue.setScale(3,BigDecimal.ROUND_HALF_UP);
                     bonferroni.setScale(3);
                     data.put("acc", acc);
                     data.put("term", term);
