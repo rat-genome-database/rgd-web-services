@@ -1,3 +1,4 @@
+
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
@@ -19,9 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,26 +38,26 @@ public class EnrichmentWebService {
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public List getEnrichmentData( @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
+    public List getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,enrichmentRequest.speciesTypeKey);
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        if(enrichmentRequest.aspect == "N" && enrichmentRequest.speciesTypeKey == 1)
-        aspects.add("H");
-        else aspects.add(enrichmentRequest.aspect);
+        aspects.add(enrichmentRequest.aspect);
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
+        int precision = 7;
+        MathContext mc = new MathContext(precision);
         List result = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
         BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
         Iterator tit = geneCounts.keySet().iterator();
-        geneCounts.keySet().parallelStream().forEach(i-> {
+        geneCounts.keySet().parallelStream().forEach(i -> {
             try {
-                synchronized(result) {
+                synchronized (result) {
                     ConcurrentHashMap data = new ConcurrentHashMap();
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
@@ -70,11 +68,11 @@ public class EnrichmentWebService {
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue",format(pvalue,8));
-                    data.put("correctedpvalue", format(bonferroni,8));
+                    data.put("pvalue", pvalue.round(mc));
+                    data.put("correctedpvalue", bonferroni.round(mc));
                     result.add(data);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
@@ -86,13 +84,13 @@ public class EnrichmentWebService {
 
     @RequestMapping(value = "/annotatedGenes", method = RequestMethod.POST)
     @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
-    public Map getEnrichmentData( @RequestBody(required = true) EnrichmentGeneRequest geneRequest)
+    public Map getEnrichmentData(@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
         Map result = new ConcurrentHashMap();
         List geneData = Collections.synchronizedList(new ArrayList<>());
         List genes = Collections.synchronizedList(new ArrayList<>());
 
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols,geneRequest.speciesTypeKey);
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols, geneRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         termSet.add(geneRequest.accId);
         ArrayList<String> aspects = new ArrayList<>();
@@ -110,35 +108,27 @@ public class EnrichmentWebService {
                 Term baseTerm = (Term) bIt.next();
                 terms.add(baseTerm.getTerm());
             }
-            if(terms.size() == 0)
-                terms.add((oDao.getTermByAccId(geneRequest.accId)).getTerm());
-            data.put("gene",gw.getGene().getSymbol());
-            data.put("terms",terms);
+            data.put("gene", gw.getGene().getSymbol());
+            data.put("terms", terms);
             geneData.add(data);
             genes.add(gw.getGene().getSymbol());
         }
 
-        result.put("geneData",geneData);
-        result.put("genes",genes);
+        result.put("geneData", geneData);
+        result.put("genes", genes);
         return result;
     }
 
-    private static String format(BigDecimal x, int scale) {
-        NumberFormat formatter = new DecimalFormat("0.0E0");
-        formatter.setRoundingMode(RoundingMode.HALF_UP);
-        formatter.setMinimumFractionDigits(scale);
-        return formatter.format(x);
-    }
+
 }
 
-
-class SortbyPvalue implements Comparator<ConcurrentHashMap>
-{
+class SortbyPvalue implements Comparator<ConcurrentHashMap> {
 
     public int compare(ConcurrentHashMap s1, ConcurrentHashMap s2) {
-        if(( new BigDecimal((String)s1.get("pvalue"))).compareTo(new BigDecimal((String)s2.get("pvalue"))) == 0)
-            return Integer.compare(((int)s2.get("count")),((int)s1.get("count")));
+        if (((BigDecimal) s1.get("pvalue")).compareTo((BigDecimal) s2.get("pvalue")) == 0)
+            return Integer.compare(((int) s2.get("count")), ((int) s1.get("count")));
         else
-            return ( (BigDecimal)s1.get("pvalue")).compareTo((BigDecimal)s2.get("pvalue"));
+            return ((BigDecimal) s1.get("pvalue")).compareTo((BigDecimal) s2.get("pvalue"));
     }
 }
+
