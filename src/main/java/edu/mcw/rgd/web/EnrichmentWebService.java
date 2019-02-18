@@ -102,6 +102,9 @@ public class EnrichmentWebService {
                 Term baseTerm = (Term) bIt.next();
                 terms.add(baseTerm.getTerm());
             }
+            if(terms.size() == 0)
+                terms.add((oDao.getTermByAccId(geneRequest.accId)).getTerm());
+            
             data.put("gene", gw.getGene().getSymbol());
             data.put("terms", terms);
             geneData.add(data);
