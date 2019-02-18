@@ -40,7 +40,9 @@ public class EnrichmentWebService {
         List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        aspects.add(enrichmentRequest.aspect);
+        if(enrichmentRequest.aspect == "N" && enrichmentRequest.speciesTypeKey == 1)
+            aspects.add("H"); // To get human phenotype fot huma species
+        else aspects.add(enrichmentRequest.aspect);
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
@@ -104,7 +106,7 @@ public class EnrichmentWebService {
             }
             if(terms.size() == 0)
                 terms.add((oDao.getTermByAccId(geneRequest.accId)).getTerm());
-            
+
             data.put("gene", gw.getGene().getSymbol());
             data.put("terms", terms);
             geneData.add(data);
