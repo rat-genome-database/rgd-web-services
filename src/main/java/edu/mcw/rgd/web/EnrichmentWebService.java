@@ -5,21 +5,17 @@ import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
-import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
 import edu.mcw.rgd.datamodel.annotation.OntologyEnrichment;
 import edu.mcw.rgd.datamodel.annotation.TermWrapper;
-import edu.mcw.rgd.datamodel.ontologyx.Aspect;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,8 +44,6 @@ public class EnrichmentWebService {
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-        int precision = 7;
-        MathContext mc = new MathContext(precision);
         List result = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
@@ -62,14 +56,14 @@ public class EnrichmentWebService {
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
                     int refs = geneCounts.get(acc);
-                    BigDecimal pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
-                    BigDecimal bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+                    String pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
+                    String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
 
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
-                    data.put("pvalue", pvalue.round(mc));
-                    data.put("correctedpvalue", bonferroni.round(mc));
+                    data.put("pvalue", pvalue);
+                    data.put("correctedpvalue", bonferroni);
                     result.add(data);
                 }
             } catch (Exception e) {
