@@ -39,14 +39,15 @@ public class EnrichmentWebService {
     public List getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, enrichmentRequest.speciesTypeKey);
+        int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        if(enrichmentRequest.aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && enrichmentRequest.speciesTypeKey == SpeciesType.HUMAN)
+        if(enrichmentRequest.aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && speciesTypeKey == SpeciesType.HUMAN)
             aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
         else aspects.add(enrichmentRequest.aspect);
 
-        int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
+        int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
         List result = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
@@ -60,7 +61,7 @@ public class EnrichmentWebService {
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
                     int refs = geneCounts.get(acc);
-                    String pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, enrichmentRequest.speciesTypeKey);
+                    String pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
 
                     data.put("acc", acc);
@@ -84,11 +85,13 @@ public class EnrichmentWebService {
     @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
     public Map getEnrichmentData(@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
+
+        int speciesTypeKey = SpeciesType.parse(geneRequest.species);
         Map result = new ConcurrentHashMap();
         List geneData = Collections.synchronizedList(new ArrayList<>());
         List genes = Collections.synchronizedList(new ArrayList<>());
 
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols, geneRequest.speciesTypeKey);
+        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(geneRequest.geneSymbols, speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         termSet.add(geneRequest.accId);
         ArrayList<String> aspects = new ArrayList<>();
