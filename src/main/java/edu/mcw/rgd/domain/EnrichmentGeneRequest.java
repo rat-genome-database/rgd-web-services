@@ -8,6 +8,6 @@ import java.util.List;
 public class EnrichmentGeneRequest {
 
     public String accId;
-    public int speciesTypeKey;
+    public String species;
     public List<String> geneSymbols;
 }
