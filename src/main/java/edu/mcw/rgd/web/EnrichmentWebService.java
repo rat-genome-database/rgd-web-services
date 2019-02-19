@@ -9,6 +9,7 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
 import edu.mcw.rgd.datamodel.annotation.OntologyEnrichment;
 import edu.mcw.rgd.datamodel.annotation.TermWrapper;
+import edu.mcw.rgd.datamodel.ontologyx.Aspect;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
@@ -41,8 +42,8 @@ public class EnrichmentWebService {
         List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        if(enrichmentRequest.aspect.equalsIgnoreCase("N") && enrichmentRequest.speciesTypeKey == SpeciesType.HUMAN)
-            aspects.add("H"); // To get human phenotype fot huma species
+        if(enrichmentRequest.aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && enrichmentRequest.speciesTypeKey == SpeciesType.HUMAN)
+            aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
         else aspects.add(enrichmentRequest.aspect);
 
         int refGenes = dao.getReferenceGeneCount(enrichmentRequest.speciesTypeKey);
