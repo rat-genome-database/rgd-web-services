@@ -5,6 +5,7 @@ import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
 import edu.mcw.rgd.datamodel.annotation.OntologyEnrichment;
 import edu.mcw.rgd.datamodel.annotation.TermWrapper;
@@ -40,7 +41,7 @@ public class EnrichmentWebService {
         List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, enrichmentRequest.speciesTypeKey);
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
-        if(enrichmentRequest.aspect == "N" && enrichmentRequest.speciesTypeKey == 1)
+        if(enrichmentRequest.aspect.equalsIgnoreCase("N") && enrichmentRequest.speciesTypeKey == SpeciesType.HUMAN)
             aspects.add("H"); // To get human phenotype fot huma species
         else aspects.add(enrichmentRequest.aspect);
 
