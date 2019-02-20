@@ -9,6 +9,7 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.domain.AnnotatedGeneRequest;
 import edu.mcw.rgd.domain.RGDIDListRequest;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
@@ -23,6 +24,7 @@ import java.util.List;
  * Created by jdepons on 7/27/2016.
  */
 @RestController
+@Api(tags="Lookup")
 @RequestMapping(value = "/lookup")
 
 public class LookupWebService {
