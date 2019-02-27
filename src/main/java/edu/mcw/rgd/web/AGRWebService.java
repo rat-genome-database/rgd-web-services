@@ -340,13 +340,6 @@ public class AGRWebService {
                 continue;
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             HashMap phenotype = new HashMap();
 
             // object id
@@ -372,7 +365,7 @@ public class AGRWebService {
 
             phenotype.put("phenotypeStatement", a.getTerm());
 
-            HashMap evidenceMap = handleEvidence(pmedIds.get(0).getAccId(), a.getRefRgdId());
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
             if( evidenceMap!=null ) {
                 phenotype.put("evidence", evidenceMap);
             }
@@ -390,34 +383,21 @@ public class AGRWebService {
         return returnMap;
     }
 
-    HashMap handleEvidence(String pmids, int refRgdId) {
+    HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+
+        List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
+        String pmid = null;
+        if( !pmidIds.isEmpty() ) {
+            pmid = "PMID:"+pmidIds.get(0).getAccId();
+        }
 
         HashMap evidence = new HashMap<>();
 
         // look for a PMID
-        String[] dbRefs = pmids.split("[\\|]");
-        for( String ref : dbRefs ) {
-            if (ref.startsWith("PMID:")) {
-                evidence.put("publicationId", ref);
+        if( pmid!=null ) {
+            evidence.put("publicationId", pmid);
 
-                if( refRgdId>0 ) {
-                    HashMap crossRef = new HashMap<>();
-                    crossRef.put("id", "RGD:" + refRgdId);
-                    List<String> pages = new ArrayList<>();
-                    pages.add("reference");
-                    crossRef.put("pages", pages);
-
-                    evidence.put("crossReference", crossRef);
-                }
-                return evidence;
-            }
-        }
-
-        // no PMID available -- set reference to REF_RGD_ID
-        for( String ref : dbRefs ) {
-            if( ref.isEmpty() && refRgdId>0 ) {
-                evidence.put("publicationId", "RGD:" + refRgdId);
-
+            if( refRgdId>0 ) {
                 HashMap crossRef = new HashMap<>();
                 crossRef.put("id", "RGD:" + refRgdId);
                 List<String> pages = new ArrayList<>();
@@ -425,11 +405,25 @@ public class AGRWebService {
                 crossRef.put("pages", pages);
 
                 evidence.put("crossReference", crossRef);
-
-                return evidence;
-            } else {
-                System.out.println("*** WARN *** unexpected reference type: "+ref);
             }
+            return evidence;
+        }
+
+        // no PMID available -- set reference to REF_RGD_ID
+        if( refRgdId>0 ) {
+            evidence.put("publicationId", "RGD:" + refRgdId);
+
+            HashMap crossRef = new HashMap<>();
+            crossRef.put("id", "RGD:" + refRgdId);
+            List<String> pages = new ArrayList<>();
+            pages.add("reference");
+            crossRef.put("pages", pages);
+
+            evidence.put("crossReference", crossRef);
+
+            return evidence;
+        } else {
+            System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
         }
 
         return null;
@@ -472,13 +466,6 @@ public class AGRWebService {
                 qualifier = "RO:0002325";
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
             // the default assay term
 
@@ -500,7 +487,7 @@ public class AGRWebService {
             record.put("dateAssigned", formatDate(a.getCreatedDate()));
 
             // evidence
-            HashMap evidenceMap = handleEvidence(pmedIds.get(0).getAccId(), a.getRefRgdId());
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
             if( evidenceMap!=null ) {
                 record.put("evidence", evidenceMap);
             }
