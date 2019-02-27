@@ -372,10 +372,10 @@ public class AGRWebService {
 
             phenotype.put("phenotypeStatement", a.getTerm());
 
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            phenotype.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(pmedIds.get(0).getAccId(), a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                phenotype.put("evidence", evidenceMap);
+            }
 
             phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
 
@@ -389,6 +389,52 @@ public class AGRWebService {
 
         return returnMap;
     }
+
+    HashMap handleEvidence(String pmids, int refRgdId) {
+
+        HashMap evidence = new HashMap<>();
+
+        // look for a PMID
+        String[] dbRefs = pmids.split("[\\|]");
+        for( String ref : dbRefs ) {
+            if (ref.startsWith("PMID:")) {
+                evidence.put("publicationId", ref);
+
+                if( refRgdId>0 ) {
+                    HashMap crossRef = new HashMap<>();
+                    crossRef.put("id", "RGD:" + refRgdId);
+                    List<String> pages = new ArrayList<>();
+                    pages.add("reference");
+                    crossRef.put("pages", pages);
+
+                    evidence.put("crossReference", crossRef);
+                }
+                return evidence;
+            }
+        }
+
+        // no PMID available -- set reference to REF_RGD_ID
+        for( String ref : dbRefs ) {
+            if( ref.isEmpty() && refRgdId>0 ) {
+                evidence.put("publicationId", "RGD:" + refRgdId);
+
+                HashMap crossRef = new HashMap<>();
+                crossRef.put("id", "RGD:" + refRgdId);
+                List<String> pages = new ArrayList<>();
+                pages.add("reference");
+                crossRef.put("pages", pages);
+
+                evidence.put("crossReference", crossRef);
+
+                return evidence;
+            } else {
+                System.out.println("*** WARN *** unexpected reference type: "+ref);
+            }
+        }
+
+        return null;
+    }
+
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
@@ -454,10 +500,10 @@ public class AGRWebService {
             record.put("dateAssigned", formatDate(a.getCreatedDate()));
 
             // evidence
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            record.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(pmedIds.get(0).getAccId(), a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                record.put("evidence", evidenceMap);
+            }
 
             // expression ids
             String assay = "MMO:0000640"; // expression assay
@@ -516,7 +562,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.7");
+        metadata.put("release", "RGD-1.0.0.8");
         return metadata;
     }
 
