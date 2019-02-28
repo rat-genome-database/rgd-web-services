@@ -340,13 +340,6 @@ public class AGRWebService {
                 continue;
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             HashMap phenotype = new HashMap();
 
             // object id
@@ -372,10 +365,10 @@ public class AGRWebService {
 
             phenotype.put("phenotypeStatement", a.getTerm());
 
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            phenotype.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                phenotype.put("evidence", evidenceMap);
+            }
 
             phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
 
@@ -389,6 +382,53 @@ public class AGRWebService {
 
         return returnMap;
     }
+
+    HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+
+        List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
+        String pmid = null;
+        if( !pmidIds.isEmpty() ) {
+            pmid = "PMID:"+pmidIds.get(0).getAccId();
+        }
+
+        HashMap evidence = new HashMap<>();
+
+        // look for a PMID
+        if( pmid!=null ) {
+            evidence.put("publicationId", pmid);
+
+            if( refRgdId>0 ) {
+                HashMap crossRef = new HashMap<>();
+                crossRef.put("id", "RGD:" + refRgdId);
+                List<String> pages = new ArrayList<>();
+                pages.add("reference");
+                crossRef.put("pages", pages);
+
+                evidence.put("crossReference", crossRef);
+            }
+            return evidence;
+        }
+
+        // no PMID available -- set reference to REF_RGD_ID
+        if( refRgdId>0 ) {
+            evidence.put("publicationId", "RGD:" + refRgdId);
+
+            HashMap crossRef = new HashMap<>();
+            crossRef.put("id", "RGD:" + refRgdId);
+            List<String> pages = new ArrayList<>();
+            pages.add("reference");
+            crossRef.put("pages", pages);
+
+            evidence.put("crossReference", crossRef);
+
+            return evidence;
+        } else {
+            System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
+        }
+
+        return null;
+    }
+
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
@@ -426,13 +466,6 @@ public class AGRWebService {
                 qualifier = "RO:0002325";
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
             // the default assay term
 
@@ -454,10 +487,10 @@ public class AGRWebService {
             record.put("dateAssigned", formatDate(a.getCreatedDate()));
 
             // evidence
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            record.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                record.put("evidence", evidenceMap);
+            }
 
             // expression ids
             String assay = "MMO:0000640"; // expression assay
@@ -516,7 +549,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.7");
+        metadata.put("release", "RGD-1.0.0.8");
         return metadata;
     }
 
