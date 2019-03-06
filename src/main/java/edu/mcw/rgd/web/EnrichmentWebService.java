@@ -37,7 +37,7 @@ public class EnrichmentWebService {
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public List getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
+    public Map getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
         int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
@@ -52,7 +52,9 @@ public class EnrichmentWebService {
 
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
         int inputGenes = geneRgdIds.size();
-        List result = Collections.synchronizedList(new ArrayList<>());
+        Map result = new ConcurrentHashMap();
+        List geneData = gdao.getGeneByRgdIds(geneRgdIds);
+        List enrichmentData = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
 
         BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
@@ -72,15 +74,16 @@ public class EnrichmentWebService {
                     data.put("count", refs);
                     data.put("pvalue", pvalue);
                     data.put("correctedpvalue", bonferroni);
-                    result.add(data);
+                    enrichmentData.add(data);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
 
-        Collections.sort(result, new SortbyPvalue());
-
+        Collections.sort(enrichmentData, new SortbyPvalue());
+        result.put("enrichment",enrichmentData);
+        result.put("geneSymbols",geneData);
         return result;
     }
 
