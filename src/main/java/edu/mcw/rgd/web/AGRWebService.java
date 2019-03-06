@@ -1,11 +1,10 @@
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.AliasDAO;
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
 import io.swagger.annotations.Api;
@@ -306,6 +305,68 @@ public class AGRWebService {
 
         returnMap.put("data", alleleList);
 
+        returnMap.put("metaData", getMetaData());
+
+        return returnMap;
+    }
+
+    @RequestMapping(value="/variants/{taxonId}", method= RequestMethod.GET)
+    @ApiOperation(value="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getVariantsForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+
+        //rat taxon : 10116
+        int speciesTypeKey = SpeciesType.parse("taxon:"+taxonId);
+
+        HashMap returnMap = new HashMap();
+        ArrayList variantList = new ArrayList();
+
+        Map map = MapManager.getInstance().getReferenceAssembly(speciesTypeKey);
+        RgdVariantDAO vdao = new RgdVariantDAO();
+        MapDAO mdao = new MapDAO();
+        FileDownloader fd = new FileDownloader();
+
+        List<RgdVariant> variants = vdao.getVariantsForSpecies(speciesTypeKey);
+        for( RgdVariant var: variants ) {
+
+            List<MapData> mds = mdao.getMapData(var.getRgdId(), map.getKey());
+            for( MapData md: mds ) {
+
+                String alleleId = "RGD:" + var.getRgdId();
+                String type = var.getType();
+                String assembly = map.getName();
+                String chromosome = md.getChromosome();
+                int start = md.getStartPos();
+                int end = md.getStopPos();
+                String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
+                String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
+
+                String paddedBase = null;
+                // emit 'paddedBase' for insertions and deletions
+                if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+                    String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
+                            "&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
+                    fd.setExternalFile(url);
+                    paddedBase = fd.download();
+                }
+
+                HashMap rec = new HashMap();
+                rec.put("alleleId", alleleId);
+                rec.put("type", type);
+                rec.put("assembly", assembly);
+                rec.put("chromosome", chromosome);
+                rec.put("start", start);
+                rec.put("end", end);
+                rec.put("genomicReferenceSequence", genomicReferenceSequence);
+                rec.put("genomicVariantSequence", genomicVariantSequence);
+                if( paddedBase!=null ) {
+                    rec.put("paddedBase", paddedBase);
+                }
+
+                variantList.add(rec);
+            }
+        }
+
+        returnMap.put("data", variantList);
         returnMap.put("metaData", getMetaData());
 
         return returnMap;
