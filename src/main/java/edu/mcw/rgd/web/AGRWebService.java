@@ -311,7 +311,7 @@ public class AGRWebService {
 
     @RequestMapping(value="/variants/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getAllelesForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    public HashMap getVariantsForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         //rat taxon : 10116
         int speciesTypeKey = SpeciesType.parse("taxon:"+taxonId);
