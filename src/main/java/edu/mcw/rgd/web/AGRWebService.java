@@ -4,6 +4,7 @@ import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
 import io.swagger.annotations.Api;
@@ -322,6 +323,7 @@ public class AGRWebService {
         Map map = MapManager.getInstance().getReferenceAssembly(speciesTypeKey);
         RgdVariantDAO vdao = new RgdVariantDAO();
         MapDAO mdao = new MapDAO();
+        FileDownloader fd = new FileDownloader();
 
         List<RgdVariant> variants = vdao.getVariantsForSpecies(speciesTypeKey);
         for( RgdVariant var: variants ) {
@@ -338,6 +340,15 @@ public class AGRWebService {
                 String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
                 String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
 
+                String paddedBase = null;
+                // emit 'paddedBase' for insertions and deletions
+                if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+                    String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
+                            "&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
+                    fd.setExternalFile(url);
+                    paddedBase = fd.download();
+                }
+
                 HashMap rec = new HashMap();
                 rec.put("alleleId", alleleId);
                 rec.put("type", type);
@@ -345,6 +356,11 @@ public class AGRWebService {
                 rec.put("chromosome", chromosome);
                 rec.put("start", start);
                 rec.put("end", end);
+                rec.put("genomicReferenceSequence", genomicReferenceSequence);
+                rec.put("genomicVariantSequence", genomicVariantSequence);
+                if( paddedBase!=null ) {
+                    rec.put("paddedBase", paddedBase);
+                }
 
                 variantList.add(rec);
             }
