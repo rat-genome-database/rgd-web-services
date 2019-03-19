@@ -349,6 +349,8 @@ public class AGRWebService {
                     paddedBase = fd.download();
                 }
 
+                Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
+
                 HashMap rec = new HashMap();
                 rec.put("alleleId", alleleId);
                 rec.put("type", type);
@@ -361,6 +363,7 @@ public class AGRWebService {
                 if( paddedBase!=null ) {
                     rec.put("paddedBase", paddedBase);
                 }
+                rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
 
                 variantList.add(rec);
             }
