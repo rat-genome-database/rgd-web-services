@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping(value = "/maps")
 public class MapWebService {
 
-    @RequestMapping(value="/maps/{speciesTypeKey}", method= RequestMethod.GET)
+    @RequestMapping(value="/{speciesTypeKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of assemblies", tags="Map")
     public List<Map> getMapsBySpecies(
             @ApiParam(value="species Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
@@ -25,7 +25,7 @@ public class MapWebService {
     ) throws Exception{
 
         MapDAO mdao= new MapDAO();
-        List<Map> maps = mdao.getMaps(speciesTypeKey);
+        List<Map> maps = mdao.getMaps(speciesTypeKey,"bp");
         return maps;
     }
 
