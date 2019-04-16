@@ -1,11 +1,10 @@
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.AliasDAO;
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
 import io.swagger.annotations.Api;
@@ -311,6 +310,71 @@ public class AGRWebService {
         return returnMap;
     }
 
+    @RequestMapping(value="/variants/{taxonId}", method= RequestMethod.GET)
+    @ApiOperation(value="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getVariantsForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+
+        //rat taxon : 10116
+        int speciesTypeKey = SpeciesType.parse("taxon:"+taxonId);
+
+        HashMap returnMap = new HashMap();
+        ArrayList variantList = new ArrayList();
+
+        Map map = MapManager.getInstance().getReferenceAssembly(speciesTypeKey);
+        RgdVariantDAO vdao = new RgdVariantDAO();
+        MapDAO mdao = new MapDAO();
+        FileDownloader fd = new FileDownloader();
+
+        List<RgdVariant> variants = vdao.getVariantsForSpecies(speciesTypeKey);
+        for( RgdVariant var: variants ) {
+
+            List<MapData> mds = mdao.getMapData(var.getRgdId(), map.getKey());
+            for( MapData md: mds ) {
+
+                String alleleId = "RGD:" + var.getRgdId();
+                String type = var.getType();
+                String assembly = map.getName();
+                String chromosome = md.getChromosome();
+                int start = md.getStartPos();
+                int end = md.getStopPos();
+                String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
+                String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
+
+                String paddedBase = null;
+                // emit 'paddedBase' for insertions and deletions
+                if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+                    String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
+                            "&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
+                    fd.setExternalFile(url);
+                    paddedBase = fd.download();
+                }
+
+                Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
+
+                HashMap rec = new HashMap();
+                rec.put("alleleId", alleleId);
+                rec.put("type", type);
+                rec.put("assembly", assembly);
+                rec.put("chromosome", chromosome);
+                rec.put("start", start);
+                rec.put("end", end);
+                rec.put("genomicReferenceSequence", genomicReferenceSequence);
+                rec.put("genomicVariantSequence", genomicVariantSequence);
+                if( paddedBase!=null ) {
+                    rec.put("paddedBase", paddedBase);
+                }
+                rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
+
+                variantList.add(rec);
+            }
+        }
+
+        returnMap.put("data", variantList);
+        returnMap.put("metaData", getMetaData());
+
+        return returnMap;
+    }
+
     @RequestMapping(value="/phenotypes/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get phenotype annotations submitted by RGD to AGR by taxonId", tags="AGR")
     public HashMap getPhenotypesForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
@@ -340,13 +404,6 @@ public class AGRWebService {
                 continue;
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             HashMap phenotype = new HashMap();
 
             // object id
@@ -372,10 +429,10 @@ public class AGRWebService {
 
             phenotype.put("phenotypeStatement", a.getTerm());
 
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            phenotype.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                phenotype.put("evidence", evidenceMap);
+            }
 
             phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
 
@@ -389,6 +446,53 @@ public class AGRWebService {
 
         return returnMap;
     }
+
+    HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+
+        List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
+        String pmid = null;
+        if( !pmidIds.isEmpty() ) {
+            pmid = "PMID:"+pmidIds.get(0).getAccId();
+        }
+
+        HashMap evidence = new HashMap<>();
+
+        // look for a PMID
+        if( pmid!=null ) {
+            evidence.put("publicationId", pmid);
+
+            if( refRgdId>0 ) {
+                HashMap crossRef = new HashMap<>();
+                crossRef.put("id", "RGD:" + refRgdId);
+                List<String> pages = new ArrayList<>();
+                pages.add("reference");
+                crossRef.put("pages", pages);
+
+                evidence.put("crossReference", crossRef);
+            }
+            return evidence;
+        }
+
+        // no PMID available -- set reference to REF_RGD_ID
+        if( refRgdId>0 ) {
+            evidence.put("publicationId", "RGD:" + refRgdId);
+
+            HashMap crossRef = new HashMap<>();
+            crossRef.put("id", "RGD:" + refRgdId);
+            List<String> pages = new ArrayList<>();
+            pages.add("reference");
+            crossRef.put("pages", pages);
+
+            evidence.put("crossReference", crossRef);
+
+            return evidence;
+        } else {
+            System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
+        }
+
+        return null;
+    }
+
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
@@ -426,13 +530,6 @@ public class AGRWebService {
                 qualifier = "RO:0002325";
             }
 
-            // get pubmed id
-            List<XdbId> pmedIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, a.getRefRgdId());
-            if( pmedIds.isEmpty() ) {
-                System.out.println("no PMID id for REF_RGD_ID "+a.getRefRgdId());
-                continue;
-            }
-
             // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
             // the default assay term
 
@@ -454,10 +551,10 @@ public class AGRWebService {
             record.put("dateAssigned", formatDate(a.getCreatedDate()));
 
             // evidence
-            HashMap evidenceMap = new HashMap();
-            evidenceMap.put("modPublicationId", "RGD:"+a.getRefRgdId());
-            evidenceMap.put("pubMedId", "PMID:"+pmedIds.get(0).getAccId());
-            record.put("evidence",evidenceMap);
+            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
+            if( evidenceMap!=null ) {
+                record.put("evidence", evidenceMap);
+            }
 
             // expression ids
             String assay = "MMO:0000640"; // expression assay
@@ -516,7 +613,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.7");
+        metadata.put("release", "RGD-1.0.0.8");
         return metadata;
     }
 
