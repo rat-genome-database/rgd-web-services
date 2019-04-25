@@ -324,48 +324,52 @@ public class AGRWebService {
         RgdVariantDAO vdao = new RgdVariantDAO();
         MapDAO mdao = new MapDAO();
         FileDownloader fd = new FileDownloader();
+        GeneDAO gdao = new GeneDAO();
 
         List<RgdVariant> variants = vdao.getVariantsForSpecies(speciesTypeKey);
         for( RgdVariant var: variants ) {
 
+            List<Gene> geneList = gdao.getAssociatedGenes(var.getRgdId());
             List<MapData> mds = mdao.getMapData(var.getRgdId(), map.getKey());
             for( MapData md: mds ) {
 
-                String alleleId = "RGD:" + var.getRgdId();
-                String type = var.getType();
-                String assembly = map.getName();
-                String chromosome = md.getChromosome();
-                int start = md.getStartPos();
-                int end = md.getStopPos();
-                String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
-                String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
+                for( Gene g: geneList ) {
+                    String alleleId = "RGD:" + g.getRgdId();
+					String type = var.getType();
+					String assembly = map.getName();
+					String chromosome = md.getChromosome();
+					int start = md.getStartPos();
+					int end = md.getStopPos();
+					String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
+					String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
 
-                String paddedBase = null;
-                // emit 'paddedBase' for insertions and deletions
-                if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
-                    String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
-                            "&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
-                    fd.setExternalFile(url);
-                    paddedBase = fd.download();
-                }
+					String paddedBase = null;
+					// emit 'paddedBase' for insertions and deletions
+					if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+						String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
+								"&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
+						fd.setExternalFile(url);
+						paddedBase = fd.download();
+					}
 
-                Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
+					Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
 
-                HashMap rec = new HashMap();
-                rec.put("alleleId", alleleId);
-                rec.put("type", type);
-                rec.put("assembly", assembly);
-                rec.put("chromosome", chromosome);
-                rec.put("start", start);
-                rec.put("end", end);
-                rec.put("genomicReferenceSequence", genomicReferenceSequence);
-                rec.put("genomicVariantSequence", genomicVariantSequence);
-                if( paddedBase!=null ) {
-                    rec.put("paddedBase", paddedBase);
-                }
-                rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
+					HashMap rec = new HashMap();
+					rec.put("alleleId", alleleId);
+					rec.put("type", type);
+					rec.put("assembly", assembly);
+					rec.put("chromosome", chromosome);
+					rec.put("start", start);
+					rec.put("end", end);
+					rec.put("genomicReferenceSequence", genomicReferenceSequence);
+					rec.put("genomicVariantSequence", genomicVariantSequence);
+					if( paddedBase!=null ) {
+						rec.put("paddedBase", paddedBase);
+					}
+					rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
 
-                variantList.add(rec);
+					variantList.add(rec);
+				}
             }
         }
 
