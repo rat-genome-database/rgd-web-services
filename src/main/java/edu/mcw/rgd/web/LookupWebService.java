@@ -295,7 +295,7 @@ public class LookupWebService {
     @ApiOperation(value="Return a Map of species type keys available in RGD", tags = "Lookup")
     public java.util.Map getSpeciesTypes() throws Exception{
 
-        List<Integer> species = (ArrayList)SpeciesType.getSpeciesTypeKeys();
+        List<Integer> species = new ArrayList<Integer>(SpeciesType.getSpeciesTypeKeys());
         HashMap hm = new HashMap();
         for(Integer s: species) {
             hm.put(SpeciesType.getCommonName(s), s);
