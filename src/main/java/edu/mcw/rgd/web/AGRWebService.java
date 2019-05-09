@@ -346,8 +346,14 @@ public class AGRWebService {
 					String paddedBase = null;
 					// emit 'paddedBase' for insertions and deletions
 					if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+						int paddedBasePos = 0;
+						if( type.equals("SO:0000159") ) { // deletion
+							paddedBasePos = start - 1;
+						} else if( type.equals("SO:0000667") ) { // insertion: ref nuc is the padding base
+							paddedBasePos = start;
+						}
 						String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
-								"&chr=" + chromosome + "&startPos=" + (start - 1) + "&stopPos=" + (start - 1) + "&format=text";
+								"&chr=" + chromosome + "&startPos=" + paddedBasePos + "&stopPos=" + paddedBasePos + "&format=text";
 						fd.setExternalFile(url);
 						paddedBase = fd.download();
 					}
