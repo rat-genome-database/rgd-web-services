@@ -298,7 +298,8 @@ public class LookupWebService {
         List<Integer> species = new ArrayList<Integer>(SpeciesType.getSpeciesTypeKeys());
         HashMap hm = new HashMap();
         for(Integer s: species) {
-            hm.put(SpeciesType.getCommonName(s), s);
+            if( SpeciesType.isSearchable(s.intValue()) )
+                hm.put(SpeciesType.getCommonName(s), s);
         }
         return hm;
     }
