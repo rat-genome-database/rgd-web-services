@@ -346,7 +346,7 @@ public class AGRWebService {
 					String paddedBase = null;
 					// emit 'paddedBase' for insertions and deletions
 					if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
-						int paddedBasePos;
+						int paddedBasePos = 0;
 						if( type.equals("SO:0000159") ) { // deletion
 							paddedBasePos = start - 1;
 						} else if( type.equals("SO:0000667") ) { // insertion: ref nuc is the padding base
