@@ -30,7 +30,7 @@ public class MapWebService {
         return maps;
     }
 
-    @RequestMapping(value="/{mapKey}", method= RequestMethod.GET)
+    @RequestMapping(value="/chr/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
     public HashMap<String,Integer> getChromosomesByAssembly(
             @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
