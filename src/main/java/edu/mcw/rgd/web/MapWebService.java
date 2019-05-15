@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.TreeMap;
 import java.util.List;
-
+import java.util.Set;
 /**
  * Created by hsnalabolu on 4/9/2019.
  */
@@ -32,13 +32,13 @@ public class MapWebService {
 
     @RequestMapping(value="/chr/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
-    public TreeMap<String,Integer> getChromosomesByAssembly(
+    public Set<String> getChromosomesByAssembly(
             @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
     ) throws Exception{
 
         MapDAO mdao= new MapDAO();
-        TreeMap<String,Integer> chromosomes = (TreeMap)mdao.getChromosomeSizes(mapKey);
+       Set<String> chromosomes = ((TreeMap)mdao.getChromosomeSizes(mapKey)).keySet();
         return chromosomes;
     }
 
