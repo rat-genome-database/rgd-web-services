@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 
 /**
@@ -32,13 +32,13 @@ public class MapWebService {
 
     @RequestMapping(value="/chr/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
-    public HashMap<String,Integer> getChromosomesByAssembly(
+    public TreeMap<String,Integer> getChromosomesByAssembly(
             @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
     ) throws Exception{
 
         MapDAO mdao= new MapDAO();
-        HashMap<String,Integer> chromosomes = (HashMap)mdao.getChromosomeSizes(mapKey);
+        TreeMap<String,Integer> chromosomes = (TreeMap)mdao.getChromosomeSizes(mapKey);
         return chromosomes;
     }
 
