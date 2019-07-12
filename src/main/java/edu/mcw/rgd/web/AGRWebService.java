@@ -310,6 +310,113 @@ public class AGRWebService {
         return returnMap;
     }
 
+    @RequestMapping(value="/affectedGenomicModels/{taxonId}", method= RequestMethod.GET)
+    @ApiOperation(value="Get affected genomic models (rat strains with gene alleles) submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getAffectedGenomicModels(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+
+        //rat taxon : 10116
+        int speciesTypeKey = SpeciesType.parse("taxon:"+taxonId);
+        if ( speciesTypeKey!=3 ) {
+            throw new Exception("Affected genomic models for Taxon ID " + taxonId + " not supported");
+        }
+
+        AliasDAO aliasDAO = new AliasDAO();
+        AssociationDAO assocDAO = new AssociationDAO();
+        RGDManagementDAO idDAO = new RGDManagementDAO();
+        StrainDAO strainDAO = assocDAO.getStrainDAO();
+
+        List<Strain> strains = strainDAO.getActiveStrains();
+
+        ArrayList resultList = new ArrayList();
+
+        for( Strain strain: strains ) {
+            HashMap map = new HashMap();
+
+            map.put("primaryID", "RGD:" + strain.getRgdId());
+            map.put("name", strain.getSymbol());
+            map.put("subtype", "strain");
+            map.put("taxonId", "NCBITaxon:10116"); // rat taxon id
+
+            // cross reference: back link to RGD
+            HashMap crossRef = new HashMap();
+            List<String> pages = new ArrayList<>();
+            pages.add("strain");
+            crossRef.put("id", "RGD:"+strain.getRgdId());
+            crossRef.put("pages", pages);
+            map.put("crossReference", crossRef);
+
+            // synonyms
+            List<Alias> aliases = aliasDAO.getAliases(strain.getRgdId());
+            if( !aliases.isEmpty() ) {
+                List<String> synonyms = new ArrayList<String>();
+                for (Alias alias : aliases) {
+                    synonyms.add(alias.getValue());
+                }
+                map.put("synonyms", synonyms);
+            }
+
+            // secondary ids
+            List<Integer> secondaryRgdIds = idDAO.getOldRgdIds(strain.getRgdId());
+            if( !secondaryRgdIds.isEmpty() ) {
+                List<String> secondaryIds = new ArrayList<String>();
+                for( Integer rgdId: secondaryRgdIds ) {
+                    secondaryIds.add("RGD:"+rgdId);
+                }
+                map.put("secondaryIds", secondaryIds);
+            }
+
+            // parental population ids (background ids)
+            if( strain.getBackgroundStrainRgdId()!=null && strain.getBackgroundStrainRgdId()!=0 ) {
+                List<String> backgroundStrainRgdIds = new ArrayList<String>();
+                backgroundStrainRgdIds.add("RGD:"+strain.getBackgroundStrainRgdId());
+                map.put("parentalPopulationIDs", backgroundStrainRgdIds);
+            }
+
+            // gene alleles for the strain
+            List<Strain2MarkerAssociation> geneAlleles = assocDAO.getStrain2GeneAssociations(strain.getRgdId());
+            Iterator<Strain2MarkerAssociation> it = geneAlleles.iterator();
+            while( it.hasNext() ) {
+                Strain2MarkerAssociation i = it.next();
+                if( !Utils.stringsAreEqual(Utils.NVL(i.getMarkerType(),"allele"), "allele") ) {
+                    it.remove();
+                }
+            }
+            if( !geneAlleles.isEmpty() ) {
+                List affectedGenomicModelComponents = new ArrayList();
+                for( Strain2MarkerAssociation assoc: geneAlleles ) {
+                    HashMap<String,String> component = new HashMap<String, String>();
+                    component.put("alleleID", "RGD:"+assoc.getMarkerRgdId());
+
+                    // convert strain genetic status to zygosity
+                    String zygosity = "GENO:0000137"; // unspecified
+                    if( strain.getGeneticStatus()!=null ) {
+                        if( strain.getGeneticStatus().equals("Wild Type") || strain.getGeneticStatus().equals("Homozygous") ) {
+                            zygosity = "GENO:0000136"; // homozygous
+                        } else
+                        if( strain.getGeneticStatus().equals("Heterozygous") ) {
+                            zygosity = "GENO:0000135"; // heterozygous
+                        } else
+                        if( strain.getGeneticStatus().equals("Hemizygous") ) {
+                            zygosity = "GENO:0000134"; // hemizygous
+                        }
+                    }
+                    component.put("zygosity", zygosity);
+
+                    affectedGenomicModelComponents.add(component);
+                }
+                map.put("affectedGenomicModelComponents", affectedGenomicModelComponents);
+            }
+
+            resultList.add(map);
+        }
+
+        HashMap returnMap = new HashMap();
+        returnMap.put("data", resultList);
+        returnMap.put("metaData", getMetaData());
+
+        return returnMap;
+    }
+
     @RequestMapping(value="/variants/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
     public HashMap getVariantsForTaxon(@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
@@ -344,6 +451,8 @@ public class AGRWebService {
 					String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
 
 					String paddedBase = null;
+                    Integer insertionLength = null;
+
 					// emit 'paddedBase' for insertions and deletions
 					if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
 						int paddedBasePos = 0;
@@ -351,6 +460,7 @@ public class AGRWebService {
 							paddedBasePos = start - 1;
 						} else if( type.equals("SO:0000667") ) { // insertion: ref nuc is the padding base
 							paddedBasePos = start;
+                            insertionLength = genomicVariantSequence.length();
 						}
 						String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
 								"&chr=" + chromosome + "&startPos=" + paddedBasePos + "&stopPos=" + paddedBasePos + "&format=text";
@@ -372,6 +482,9 @@ public class AGRWebService {
 					if( paddedBase!=null ) {
 						rec.put("paddedBase", paddedBase);
 					}
+                    if( insertionLength!=null ) { // added in schema 1.0.0.9
+                        rec.put("insertionLength", insertionLength);
+                    }
 					rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
 
 					variantList.add(rec);
@@ -623,7 +736,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.8");
+        metadata.put("release", "RGD-1.0.0.9");
         return metadata;
     }
 
