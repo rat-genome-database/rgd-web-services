@@ -35,9 +35,6 @@ public class AGRWebService {
         //rat taxon : 10116
         //human taxon : 9606
 
-        HashMap returnMap = new HashMap();
-
-
         ArrayList geneList = new ArrayList();
 
         AliasDAO adao = new AliasDAO();
@@ -138,17 +135,21 @@ public class AGRWebService {
             }
 
 
-            map.put("crossReferences", crossList);
+            HashMap basicGeneticEntity = new HashMap();
+            map.put("basicGeneticEntity", basicGeneticEntity);
 
-            map.put("taxonId","NCBITaxon:" + taxonId);
+            basicGeneticEntity.put("crossReferences", crossList);
+
+            basicGeneticEntity.put("taxonId","NCBITaxon:" + taxonId);
 
 
             // human taxon : 9606
             if (taxonId.equals("9606")) {
-                map.put("primaryId", hgncId);
+                basicGeneticEntity.put("primaryId", hgncId);
+
                 List secondaryIds = new ArrayList();
                 secondaryIds.add("RGD:" + rgdId);
-                map.put("secondaryIds", secondaryIds);
+                basicGeneticEntity.put("secondaryIds", secondaryIds);
 
 				// add a cross-references for human genes:
 				// 1) RGD id mapped to 'gene/references' page (to link back to RGD via Literature link an AGR page)
@@ -172,12 +173,12 @@ public class AGRWebService {
 				crossRef.put("id", "RGD:"+g.getRgdId());
 				crossList.add(crossRef);
 
-				}else { //rat taxon : 10116
-                map.put("primaryId", "RGD:"+g.getRgdId());
+            } else { //rat taxon : 10116
+                basicGeneticEntity.put("primaryId", "RGD:"+g.getRgdId());
                 if (hgncId != null) {
                     List secondaryIds = new ArrayList();
                     secondaryIds.add(hgncId);
-                    map.put("secondaryIds", secondaryIds);
+                    basicGeneticEntity.put("secondaryIds", secondaryIds);
                 }
 
 				// add a cross-reference object for gene rgd id
@@ -212,7 +213,7 @@ public class AGRWebService {
                 }
             }
             if( !synonyms.isEmpty() ) {
-                map.put("synonyms", synonyms);
+                basicGeneticEntity.put("synonyms", synonyms);
             }
 
             List genomeLocations = new ArrayList();
@@ -225,15 +226,14 @@ public class AGRWebService {
                 hm.put("strand", mg.getStrand());
                 genomeLocations.add(hm);
 
-            map.put("genomeLocations", genomeLocations);
+            basicGeneticEntity.put("genomeLocations", genomeLocations);
 
             geneList.add(map);
         }
 
+        HashMap returnMap = new HashMap();
         returnMap.put("data",geneList);
-
         returnMap.put("metaData", getMetaData());
-
         return returnMap;
     }
 
@@ -397,7 +397,8 @@ public class AGRWebService {
                             zygosity = "GENO:0000135"; // heterozygous
                         } else
                         if( strain.getGeneticStatus().equals("Hemizygous") ) {
-                            zygosity = "GENO:0000134"; // hemizygous
+                            zygosity = "GENO:0000137"; // unspecified
+                            // zygosity = "GENO:0000134"; // hemizygous
                         }
                     }
                     component.put("zygosity", zygosity);
