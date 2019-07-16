@@ -397,8 +397,7 @@ public class AGRWebService {
                             zygosity = "GENO:0000135"; // heterozygous
                         } else
                         if( strain.getGeneticStatus().equals("Hemizygous") ) {
-                            zygosity = "GENO:0000137"; // unspecified
-                            // zygosity = "GENO:0000134"; // hemizygous
+                            zygosity = "GENO:0000134"; // hemizygous
                         }
                     }
                     component.put("zygosity", zygosity);
