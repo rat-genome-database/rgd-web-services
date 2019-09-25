@@ -212,16 +212,14 @@ public class PhenotypeWebService {
             map.put("accId", measurement);
             map.put("term", termResolver.get(measurement).getTerm());
 
-            List ranges = new ArrayList<>();
+            HashMap ranges = new HashMap();
             for(PhenominerExpectedRange range: normalRanges){
                 HashMap rmap = new HashMap();
-                HashMap r = new HashMap();
                 rmap.put("mean",range.getRangeValue());
                 rmap.put("low",range.getRangeLow());
                 rmap.put("high",range.getRangeHigh());
                 rmap.put("sd",range.getRangeSD());
-                r.put(range.getSex(),rmap);
-                ranges.add(r);
+                ranges.put(range.getSex(),rmap);
             }
             map.put("normalRanges",ranges);
             measurementList.add(map);
