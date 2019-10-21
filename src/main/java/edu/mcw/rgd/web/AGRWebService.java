@@ -522,8 +522,8 @@ public class AGRWebService {
 
         List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "RGD");
         for( Annotation a: annots ) {
-            // handle only GENES
-            if( a.getRgdObjectKey()!=RgdId.OBJECT_KEY_GENES ) {
+            // handle only GENES and STRAINS
+            if( !(a.getRgdObjectKey()==RgdId.OBJECT_KEY_GENES || a.getRgdObjectKey()==RgdId.OBJECT_KEY_STRAINS) ) {
                 continue;
             }
 
