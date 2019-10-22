@@ -518,6 +518,7 @@ public class AGRWebService {
         ArrayList phenotypes = new ArrayList();
 
         AnnotationDAO adao = new AnnotationDAO();
+        StrainDAO sdao = new StrainDAO();
         XdbIdDAO xdao = new XdbIdDAO();
 
         List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "RGD");
@@ -525,6 +526,13 @@ public class AGRWebService {
             // handle only GENES and STRAINS
             if( !(a.getRgdObjectKey()==RgdId.OBJECT_KEY_GENES || a.getRgdObjectKey()==RgdId.OBJECT_KEY_STRAINS) ) {
                 continue;
+            }
+            // STRAINS must be of mutant type
+            if( a.getRgdObjectKey()==RgdId.OBJECT_KEY_STRAINS ) {
+                Strain strain = sdao.getStrain(a.getAnnotatedObjectRgdId());
+                if( !Utils.stringsAreEqual(strain.getStrainTypeName(), "mutant") ) {
+                    continue; // strain type is different than 'mutant'
+                }
             }
 
             HashMap phenotype = new HashMap();
