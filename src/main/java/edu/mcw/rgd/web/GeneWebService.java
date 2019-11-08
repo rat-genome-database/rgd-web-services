@@ -99,6 +99,18 @@ public class GeneWebService {
         return geneDAO.getActiveGenes(keyword,speciesTypeKey);
     }
 
+    @RequestMapping(value="/region/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
+    @ApiOperation(value="Return a list of genes in region", tags="Gene")
+    public List<MappedGene> getGenesInRegion(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                         @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
+                                         @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                         @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+
+        return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey);
+    }
+
+
+
     @RequestMapping(value="/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @ApiOperation(value="Return a list of genes position and map key", tags="Gene")
     public List<Gene> getGenesByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
