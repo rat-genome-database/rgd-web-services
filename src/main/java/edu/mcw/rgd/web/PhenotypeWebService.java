@@ -3,10 +3,12 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PathwayDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
+import edu.mcw.rgd.dao.impl.PhenominerExpectedRangeDao;
 import edu.mcw.rgd.datamodel.Pathway;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
+import edu.mcw.rgd.datamodel.phenominerExpectedRange.PhenominerExpectedRange;
 import edu.mcw.rgd.process.Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,124 +31,166 @@ import java.util.*;
 public class PhenotypeWebService {
 
     PhenominerDAO phenominerDAO = new PhenominerDAO();
+    PhenominerExpectedRangeDao pedao = new PhenominerExpectedRangeDao();
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{termString}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla)", tags = "Quantitative Phenotype")
     public HashMap getChartInfo(@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
             @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
-    ArrayList error = new ArrayList();
-    ArrayList warning = new ArrayList();
-    ArrayList status = new ArrayList();
+        List<String> sampleIds = new ArrayList<String>();
+        List mmIds = new ArrayList<String>();
+        List cmIds = new ArrayList<String>();
+        List ecIds = new ArrayList<String>();
 
-    List<String> sampleIds = new ArrayList<String>();
-    List mmIds = new ArrayList<String>();
-    List cmIds = new ArrayList<String>();
-    List ecIds = new ArrayList<String>();
+        String[] terms = termString.split(",");
 
-    double min = 1000000000;
-    double max = -1000000000;
+        for (int j=0; j< terms.length; j++) {
+            String[] termParts = terms[j].split(":");
 
-    List ageRanges= new ArrayList();
-    HashMap uniqueRanges=new HashMap();
-    String[] terms = termString.split(",");
+            while (termParts[1].length()<7) {
+                termParts[1]="0" + termParts[1];
+            }
 
-    for (int j=0; j< terms.length; j++) {
-        String[] termParts = terms[j].split(":");
-
-        while (termParts[1].length()<7) {
-            termParts[1]="0" + termParts[1];
+            terms[j] = termParts[0] + ":" + termParts[1];
         }
 
-        terms[j] = termParts[0] + ":" + termParts[1];
-    }
-
-    for (int i=0; i< terms.length; i++) {
-        if (terms[i].startsWith("RS") || terms[i].startsWith("CS")) {
-            sampleIds.add(terms[i]);
-        }else if (terms[i].startsWith("CMO")) {
-            cmIds.add(terms[i]);
-        }else if (terms[i].startsWith("MMO")) {
-            mmIds.add(terms[i]);
-        }else if (terms[i].startsWith("XCO")) {
-            ecIds.add(terms[i]);
-        }
-    }
-
-    PhenominerDAO pdao = new PhenominerDAO();
-    List<Record> records = pdao.getFullRecords(sampleIds,mmIds,cmIds,ecIds,speciesTypeKey);
-
-    HashMap<String, Term> termResolver = new HashMap<String, Term>();
-    List<String> termList = new ArrayList<String>();
-    HashMap<String,String> measurements = new HashMap<String,String>();
-    HashMap<String,String> methods = new HashMap<String,String>();
-    HashMap<String,String> samples = new HashMap<String,String>();
-    HashMap<String,String> conditions =  new HashMap<String,String>();
-
-    for (Record r: records) {
-
-        termList.add(r.getSample().getStrainAccId());
-        samples.put(r.getSample().getStrainAccId(), null);
-        termList.add(r.getClinicalMeasurement().getAccId());
-        measurements.put(r.getClinicalMeasurement().getAccId(), null);
-        termList.add(r.getMeasurementMethod().getAccId());
-        methods.put(r.getMeasurementMethod().getAccId(), null);
-
-        for (Condition c : r.getConditions()) {
-            termList.add(c.getOntologyId());
-            conditions.put(c.getOntologyId(), null);
-        }
-
-        double thisVal = Double.parseDouble(r.getMeasurementValue());
-
-        if (thisVal < min) {
-            min = thisVal;
-        }
-
-        if (thisVal > max) {
-            max = thisVal;
-        }
-
-        if (r.getSample().getAgeDaysFromLowBound() != null) {
-
-            String range = r.getSample().getAgeDaysFromLowBound() + " days - " + r.getSample().getAgeDaysFromHighBound() + " days";
-            if (!uniqueRanges.containsKey(range)) {
-                HashMap thisRange = new HashMap();
-                thisRange.put("range", range);
-                uniqueRanges.put(range, null);
-
-                ageRanges.add(thisRange);
+        for (int i=0; i< terms.length; i++) {
+            if (terms[i].startsWith("RS") || terms[i].startsWith("CS")) {
+                sampleIds.add(terms[i]);
+            }else if (terms[i].startsWith("CMO")) {
+                cmIds.add(terms[i]);
+            }else if (terms[i].startsWith("MMO")) {
+                mmIds.add(terms[i]);
+            }else if (terms[i].startsWith("XCO")) {
+                ecIds.add(terms[i]);
             }
         }
+
+        List<Record> records = phenominerDAO.getFullRecords(sampleIds, mmIds, cmIds, ecIds, speciesTypeKey);
+
+        return getChartInfoForRecords(records);
     }
 
-    String[] termIds = new String[termList.size()];
-    termIds = termList.toArray(termIds);
+    @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{refRgdId}/{termString}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla).  Reference RGD ID for a study works like a filter.", tags = "Quantitative Phenotype")
+    public HashMap getChartInfo(@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+			@ApiParam(value="Reference RGD ID for a study", required=true) @PathVariable(value = "refRgdId") int refRgdId,
+            @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
-    OntologyXDAO xdao = new OntologyXDAO();
-    List<Term> ontTerms = xdao.getTermByAccId(termIds);
+        List<String> sampleIds = new ArrayList<String>();
+        List mmIds = new ArrayList<String>();
+        List cmIds = new ArrayList<String>();
+        List ecIds = new ArrayList<String>();
 
-    for (Term term: ontTerms) {
-        termResolver.put(term.getAccId(),term);
-    }
+        String[] terms = termString.split(",");
 
+        for (int j=0; j< terms.length; j++) {
+            String[] termParts = terms[j].split(":");
 
-    LinkedHashMap conditionSet = new LinkedHashMap();
+            while (termParts[1].length()<7) {
+                termParts[1]="0" + termParts[1];
+            }
 
-    for (Record r: records) {
-
-        if (!conditionSet.containsKey(r.getClinicalMeasurement().getAccId())) {
-            HashSet hm = new HashSet();
-            hm.add(r.getConditionDescription());
-            conditionSet.put(r.getClinicalMeasurement().getAccId(),hm);
-        }else {
-            HashSet hm = (HashSet) conditionSet.get(r.getClinicalMeasurement().getAccId());
-            hm.add(r.getConditionDescription());
-            conditionSet.put(r.getClinicalMeasurement().getAccId(),hm);
-
+            terms[j] = termParts[0] + ":" + termParts[1];
         }
 
+        for (int i=0; i< terms.length; i++) {
+            if (terms[i].startsWith("RS") || terms[i].startsWith("CS")) {
+                sampleIds.add(terms[i]);
+            }else if (terms[i].startsWith("CMO")) {
+                cmIds.add(terms[i]);
+            }else if (terms[i].startsWith("MMO")) {
+                mmIds.add(terms[i]);
+            }else if (terms[i].startsWith("XCO")) {
+                ecIds.add(terms[i]);
+            }
+        }
+
+        List<Record> records = phenominerDAO.getFullRecords(sampleIds, mmIds, cmIds, ecIds, speciesTypeKey, refRgdId);
+
+        return getChartInfoForRecords(records);
     }
+
+    HashMap getChartInfoForRecords(List<Record> records) throws Exception {
+
+        double min = 1000000000;
+        double max = -1000000000;
+
+        List ageRanges= new ArrayList();
+        HashMap uniqueRanges=new HashMap();
+
+        HashMap<String, Term> termResolver = new HashMap<String, Term>();
+        List<String> termList = new ArrayList<String>();
+        HashMap<String,String> measurements = new HashMap<String,String>();
+        HashMap<String,String> methods = new HashMap<String,String>();
+        HashMap<String,String> samples = new HashMap<String,String>();
+        HashMap<String,String> conditions =  new HashMap<String,String>();
+
+        for (Record r: records) {
+
+            termList.add(r.getSample().getStrainAccId());
+            samples.put(r.getSample().getStrainAccId(), null);
+            termList.add(r.getClinicalMeasurement().getAccId());
+            measurements.put(r.getClinicalMeasurement().getAccId(), null);
+            termList.add(r.getMeasurementMethod().getAccId());
+            methods.put(r.getMeasurementMethod().getAccId(), null);
+
+            for (Condition c : r.getConditions()) {
+                termList.add(c.getOntologyId());
+                conditions.put(c.getOntologyId(), null);
+            }
+
+            double thisVal = Double.parseDouble(r.getMeasurementValue());
+
+            if (thisVal < min) {
+                min = thisVal;
+            }
+
+            if (thisVal > max) {
+                max = thisVal;
+            }
+
+            if (r.getSample().getAgeDaysFromLowBound() != null) {
+
+                String range = r.getSample().getAgeDaysFromLowBound() + " days - " + r.getSample().getAgeDaysFromHighBound() + " days";
+                if (!uniqueRanges.containsKey(range)) {
+                    HashMap thisRange = new HashMap();
+                    thisRange.put("range", range);
+                    uniqueRanges.put(range, null);
+
+                    ageRanges.add(thisRange);
+                }
+            }
+        }
+
+        String[] termIds = new String[termList.size()];
+        termIds = termList.toArray(termIds);
+
+        OntologyXDAO xdao = new OntologyXDAO();
+        List<Term> ontTerms = xdao.getTermByAccId(termIds);
+
+        for (Term term: ontTerms) {
+            termResolver.put(term.getAccId(),term);
+        }
+
+
+        LinkedHashMap conditionSet = new LinkedHashMap();
+
+        for (Record r: records) {
+
+            if (!conditionSet.containsKey(r.getClinicalMeasurement().getAccId())) {
+                HashSet hm = new HashSet();
+                hm.add(r.getConditionDescription());
+                conditionSet.put(r.getClinicalMeasurement().getAccId(),hm);
+            }else {
+                HashSet hm = (HashSet) conditionSet.get(r.getClinicalMeasurement().getAccId());
+                hm.add(r.getConditionDescription());
+                conditionSet.put(r.getClinicalMeasurement().getAccId(),hm);
+
+            }
+
+        }
         HashMap hm = new HashMap();
         List measurementList = new ArrayList();
         List methodList = new ArrayList();
@@ -164,9 +208,20 @@ public class PhenotypeWebService {
 
         for (String measurement: measurements.keySet()) {
             HashMap map = new HashMap();
+            List<PhenominerExpectedRange> normalRanges = pedao.getNormalRangesByCMId(measurement);
             map.put("accId", measurement);
             map.put("term", termResolver.get(measurement).getTerm());
 
+            HashMap ranges = new HashMap();
+            for(PhenominerExpectedRange range: normalRanges){
+                HashMap rmap = new HashMap();
+                rmap.put("mean",range.getRangeValue());
+                rmap.put("low",range.getRangeLow());
+                rmap.put("high",range.getRangeHigh());
+                rmap.put("sd",range.getRangeSD());
+                ranges.put(range.getSex(),rmap);
+            }
+            map.put("normalRanges",ranges);
             measurementList.add(map);
         }
         hm.put("measurements", measurementList);
