@@ -3,6 +3,7 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.MappedGene;
+import edu.mcw.rgd.datamodel.MappedGenePosition;
 import edu.mcw.rgd.domain.AnnotatedGeneRequest;
 import edu.mcw.rgd.domain.OrthologRequest;
 import edu.mcw.rgd.domain.RGDIDListRequest;
@@ -101,10 +102,10 @@ public class GeneWebService {
 
     @RequestMapping(value="/region/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @ApiOperation(value="Return a list of genes in region", tags="Gene")
-    public List<MappedGene> getGenesInRegion(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                         @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
-                                         @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                         @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<MappedGenePosition> getGenesInRegion(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                     @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
+                                                     @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                                     @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
         return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey);
     }
