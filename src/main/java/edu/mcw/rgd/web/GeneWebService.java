@@ -107,7 +107,7 @@ public class GeneWebService {
                                                      @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                                      @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
-        return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey);
+        return geneDAO.getActiveMappedGenePositions(chr.toUpperCase(), start, stop, mapKey);
     }
 
 
