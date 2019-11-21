@@ -1,6 +1,7 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.MapDAO;
+import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.Map;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,4 +43,17 @@ public class MapWebService {
         return chromosomes;
     }
 
+    @RequestMapping(value="/chr/{chromosome}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
+    public Chromosome getChromosomeByAssembly(
+            @ApiParam(value="chromosome", required=true) @PathVariable(value = "chromosome") String chromosome,
+            @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
+
+
+    ) throws Exception{
+
+        MapDAO mdao= new MapDAO();
+
+        return mdao.getChromosome(mapKey,chromosome);
+    }
 }
