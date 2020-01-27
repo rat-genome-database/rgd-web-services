@@ -2,6 +2,7 @@ package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
+import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.dao.impl.XdbIdDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.Map;
@@ -311,4 +312,11 @@ public class LookupWebService {
         return g.getTypes();
     }
 
+    @RequestMapping(value="/standardUnit/{accId}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a standardUnit for an ontology if it exists", tags = "Lookup")
+    public String getMaps(@ApiParam(value="RGD term acc", required=true) @PathVariable(value = "accId") String accId) throws Exception{
+
+        PhenominerDAO pdao = new PhenominerDAO();
+        return pdao.getStandardUnit(accId);
+    }
 }
