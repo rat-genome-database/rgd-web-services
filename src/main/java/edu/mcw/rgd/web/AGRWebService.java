@@ -268,6 +268,17 @@ public class AGRWebService {
             map.put("taxonId", "NCBITaxon:" + taxonId);
             map.put("symbol", g.getSymbol());
 
+            // allele description: combine allele name with allele description
+            String desc = g.getName();
+            if( !Utils.isStringEmpty(g.getDescription()) ) {
+                if( desc==null ) {
+                    desc = g.getDescription();
+                } else {
+                    desc += "; "+g.getDescription();
+                }
+            }
+            map.put("description", desc);
+
             // 'symbolText'
             // the symbol in text format, replacing all html tags with <>.
             // There may be more than one set of <> in the symbol.
@@ -744,7 +755,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.0.9");
+        metadata.put("release", "RGD-1.0.1.0");
         return metadata;
     }
 
