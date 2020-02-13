@@ -3,6 +3,7 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.Map;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -39,10 +40,10 @@ public class MapWebService {
     ) throws Exception{
 
         MapDAO mdao= new MapDAO();
-       Set<String> chromosomes = ((TreeMap)mdao.getChromosomeSizes(mapKey)).keySet();
+        Map primary = mdao.getPrimaryRefAssembly(mdao.getSpeciesTypeKeyForMap(mapKey));
+       Set<String> chromosomes = ((TreeMap)mdao.getChromosomeSizes(primary.getKey())).keySet();
         return chromosomes;
     }
-
     @RequestMapping(value="/chr/{chromosome}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
     public Chromosome getChromosomeByAssembly(
