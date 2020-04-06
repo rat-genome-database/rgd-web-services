@@ -1,6 +1,7 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.QTLDAO;
+import edu.mcw.rgd.datamodel.MappedQTL;
 import edu.mcw.rgd.datamodel.QTL;
 
 import io.swagger.annotations.*;
@@ -44,7 +45,15 @@ public class QTLWebService {
 
         return qdao.getActiveQTLs(chr.toUpperCase(), start,stop,mapKey);
     }
+    @RequestMapping( value="/mapped/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Returns a list QTL for given position and assembly map", tags = "QTL")
+    public List<MappedQTL> getMappedQTLByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
+                                                @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                                @ApiParam(value="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        return qdao.getActiveMappedQTLs(chr.toUpperCase(), start,stop,mapKey);
+    }
     /*
     Map<Long, NewsEntry> entries = new ConcurrentHashMap<Long, NewsEntry>();
 
