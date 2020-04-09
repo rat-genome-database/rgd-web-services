@@ -1,10 +1,23 @@
+buildscript {
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	dependencies {
+		classpath "gradle.plugin.org.gretty:gretty:3.0.2"
+	}
+}
+
+apply plugin: "org.gretty"
 apply plugin: 'java'
 apply plugin: 'war'
-apply plugin: 'jetty'
 
 // JDK 8
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+
 
 repositories {
 
@@ -32,13 +45,13 @@ dependencies {
 }
 
 // Embeded Jetty for testing
-jettyRun{
-	contextPath = "rest"
-	httpPort = 8080
+tasks.whenTaskAdded { task ->
+	if (task.name == 'jettyRun') {
+		task.contextPath 'rest'
+		task.httpPort 8080
+	}
+	if (task.name == 'jettyRunWar') {
+		task.contextPath 'rest'
+		task.httpPort 8080
+	}
 }
-
-jettyRunWar{
-	contextPath = "rest"
-	httpPort = 8080
-}
-
