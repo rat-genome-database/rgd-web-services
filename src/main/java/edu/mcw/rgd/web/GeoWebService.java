@@ -25,7 +25,7 @@ public class GeoWebService {
 
     @RequestMapping(value = "/{species}", method = RequestMethod.GET)
     @ApiOperation(value = "Returns a list experiments in geo for species", tags = "Geo")
-    public List<Study> getMappedSSLPByPosition(@ApiParam(value = "Species", required = true) @PathVariable(value = "species") String species) throws Exception {
+    public List<Study> getGeoStudies(@ApiParam(value = "Species", required = true) @PathVariable(value = "species") String species) throws Exception {
 
         return pdao.getGeoStudies(species);
     }
