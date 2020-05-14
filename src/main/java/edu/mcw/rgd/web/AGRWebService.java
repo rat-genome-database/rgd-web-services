@@ -544,6 +544,10 @@ public class AGRWebService {
         XdbIdDAO xdao = new XdbIdDAO();
 
         List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "RGD");
+        if( aspect.equals("H") ) {
+            // for human HPO, in addition to manual RGD annots, also load the other annots
+            annots.addAll(adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "HPO"));
+        }
         for( Annotation a: annots ) {
             // handle only GENES and STRAINS
             if( !(a.getRgdObjectKey()==RgdId.OBJECT_KEY_GENES || a.getRgdObjectKey()==RgdId.OBJECT_KEY_STRAINS) ) {
