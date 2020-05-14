@@ -257,11 +257,6 @@ public class AGRWebService {
         List<Gene> alleles = geneDAO.getActiveGenesByType("allele", speciesTypeKey);
         for( Gene g: alleles ) {
 
-            List<Gene> parentGenes = geneDAO.getGeneFromVariant(g.getRgdId());
-            if( parentGenes.size()!=1 ) {
-                continue;
-            }
-
             HashMap map = new HashMap();
 
             map.put("primaryId", "RGD:" + g.getRgdId());
@@ -287,8 +282,23 @@ public class AGRWebService {
                 .replaceAll("</i>|</sup>",">").replaceAll(">>",">");
             map.put("symbolText", symbolText);
 
-            map.put("gene", "RGD:"+parentGenes.get(0).getRgdId());
+            // parent gene for the allele
+            List<Gene> parentGenes = geneDAO.getGeneFromVariant(g.getRgdId());
+            List alleleObjectRelations = new ArrayList();
+            for( Gene parentGene: parentGenes ) {
+                HashMap objRel = new HashMap();
+                objRel.put("association_type", "allele_of");
+                objRel.put("gene", "RGD:" + parentGenes.get(0).getRgdId());
 
+                HashMap alleleObjRel = new HashMap();
+                alleleObjRel.put("objectRelation", objRel);
+                alleleObjectRelations.add(alleleObjRel);
+            }
+            if( !alleleObjectRelations.isEmpty() ) {
+                map.put("alleleObjectRelations", alleleObjectRelations);
+            }
+
+            // synonyms
             Set<String> synonyms = new TreeSet<>();
             List<Alias> aliases = adao.getAliases(g.getRgdId());
             for( Alias a : aliases ) {
@@ -756,7 +766,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.0");
+        metadata.put("release", "RGD-1.0.1.1");
         return metadata;
     }
 
