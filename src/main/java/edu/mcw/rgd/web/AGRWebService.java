@@ -635,10 +635,17 @@ public class AGRWebService {
         }
 
         // one evidence for RAT and HUMAN manual RGD annotations
-        HashMap evidence = new HashMap<>();
+        HashMap evidence = handleEvidence(xdao, a.getRefRgdId());
         evidenceList.add(evidence);
 
-        int refRgdId = a.getRefRgdId();
+        return evidenceList;
+    }
+
+    HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+
+        // one evidence for RAT and HUMAN manual RGD annotations
+        HashMap evidence = new HashMap<>();
+
         List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
         String pmid = null;
         if( !pmidIds.isEmpty() ) {
@@ -676,9 +683,8 @@ public class AGRWebService {
             System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
         }
 
-        return evidenceList;
+        return evidence;
     }
-
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
