@@ -561,8 +561,6 @@ public class AGRWebService {
                 }
             }
 
-            HashMap phenotype = new HashMap();
-
             // object id
             String objectId;
             if( speciesTypeKey==SpeciesType.RAT ) {
@@ -574,26 +572,29 @@ public class AGRWebService {
                 }
                 objectId = hgncIds.get(0).getAccId();
             }
-            phenotype.put("objectId", objectId);
 
-            // phenotype identifiers
-            List phenotypeIds = new ArrayList<>();
-            HashMap phenotypeId = new HashMap();
-            phenotypeId.put("termId", a.getTermAcc());
-            phenotypeId.put("termOrder", 1);
-            phenotypeIds.add(phenotypeId);
-            phenotype.put("phenotypeTermIdentifiers", phenotypeIds);
+            List<HashMap> evidenceList = handleEvidence(xdao, a);
+            for( HashMap evidenceMap: evidenceList ) {
 
-            phenotype.put("phenotypeStatement", a.getTerm());
-
-            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
-            if( evidenceMap!=null ) {
+                HashMap phenotype = new HashMap();
                 phenotype.put("evidence", evidenceMap);
+
+                phenotype.put("objectId", objectId);
+
+                // phenotype identifiers
+                List phenotypeIds = new ArrayList<>();
+                HashMap phenotypeId = new HashMap();
+                phenotypeId.put("termId", a.getTermAcc());
+                phenotypeId.put("termOrder", 1);
+                phenotypeIds.add(phenotypeId);
+                phenotype.put("phenotypeTermIdentifiers", phenotypeIds);
+
+                phenotype.put("phenotypeStatement", a.getTerm());
+
+                phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
+
+                phenotypes.add(phenotype);
             }
-
-            phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
-
-            phenotypes.add(phenotype);
         }
 
 
@@ -604,15 +605,45 @@ public class AGRWebService {
         return returnMap;
     }
 
-    HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+    List<HashMap> handleEvidence(XdbIdDAO xdao, Annotation a) throws Exception {
 
+        List<HashMap> evidenceList = new ArrayList<>();
+
+        if( a.getDataSrc().equals("HPO") ) {
+
+            if( Utils.isStringEmpty(a.getNotes()) ) {
+                return evidenceList;
+            }
+            // notes contain multiple space separated OMIM:xxx or ORPHA:xxxx ids
+            String[] omimOrphaIds = a.getNotes().split("[\\s]");
+            for( String omimOrphaId: omimOrphaIds ) {
+
+                HashMap evidence = new HashMap<>();
+                evidenceList.add(evidence);
+
+                evidence.put("publicationId", omimOrphaId);
+
+                HashMap crossRef = new HashMap<>();
+                crossRef.put("id", omimOrphaId);
+                List<String> pages = new ArrayList<>();
+                pages.add("disease");
+                crossRef.put("pages", pages);
+
+                evidence.put("crossReference", crossRef);
+            }
+            return evidenceList;
+        }
+
+        // one evidence for RAT and HUMAN manual RGD annotations
+        HashMap evidence = new HashMap<>();
+        evidenceList.add(evidence);
+
+        int refRgdId = a.getRefRgdId();
         List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
         String pmid = null;
         if( !pmidIds.isEmpty() ) {
             pmid = "PMID:"+pmidIds.get(0).getAccId();
         }
-
-        HashMap evidence = new HashMap<>();
 
         // look for a PMID
         if( pmid!=null ) {
@@ -627,11 +658,10 @@ public class AGRWebService {
 
                 evidence.put("crossReference", crossRef);
             }
-            return evidence;
         }
 
         // no PMID available -- set reference to REF_RGD_ID
-        if( refRgdId>0 ) {
+        else if( refRgdId>0 ) {
             evidence.put("publicationId", "RGD:" + refRgdId);
 
             HashMap crossRef = new HashMap<>();
@@ -642,12 +672,11 @@ public class AGRWebService {
 
             evidence.put("crossReference", crossRef);
 
-            return evidence;
         } else {
             System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
         }
 
-        return null;
+        return evidenceList;
     }
 
 
