@@ -561,6 +561,13 @@ public class AGRWebService {
                 }
             }
 
+            // skip annotations with qualifiers 'NOT','no_association'
+            if( a.getQualifier()!=null ) {
+                if( a.getQualifier().equals("no_association") || a.getQualifier().equals("NOT") ) {
+                    continue;
+                }
+            }
+
             // object id
             String objectId;
             if( speciesTypeKey==SpeciesType.RAT ) {
