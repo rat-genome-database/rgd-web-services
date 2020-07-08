@@ -39,6 +39,7 @@ public class AGRWebService {
 
         AliasDAO adao = new AliasDAO();
         GeneDAO geneDAO = new GeneDAO();
+        MapDAO mdao = new MapDAO();
         XdbIdDAO xdao = new XdbIdDAO();
 
         final String[] aliasTypes = {"old_gene_name","old_gene_symbol"};
@@ -60,14 +61,19 @@ public class AGRWebService {
         }
         final String assembly = MapManager.getInstance().getMap(mapKey).getName();
 
-        List<MappedGene> mappedGenes = geneDAO.getActiveMappedGenes(mapKey);
+        int speciesTypeKey = SpeciesType.getSpeciesTypeKeyForMap(mapKey);
+        List<Gene> genes = geneDAO.getActiveGenes(speciesTypeKey);
+        for (Gene g: genes ) {
 
-        for (MappedGene mg: mappedGenes) {
+            // do not submit genes without positions on primary assembly
+            List<MapData> mds = mdao.getMapData(g.getRgdId(), mapKey);
+            if( mds.isEmpty() ) {
+                continue;
+            }
 
             HashMap map = new HashMap();
 
-            Gene g = mg.getGene();
-            int rgdId = mg.getGene().getRgdId();
+            int rgdId = g.getRgdId();
 
 
             List crossList = new ArrayList();
@@ -203,7 +209,7 @@ public class AGRWebService {
 			}
 
             //get out of gene types
-            map.put("soTermId", mg.getGene().getSoAccId());
+            map.put("soTermId", g.getSoAccId());
 
             TreeSet<String> synonyms = new TreeSet<>();
             List<Alias> aliases = adao.getAliases(rgdId, aliasTypes);
@@ -218,13 +224,15 @@ public class AGRWebService {
 
             List genomeLocations = new ArrayList();
 
+            for( MapData md: mds ) {
                 HashMap hm = new HashMap();
                 hm.put("assembly", assembly);
-                hm.put("startPosition", mg.getStart());
-                hm.put("endPosition", mg.getStop());
-                hm.put("chromosome", mg.getChromosome());
-                hm.put("strand", mg.getStrand());
+                hm.put("startPosition", md.getStartPos());
+                hm.put("endPosition", md.getStopPos());
+                hm.put("chromosome", md.getChromosome());
+                hm.put("strand", md.getStrand());
                 genomeLocations.add(hm);
+            }
 
             basicGeneticEntity.put("genomeLocations", genomeLocations);
 
@@ -257,11 +265,6 @@ public class AGRWebService {
         List<Gene> alleles = geneDAO.getActiveGenesByType("allele", speciesTypeKey);
         for( Gene g: alleles ) {
 
-            List<Gene> parentGenes = geneDAO.getGeneFromVariant(g.getRgdId());
-            if( parentGenes.size()!=1 ) {
-                continue;
-            }
-
             HashMap map = new HashMap();
 
             map.put("primaryId", "RGD:" + g.getRgdId());
@@ -287,8 +290,23 @@ public class AGRWebService {
                 .replaceAll("</i>|</sup>",">").replaceAll(">>",">");
             map.put("symbolText", symbolText);
 
-            map.put("gene", "RGD:"+parentGenes.get(0).getRgdId());
+            // parent gene for the allele
+            List<Gene> parentGenes = geneDAO.getGeneFromVariant(g.getRgdId());
+            List alleleObjectRelations = new ArrayList();
+            for( Gene parentGene: parentGenes ) {
+                HashMap objRel = new HashMap();
+                objRel.put("association_type", "allele_of");
+                objRel.put("gene", "RGD:" + parentGenes.get(0).getRgdId());
 
+                HashMap alleleObjRel = new HashMap();
+                alleleObjRel.put("objectRelation", objRel);
+                alleleObjectRelations.add(alleleObjRel);
+            }
+            if( !alleleObjectRelations.isEmpty() ) {
+                map.put("alleleObjectRelations", alleleObjectRelations);
+            }
+
+            // synonyms
             Set<String> synonyms = new TreeSet<>();
             List<Alias> aliases = adao.getAliases(g.getRgdId());
             for( Alias a : aliases ) {
@@ -534,6 +552,10 @@ public class AGRWebService {
         XdbIdDAO xdao = new XdbIdDAO();
 
         List<Annotation> annots = adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "RGD");
+        if( aspect.equals("H") ) {
+            // for human HPO, in addition to manual RGD annots, also load the other annots
+            annots.addAll(adao.getAnnotationsBySpeciesAspectAndSource(speciesTypeKey, aspect, "HPO"));
+        }
         for( Annotation a: annots ) {
             // handle only GENES and STRAINS
             if( !(a.getRgdObjectKey()==RgdId.OBJECT_KEY_GENES || a.getRgdObjectKey()==RgdId.OBJECT_KEY_STRAINS) ) {
@@ -547,7 +569,12 @@ public class AGRWebService {
                 }
             }
 
-            HashMap phenotype = new HashMap();
+            // skip annotations with qualifiers 'NOT','no_association'
+            if( a.getQualifier()!=null ) {
+                if( a.getQualifier().equals("no_association") || a.getQualifier().equals("NOT") ) {
+                    continue;
+                }
+            }
 
             // object id
             String objectId;
@@ -560,26 +587,29 @@ public class AGRWebService {
                 }
                 objectId = hgncIds.get(0).getAccId();
             }
-            phenotype.put("objectId", objectId);
 
-            // phenotype identifiers
-            List phenotypeIds = new ArrayList<>();
-            HashMap phenotypeId = new HashMap();
-            phenotypeId.put("termId", a.getTermAcc());
-            phenotypeId.put("termOrder", 1);
-            phenotypeIds.add(phenotypeId);
-            phenotype.put("phenotypeTermIdentifiers", phenotypeIds);
+            List<HashMap> evidenceList = handleEvidence(xdao, a);
+            for( HashMap evidenceMap: evidenceList ) {
 
-            phenotype.put("phenotypeStatement", a.getTerm());
-
-            HashMap evidenceMap = handleEvidence(xdao, a.getRefRgdId());
-            if( evidenceMap!=null ) {
+                HashMap phenotype = new HashMap();
                 phenotype.put("evidence", evidenceMap);
+
+                phenotype.put("objectId", objectId);
+
+                // phenotype identifiers
+                List phenotypeIds = new ArrayList<>();
+                HashMap phenotypeId = new HashMap();
+                phenotypeId.put("termId", a.getTermAcc());
+                phenotypeId.put("termOrder", 1);
+                phenotypeIds.add(phenotypeId);
+                phenotype.put("phenotypeTermIdentifiers", phenotypeIds);
+
+                phenotype.put("phenotypeStatement", a.getTerm());
+
+                phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
+
+                phenotypes.add(phenotype);
             }
-
-            phenotype.put("dateAssigned", formatDate(a.getCreatedDate()));
-
-            phenotypes.add(phenotype);
         }
 
 
@@ -590,15 +620,52 @@ public class AGRWebService {
         return returnMap;
     }
 
+    List<HashMap> handleEvidence(XdbIdDAO xdao, Annotation a) throws Exception {
+
+        List<HashMap> evidenceList = new ArrayList<>();
+
+        if( a.getDataSrc().equals("HPO") ) {
+
+            if( Utils.isStringEmpty(a.getNotes()) ) {
+                return evidenceList;
+            }
+            // notes contain multiple space separated OMIM:xxx or ORPHA:xxxx ids
+            String[] omimOrphaIds = a.getNotes().split("[\\s]");
+            for( String omimOrphaId: omimOrphaIds ) {
+
+                HashMap evidence = new HashMap<>();
+                evidenceList.add(evidence);
+
+                evidence.put("publicationId", omimOrphaId);
+
+                HashMap crossRef = new HashMap<>();
+                crossRef.put("id", omimOrphaId);
+                List<String> pages = new ArrayList<>();
+                pages.add("disease");
+                crossRef.put("pages", pages);
+
+                evidence.put("crossReference", crossRef);
+            }
+            return evidenceList;
+        }
+
+        // one evidence for RAT and HUMAN manual RGD annotations
+        HashMap evidence = handleEvidence(xdao, a.getRefRgdId());
+        evidenceList.add(evidence);
+
+        return evidenceList;
+    }
+
     HashMap handleEvidence(XdbIdDAO xdao, int refRgdId) throws Exception {
+
+        // one evidence for RAT and HUMAN manual RGD annotations
+        HashMap evidence = new HashMap<>();
 
         List<XdbId> pmidIds = xdao.getXdbIdsByRgdId(XdbId.XDB_KEY_PUBMED, refRgdId);
         String pmid = null;
         if( !pmidIds.isEmpty() ) {
             pmid = "PMID:"+pmidIds.get(0).getAccId();
         }
-
-        HashMap evidence = new HashMap<>();
 
         // look for a PMID
         if( pmid!=null ) {
@@ -613,11 +680,10 @@ public class AGRWebService {
 
                 evidence.put("crossReference", crossRef);
             }
-            return evidence;
         }
 
         // no PMID available -- set reference to REF_RGD_ID
-        if( refRgdId>0 ) {
+        else if( refRgdId>0 ) {
             evidence.put("publicationId", "RGD:" + refRgdId);
 
             HashMap crossRef = new HashMap<>();
@@ -628,14 +694,12 @@ public class AGRWebService {
 
             evidence.put("crossReference", crossRef);
 
-            return evidence;
         } else {
             System.out.println("*** WARN *** unexpected ref rgd id: "+refRgdId);
         }
 
-        return null;
+        return evidence;
     }
-
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
     @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
@@ -756,7 +820,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.0");
+        metadata.put("release", "RGD-1.0.1.2");
         return metadata;
     }
 
