@@ -61,7 +61,8 @@ public class AGRWebService {
         }
         final String assembly = MapManager.getInstance().getMap(mapKey).getName();
 
-        List<Gene> genes = geneDAO.getActiveGenes(mapKey);
+        int speciesTypeKey = SpeciesType.getSpeciesTypeKeyForMap(mapKey);
+        List<Gene> genes = geneDAO.getActiveGenes(speciesTypeKey);
         for (Gene g: genes ) {
 
             // do not submit genes without positions on primary assembly
