@@ -39,6 +39,7 @@ public class AGRWebService {
 
         AliasDAO adao = new AliasDAO();
         GeneDAO geneDAO = new GeneDAO();
+        MapDAO mdao = new MapDAO();
         XdbIdDAO xdao = new XdbIdDAO();
 
         final String[] aliasTypes = {"old_gene_name","old_gene_symbol"};
@@ -60,14 +61,18 @@ public class AGRWebService {
         }
         final String assembly = MapManager.getInstance().getMap(mapKey).getName();
 
-        List<MappedGene> mappedGenes = geneDAO.getActiveMappedGenes(mapKey);
+        List<Gene> genes = geneDAO.getActiveGenes(mapKey);
+        for (Gene g: genes ) {
 
-        for (MappedGene mg: mappedGenes) {
+            // do not submit genes without positions on primary assembly
+            List<MapData> mds = mdao.getMapData(g.getRgdId(), mapKey);
+            if( mds.isEmpty() ) {
+                continue;
+            }
 
             HashMap map = new HashMap();
 
-            Gene g = mg.getGene();
-            int rgdId = mg.getGene().getRgdId();
+            int rgdId = g.getRgdId();
 
 
             List crossList = new ArrayList();
@@ -203,7 +208,7 @@ public class AGRWebService {
 			}
 
             //get out of gene types
-            map.put("soTermId", mg.getGene().getSoAccId());
+            map.put("soTermId", g.getSoAccId());
 
             TreeSet<String> synonyms = new TreeSet<>();
             List<Alias> aliases = adao.getAliases(rgdId, aliasTypes);
@@ -218,13 +223,15 @@ public class AGRWebService {
 
             List genomeLocations = new ArrayList();
 
+            for( MapData md: mds ) {
                 HashMap hm = new HashMap();
                 hm.put("assembly", assembly);
-                hm.put("startPosition", mg.getStart());
-                hm.put("endPosition", mg.getStop());
-                hm.put("chromosome", mg.getChromosome());
-                hm.put("strand", mg.getStrand());
+                hm.put("startPosition", md.getStartPos());
+                hm.put("endPosition", md.getStopPos());
+                hm.put("chromosome", md.getChromosome());
+                hm.put("strand", md.getStrand());
                 genomeLocations.add(hm);
+            }
 
             basicGeneticEntity.put("genomeLocations", genomeLocations);
 
@@ -812,7 +819,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.1");
+        metadata.put("release", "RGD-1.0.1.2");
         return metadata;
     }
 
