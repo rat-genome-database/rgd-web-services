@@ -78,6 +78,7 @@ public class AGRWebService {
 
             List crossList = new ArrayList();
             List<XdbId> xdbIds = xdao.getXdbIdsByRgdId(xdbKeyList, rgdId);
+            dropTremblIfSwissProtAvailable(xdbIds);
 
             HashMap found = new HashMap();
 
@@ -243,6 +244,23 @@ public class AGRWebService {
         returnMap.put("data",geneList);
         returnMap.put("metaData", getMetaData());
         return returnMap;
+    }
+
+    void dropTremblIfSwissProtAvailable(List<XdbId> xdbIds) {
+
+        // check if there are any SwissProt entries
+        boolean isSwissProt = false;
+        for( XdbId id: xdbIds ) {
+            if( id.getXdbKey()==14 && Utils.stringsAreEqualIgnoreCase(id.getSrcPipeline(), "UniProtKB/Swiss-Prot") ) {
+                isSwissProt = true;
+                break;
+            }
+        }
+
+        if( isSwissProt ) {
+            // remove all non Swiss-Prot entries
+            xdbIds.removeIf(id -> id.getXdbKey() == 14 && !Utils.stringsAreEqualIgnoreCase(id.getSrcPipeline(), "UniProtKB/Swiss-Prot"));
+        }
     }
 
 
@@ -820,7 +838,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.2");
+        metadata.put("release", "RGD-1.0.1.3");
         return metadata;
     }
 
