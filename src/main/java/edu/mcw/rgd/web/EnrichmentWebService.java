@@ -71,7 +71,9 @@ public class EnrichmentWebService {
                     TermWithStats ts = oDao.getTermWithStatsCached(acc);
                     int withChildren = 1;
                     int refAnnotGenes = ts.getStat("annotated_object_count", speciesTypeKey, RgdId.OBJECT_KEY_GENES, withChildren);
+
                     String pvalue = process.calculatePValue(inputGenes, refGenes, refs, refAnnotGenes);
+                    if(pvalue != null){
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
 
                     data.put("acc", acc);
@@ -81,6 +83,7 @@ public class EnrichmentWebService {
                     data.put("pvalue", pvalue);
                     data.put("correctedpvalue", bonferroni);
                     enrichmentData.add(data);
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
