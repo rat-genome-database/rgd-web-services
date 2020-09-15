@@ -68,7 +68,7 @@ public class EnrichmentWebService {
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
                     int refs = geneCounts.get(acc);
-                    TermWithStats ts = oDao.getTermWithStatsCached(term);
+                    TermWithStats ts = oDao.getTermWithStatsCached(acc);
                     int withChildren = 1;
                     int refAnnotGenes = ts.getStat("annotated_object_count", speciesTypeKey, RgdId.OBJECT_KEY_GENES, withChildren);
                     String pvalue = process.calculatePValue(inputGenes, refGenes, refs, refAnnotGenes);
