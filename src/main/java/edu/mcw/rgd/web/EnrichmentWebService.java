@@ -50,7 +50,7 @@ public class EnrichmentWebService {
             aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
         else aspects.add(aspect);
 
-        int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
+        int refGenes = dao.getReferenceGeneCount(speciesTypeKey,aspect);
         int inputGenes = geneRgdIds.size();
         Map result = new ConcurrentHashMap();
         List geneData = gdao.getGeneByRgdIds(geneRgdIds);
