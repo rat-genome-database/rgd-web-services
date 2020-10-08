@@ -35,6 +35,9 @@ public class AGRWebService {
         //rat taxon : 10116
         //human taxon : 9606
 
+        boolean debug = true;
+        int multis = 0;
+
         ArrayList geneList = new ArrayList();
 
         AliasDAO adao = new AliasDAO();
@@ -51,24 +54,37 @@ public class AGRWebService {
         crossRefPagesForGeneRgdId.add("gene");
         crossRefPagesForGeneRgdId.add("gene/references");
 
-		int mapKey = -1;
+        int speciesTypeKey = 0;
+        int mapKey1 = 0, mapKey2 = 0;
         if (taxonId.equals("9606")) {
-            mapKey=38;
+            speciesTypeKey = SpeciesType.HUMAN;
+            mapKey1 = 38;
+            mapKey2 = 40;
         }else if (taxonId.equals("10116")) {
-            mapKey=360;
+            speciesTypeKey = SpeciesType.RAT;
+            mapKey1 = 360;
+            mapKey2 = 361;
         }else {
             throw new Exception("Genes for Taxon ID " + taxonId + " not found");
         }
-        final String assembly = MapManager.getInstance().getMap(mapKey).getName();
+        final String assembly = MapManager.getInstance().getMap(mapKey1).getName();
 
-        int speciesTypeKey = SpeciesType.getSpeciesTypeKeyForMap(mapKey);
         List<Gene> genes = geneDAO.getActiveGenes(speciesTypeKey);
         for (Gene g: genes ) {
 
             // do not submit genes without positions on primary assembly
-            List<MapData> mds = mdao.getMapData(g.getRgdId(), mapKey);
+            List<MapData> mds = getLoci(g.getRgdId(), mapKey1, mapKey2, mdao);
             if( mds.isEmpty() ) {
                 continue;
+            }
+
+            // display genes with multiple loci
+            if( debug && mds.size()>1) {
+                multis++;
+                System.out.println(multis+" RGD:"+g.getRgdId()+" "+g.getSymbol());
+                for( MapData md: mds ) {
+                    System.out.println("    " +md.toString());
+                }
             }
 
             HashMap map = new HashMap();
@@ -158,27 +174,27 @@ public class AGRWebService {
                 secondaryIds.add("RGD:" + rgdId);
                 basicGeneticEntity.put("secondaryIds", secondaryIds);
 
-				// add a cross-references for human genes:
-				// 1) RGD id mapped to 'gene/references' page (to link back to RGD via Literature link an AGR page)
-				HashMap crossRef = new HashMap();
-				crossRef.put("id", "RGD:"+g.getRgdId());
-				List<String> pages = new ArrayList<>();
-				pages.add("gene/references");
-				crossRef.put("pages", pages);
-				crossList.add(crossRef);
+                // add a cross-references for human genes:
+                // 1) RGD id mapped to 'gene/references' page (to link back to RGD via Literature link an AGR page)
+                HashMap crossRef = new HashMap();
+                crossRef.put("id", "RGD:"+g.getRgdId());
+                List<String> pages = new ArrayList<>();
+                pages.add("gene/references");
+                crossRef.put("pages", pages);
+                crossList.add(crossRef);
 
-				// 2) HGNC id used in the species section of the page to link back to HGNC gene page
-				crossRef = new HashMap();
-				crossRef.put("id", hgncId);
-				pages = new ArrayList<>();
-				pages.add("gene");
-				crossRef.put("pages", pages);
-				crossList.add(crossRef);
+                // 2) HGNC id used in the species section of the page to link back to HGNC gene page
+                crossRef = new HashMap();
+                crossRef.put("id", hgncId);
+                pages = new ArrayList<>();
+                pages.add("gene");
+                crossRef.put("pages", pages);
+                crossList.add(crossRef);
 
-				// 3) RGD id (without pages) default_url page
-				crossRef = new HashMap();
-				crossRef.put("id", "RGD:"+g.getRgdId());
-				crossList.add(crossRef);
+                // 3) RGD id (without pages) default_url page
+                crossRef = new HashMap();
+                crossRef.put("id", "RGD:"+g.getRgdId());
+                crossList.add(crossRef);
 
             } else { //rat taxon : 10116
                 basicGeneticEntity.put("primaryId", "RGD:"+g.getRgdId());
@@ -188,26 +204,27 @@ public class AGRWebService {
                     basicGeneticEntity.put("secondaryIds", secondaryIds);
                 }
 
-				// add a cross-reference object for gene rgd id
-				HashMap crossRef = new HashMap();
-				crossRef.put("id", "RGD:"+g.getRgdId());
-				crossRef.put("pages", crossRefPagesForGeneRgdId);
-				crossList.add(crossRef);
+                // add a cross-reference object for gene rgd id
+                HashMap crossRef = new HashMap();
+                crossRef.put("id", "RGD:"+g.getRgdId());
+                crossRef.put("pages", crossRefPagesForGeneRgdId);
+                crossList.add(crossRef);
             }
 
 
             map.put("name", g.getName());
             map.put("symbol", g.getSymbol());
-			String geneSynopsis;
-			// emit merged-descriptions (AGR automated desc merged with RGD automated desc) for rat genes
-			if( mapKey==360 ) {
-				geneSynopsis = g.getMergedDescription();
-			} else { // and RGD automated desc for human genes
-				geneSynopsis = Utils.getGeneDescription(g);
-			}
-			if( !Utils.isStringEmpty(geneSynopsis) ) {
-				map.put("geneSynopsis", geneSynopsis);
-			}
+
+            String geneSynopsis;
+            // emit merged-descriptions (AGR automated desc merged with RGD automated desc) for rat genes
+            if( speciesTypeKey==SpeciesType.RAT ) {
+                geneSynopsis = g.getMergedDescription();
+            } else { // and RGD automated desc for human genes
+                geneSynopsis = Utils.getGeneDescription(g);
+            }
+            if( !Utils.isStringEmpty(geneSynopsis) ) {
+                map.put("geneSynopsis", geneSynopsis);
+            }
 
             //get out of gene types
             map.put("soTermId", g.getSoAccId());
@@ -244,6 +261,36 @@ public class AGRWebService {
         returnMap.put("data",geneList);
         returnMap.put("metaData", getMetaData());
         return returnMap;
+    }
+
+    // get gene loci from NCBI and Ensembl assemblies, and merge the loci that overlap
+    List<MapData> getLoci(int rgdId, int mapKey1, int mapKey2, MapDAO mdao) throws Exception {
+
+        List<MapData> mds = mdao.getMapData(rgdId, mapKey1);
+
+        for( MapData md2: mdao.getMapData(rgdId, mapKey2) ) {
+
+            // look for overlapping positions
+            boolean overlappingPos = false;
+            for( MapData md1: mds ) {
+                if( !md1.getChromosome().equals(md2.getChromosome()) ) {
+                    continue;
+                }
+                // same chr:
+                if( md2.getStartPos()<=md1.getStopPos()  &&  md1.getStartPos()<=md2.getStopPos() ) {
+                    // positions overlap: update 'md1'
+                    md1.setStartPos(Math.min(md1.getStartPos(), md2.getStartPos()));
+                    md1.setStopPos(Math.max(md1.getStopPos(), md2.getStopPos()));
+                    overlappingPos = true;
+                    break;
+                }
+            }
+            if( !overlappingPos ) {
+                mds.add(md2);
+            }
+        }
+
+        return mds;
     }
 
     void dropTremblIfSwissProtAvailable(List<XdbId> xdbIds) {
