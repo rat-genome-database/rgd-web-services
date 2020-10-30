@@ -5,6 +5,7 @@ import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
 import edu.mcw.rgd.datamodel.annotation.OntologyEnrichment;
@@ -12,6 +13,7 @@ import edu.mcw.rgd.datamodel.annotation.TermWrapper;
 import edu.mcw.rgd.datamodel.ontologyx.Aspect;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
@@ -50,7 +52,7 @@ public class EnrichmentWebService {
             aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
         else aspects.add(aspect);
 
-        int refGenes = dao.getReferenceGeneCount(speciesTypeKey);
+        int refGenes = dao.getReferenceGeneCount(speciesTypeKey,aspect);
         int inputGenes = geneRgdIds.size();
         Map result = new ConcurrentHashMap();
         List geneData = gdao.getGeneByRgdIds(geneRgdIds);
@@ -66,15 +68,22 @@ public class EnrichmentWebService {
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
                     int refs = geneCounts.get(acc);
-                    String pvalue = process.calculatePValue(inputGenes, refGenes, acc, refs, speciesTypeKey);
+                    TermWithStats ts = oDao.getTermWithStatsCached(acc);
+                    int withChildren = 1;
+                    int refAnnotGenes = ts.getStat("annotated_object_count", speciesTypeKey, RgdId.OBJECT_KEY_GENES, withChildren);
+
+                    String pvalue = process.calculatePValue(inputGenes, refGenes, refs, refAnnotGenes);
+                    if(pvalue != null){
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
 
                     data.put("acc", acc);
                     data.put("term", term);
                     data.put("count", refs);
+                    data.put("refCount",refAnnotGenes);
                     data.put("pvalue", pvalue);
                     data.put("correctedpvalue", bonferroni);
                     enrichmentData.add(data);
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
