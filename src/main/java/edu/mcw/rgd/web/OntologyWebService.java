@@ -34,10 +34,10 @@ public class OntologyWebService {
     @RequestMapping(value="/term/{accId1}/{accId2}", method=RequestMethod.GET)
     @ApiOperation(value="Returns true or false for terms", tags="Ontology")
     public boolean isDescendantOf(
-            @ApiParam(value="Term Accession ID", required=true)
+            @ApiParam(value="Child Term Accession ID", required=true)
             @PathVariable(value = "accId1") String accId1,
-            @ApiParam(value="Term Accession ID", required=true)
-            @PathVariable(value = "accId1") String accId2
+            @ApiParam(value="Parent Term Accession ID", required=true)
+            @PathVariable(value = "accId2") String accId2
 
     ) throws Exception{
 
