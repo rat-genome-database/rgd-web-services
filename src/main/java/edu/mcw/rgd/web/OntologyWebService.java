@@ -31,4 +31,17 @@ public class OntologyWebService {
         return oDAO.getTermByAccId(accId);
 
     }
+    @RequestMapping(value="/term/{accId1}/{accId2}", method=RequestMethod.GET)
+    @ApiOperation(value="Returns true or false for terms", tags="Ontology")
+    public boolean isDescendantOf(
+            @ApiParam(value="Term Accession ID", required=true)
+            @PathVariable(value = "accId1") String accId1,
+            @ApiParam(value="Term Accession ID", required=true)
+            @PathVariable(value = "accId1") String accId2
+
+    ) throws Exception{
+
+        return oDAO.isDescendantOf(accId1,accId2);
+
+    }
 }
