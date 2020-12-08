@@ -48,26 +48,20 @@ public class OntologyWebService {
 
     }
 
-    @RequestMapping(value="/ont/{ontId}", method=RequestMethod.GET)
-    @ApiOperation(value="Returns term for Accession ID", tags="Ontology")
-    public HashMap<String,ArrayList<String>> getOntDags(
-            @ApiParam(value="Ontology ID", required=true)
-            @PathVariable(value = "ontId") String ontId
+    @RequestMapping(value="/ont/{accId}", method=RequestMethod.GET)
+    @ApiOperation(value="Returns child and parent terms for Accession ID", tags="Ontology")
+    public HashMap<String,List<String>> getOntDags(
+            @ApiParam(value="Accession ID", required=true)
+            @PathVariable(value = "accId") String accId
 
     ) throws Exception{
 
 
-        List<TermDagEdge> d = oDAO.getAllDagsForOntology(ontId);
-        HashMap<String,ArrayList<String>> data = new HashMap<>();
-        ArrayList<String> terms;
-        for(TermDagEdge t: d){
-            if(data.size() == 0 || !data.containsKey(t.getChildTermAcc()))
-                terms = new ArrayList<>();
-            else terms = data.get(t.getChildTermAcc());
-            terms.add(t.getParentTermAcc());
-
-            data.put(t.getChildTermAcc(),terms);
-        }
+        List<String> childTerms = oDAO.getAllActiveTermDescendantAccIds(accId);
+        List<String> parentTerms = oDAO.getAllActiveTermAncestorAccIds(accId);
+        HashMap<String,List<String>> data = new HashMap<>();
+        data.put("childTerms",childTerms);
+        data.put("parentTerms",parentTerms);
         return data;
     }
 }
