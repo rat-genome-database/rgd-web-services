@@ -2,11 +2,14 @@ package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -43,5 +46,22 @@ public class OntologyWebService {
 
         return oDAO.isDescendantOf(accId1,accId2);
 
+    }
+
+    @RequestMapping(value="/ont/{accId}", method=RequestMethod.GET)
+    @ApiOperation(value="Returns child and parent terms for Accession ID", tags="Ontology")
+    public HashMap<String,List<String>> getOntDags(
+            @ApiParam(value="Accession ID", required=true)
+            @PathVariable(value = "accId") String accId
+
+    ) throws Exception{
+
+
+        List<String> childTerms = oDAO.getAllActiveTermDescendantAccIds(accId);
+        List<String> parentTerms = oDAO.getAllActiveTermAncestorAccIds(accId);
+        HashMap<String,List<String>> data = new HashMap<>();
+        data.put("childTerms",childTerms);
+        data.put("parentTerms",parentTerms);
+        return data;
     }
 }
