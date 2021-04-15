@@ -81,10 +81,10 @@ public class EnrichmentWebService {
                     BigDecimal val = new BigDecimal(0);
 
                     for(int k = inputAnnotGenes;k < inputGenes;k++) {
-                         val = val.add(process.calculatePValue(inputGenes, refGenes, inputAnnotGenes, refAnnotGenes));
+                         val = val.add(process.calculatePValue(inputGenes, refGenes, k, refAnnotGenes));
                     }
                     String pvalue = formatter.format(val);
-                    
+
                     if(pvalue != null){
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
 
