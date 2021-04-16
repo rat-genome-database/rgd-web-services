@@ -83,7 +83,7 @@ public class EnrichmentWebService {
 
                     if(pvalue != null){
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-                        int oddsRatio = process.calculateOddsRatio(inputGenes,refGenes,inputAnnotGenes,refAnnotGenes);
+                        float oddsRatio = process.calculateOddsRatio(inputGenes,refGenes,inputAnnotGenes,refAnnotGenes);
                         data.put("acc", acc);
                         data.put("term", term);
                         data.put("count", inputAnnotGenes);
