@@ -78,22 +78,19 @@ public class EnrichmentWebService {
                     TermWithStats ts = oDao.getTermWithStatsCached(acc);
                     int withChildren = 1;
                     int refAnnotGenes = ts.getStat("annotated_object_count", speciesTypeKey, RgdId.OBJECT_KEY_GENES, withChildren);
-                    BigDecimal val = new BigDecimal(0);
 
-                    for(int k = inputAnnotGenes;k < inputGenes;k++) {
-                         val = val.add(process.calculatePValue(inputGenes, refGenes, k, refAnnotGenes));
-                    }
-                    String pvalue = formatter.format(val);
+                    String pvalue = process.calculatePValue(inputGenes,refGenes,inputAnnotGenes,refAnnotGenes);
 
                     if(pvalue != null){
                     String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-
-                    data.put("acc", acc);
-                    data.put("term", term);
-                    data.put("count", inputAnnotGenes);
-                    data.put("refCount",refAnnotGenes);
-                    data.put("pvalue", pvalue);
-                    data.put("correctedpvalue", bonferroni);
+                        int oddsRatio = process.calculateOddsRatio(inputGenes,refGenes,inputAnnotGenes,refAnnotGenes);
+                        data.put("acc", acc);
+                        data.put("term", term);
+                        data.put("count", inputAnnotGenes);
+                        data.put("refCount",refAnnotGenes);
+                        data.put("pvalue", pvalue);
+                        data.put("correctedpvalue", bonferroni);
+                        data.put("oddsratio",oddsRatio);
                     enrichmentData.add(data);
                     }
                 }
