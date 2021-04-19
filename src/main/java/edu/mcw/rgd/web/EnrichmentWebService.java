@@ -21,6 +21,10 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,19 +51,25 @@ public class EnrichmentWebService {
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
         Ontology ont = oDao.getOntology(enrichmentRequest.aspect);
+        String rootTerm = oDao.getRootTerm(enrichmentRequest.aspect);
+
         String aspect = ont.getAspect();
         if(aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && speciesTypeKey == SpeciesType.HUMAN)
             aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
         else aspects.add(aspect);
 
+        NumberFormat formatter = new DecimalFormat("0.0E0");
+        formatter.setRoundingMode(RoundingMode.HALF_UP);
+        formatter.setMinimumFractionDigits(2);
+
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey,aspects.get(0));
-        int inputGenes = geneRgdIds.size();
         Map result = new ConcurrentHashMap();
         List geneData = gdao.getGeneByRgdIds(geneRgdIds);
-        List enrichmentData = Collections.synchronizedList(new ArrayList<>());
+        List<ConcurrentHashMap> enrichmentData = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
+        int inputGenes = geneCounts.get(rootTerm);
 
-        BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
+        //BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
         Iterator tit = geneCounts.keySet().iterator();
         geneCounts.keySet().parallelStream().forEach(i -> {
             try {
@@ -67,31 +77,42 @@ public class EnrichmentWebService {
                     ConcurrentHashMap data = new ConcurrentHashMap();
                     String acc = (String) tit.next();
                     String term = oDao.getTermByAccId(acc).getTerm();
-                    int refs = geneCounts.get(acc);
+                    int inputAnnotGenes = geneCounts.get(acc);
                     TermWithStats ts = oDao.getTermWithStatsCached(acc);
                     int withChildren = 1;
                     int refAnnotGenes = ts.getStat("annotated_object_count", speciesTypeKey, RgdId.OBJECT_KEY_GENES, withChildren);
-
-                    String pvalue = process.calculatePValue(inputGenes, refGenes, refs, refAnnotGenes);
-                    if(pvalue != null){
-                    String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
-
-                    data.put("acc", acc);
-                    data.put("term", term);
-                    data.put("count", refs);
-                    data.put("refCount",refAnnotGenes);
-                    data.put("pvalue", pvalue);
-                    data.put("correctedpvalue", bonferroni);
-                    enrichmentData.add(data);
+                    //check to remove infinte and negative odds ratio
+                    if(refAnnotGenes > inputAnnotGenes) {
+                        String pvalue = process.calculatePValue(inputGenes, refGenes, inputAnnotGenes, refAnnotGenes);
+                        if (pvalue != null) {
+                            // String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+                            float oddsRatio = process.calculateOddsRatio(inputGenes, refGenes, inputAnnotGenes, refAnnotGenes);
+                            data.put("acc", acc);
+                            data.put("term", term);
+                            data.put("count", inputAnnotGenes);
+                            data.put("refCount", refAnnotGenes);
+                            data.put("pvalue", pvalue);
+                            data.put("oddsratio", oddsRatio);
+                            enrichmentData.add(data);
+                        }
                     }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+        BigDecimal numberOfTerms = new BigDecimal(enrichmentData.size());
+        List<ConcurrentHashMap> resultData = new ArrayList<>();
+        for(ConcurrentHashMap d:enrichmentData){
+            String pvalue = (String)(d.get("pvalue"));
+            String bonferroni = process.calculateBonferroni(pvalue, numberOfTerms);
+            d.put("correctedpvalue", bonferroni);
+            resultData.add(d);
+        }
 
-        Collections.sort(enrichmentData, new SortbyPvalue());
-        result.put("enrichment",enrichmentData);
+        Collections.sort(resultData, new SortbyPvalue());
+
+        result.put("enrichment",resultData);
         result.put("geneSymbols",geneData);
         return result;
     }
