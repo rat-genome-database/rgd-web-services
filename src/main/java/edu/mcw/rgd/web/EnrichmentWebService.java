@@ -51,6 +51,8 @@ public class EnrichmentWebService {
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
         Ontology ont = oDao.getOntology(enrichmentRequest.aspect);
+        String rootTerm = oDao.getRootTerm(enrichmentRequest.aspect);
+
         String aspect = ont.getAspect();
         if(aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && speciesTypeKey == SpeciesType.HUMAN)
             aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
@@ -61,11 +63,12 @@ public class EnrichmentWebService {
         formatter.setMinimumFractionDigits(2);
 
         int refGenes = dao.getReferenceGeneCount(speciesTypeKey,aspects.get(0));
-        int inputGenes = geneRgdIds.size();
         Map result = new ConcurrentHashMap();
         List geneData = gdao.getGeneByRgdIds(geneRgdIds);
         List<ConcurrentHashMap> enrichmentData = Collections.synchronizedList(new ArrayList<>());
         LinkedHashMap<String, Integer> geneCounts = adao.getGeneCounts(geneRgdIds, termSet, aspects);
+        int inputGenes = geneCounts.get(rootTerm);
+
         //BigDecimal numberOfTerms = new BigDecimal(geneCounts.keySet().size());
         Iterator tit = geneCounts.keySet().iterator();
         geneCounts.keySet().parallelStream().forEach(i -> {
@@ -108,7 +111,7 @@ public class EnrichmentWebService {
         }
 
         Collections.sort(resultData, new SortbyPvalue());
-        
+
         result.put("enrichment",resultData);
         result.put("geneSymbols",geneData);
         return result;
