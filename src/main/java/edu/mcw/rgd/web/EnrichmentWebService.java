@@ -51,12 +51,13 @@ public class EnrichmentWebService {
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
         Ontology ont = oDao.getOntology(enrichmentRequest.aspect);
-        String rootTerm = oDao.getRootTerm(enrichmentRequest.aspect);
 
         String aspect = ont.getAspect();
-        if(aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && speciesTypeKey == SpeciesType.HUMAN)
-            aspects.add(Aspect.HUMAN_PHENOTYPE); // To get human phenotype for human species
-        else aspects.add(aspect);
+        if(aspect.equalsIgnoreCase(Aspect.MAMMALIAN_PHENOTYPE) && speciesTypeKey == SpeciesType.HUMAN) {
+            aspects.add(Aspect.HUMAN_PHENOTYPE);
+            enrichmentRequest.aspect = "HP";// To get human phenotype for human species
+        } else aspects.add(aspect);
+        String rootTerm = oDao.getRootTerm(enrichmentRequest.aspect);
 
         NumberFormat formatter = new DecimalFormat("0.0E0");
         formatter.setRoundingMode(RoundingMode.HALF_UP);
