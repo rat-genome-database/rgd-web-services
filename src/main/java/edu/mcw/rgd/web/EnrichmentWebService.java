@@ -1,10 +1,8 @@
 
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
-import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.datamodel.Ortholog;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
@@ -47,7 +45,23 @@ public class EnrichmentWebService {
             throws Exception {
 
         int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, speciesTypeKey);
+        int originalSpeciesTypeKey=SpeciesType.parse(enrichmentRequest.originalSpecies);
+
+        //List<Integer> ids = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,)
+
+        List<Integer> originalGeneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, Integer.parseInt(enrichmentRequest.originalSpecies));
+
+        OrthologDAO odao = new OrthologDAO();
+        List<Ortholog> orthologs = odao.getOrthologsForSourceRgdIds(originalGeneRgdIds,Integer.parseInt(enrichmentRequest.species));
+
+        
+        List<Integer> geneRgdIds = new ArrayList<Integer>();
+
+        for (Ortholog ortholog: orthologs) {
+            geneRgdIds.add(ortholog.getDestRgdId());
+        }
+
+
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
         Ontology ont = oDao.getOntology(enrichmentRequest.aspect);

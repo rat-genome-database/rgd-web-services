@@ -9,4 +9,5 @@ public class EnrichmentRequest {
     public String species;
     public List<String> genes;
     public String aspect;
+    public String originalSpecies;
 }
