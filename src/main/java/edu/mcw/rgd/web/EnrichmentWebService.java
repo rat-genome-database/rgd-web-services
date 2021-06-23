@@ -49,18 +49,20 @@ public class EnrichmentWebService {
 
         //List<Integer> ids = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,)
 
-        List<Integer> originalGeneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, Integer.parseInt(enrichmentRequest.originalSpecies));
+        List<Integer> originalGeneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, originalSpeciesTypeKey);
 
-        OrthologDAO odao = new OrthologDAO();
-        List<Ortholog> orthologs = odao.getOrthologsForSourceRgdIds(originalGeneRgdIds,Integer.parseInt(enrichmentRequest.species));
-
-        
         List<Integer> geneRgdIds = new ArrayList<Integer>();
 
-        for (Ortholog ortholog: orthologs) {
-            geneRgdIds.add(ortholog.getDestRgdId());
-        }
+        if (originalSpeciesTypeKey == speciesTypeKey) {
+            geneRgdIds = originalGeneRgdIds;
+        }else {
+            OrthologDAO odao = new OrthologDAO();
+            List<Ortholog> orthologs = odao.getOrthologsForSourceRgdIds(originalGeneRgdIds, speciesTypeKey);
 
+            for (Ortholog ortholog : orthologs) {
+                geneRgdIds.add(ortholog.getDestRgdId());
+            }
+        }
 
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
