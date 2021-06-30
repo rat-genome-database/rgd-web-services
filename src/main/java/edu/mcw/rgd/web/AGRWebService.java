@@ -211,8 +211,9 @@ public class AGRWebService {
                 crossList.add(crossRef);
             }
 
-
-            map.put("name", g.getName());
+            if( g.getName()!=null ) {
+                map.put("name", g.getName());
+            }
             map.put("symbol", g.getSymbol());
 
             String geneSynopsis;
@@ -885,7 +886,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.3");
+        metadata.put("release", "RGD-1.0.1.4");
         return metadata;
     }
 
