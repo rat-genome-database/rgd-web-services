@@ -523,7 +523,8 @@ public class AGRWebService {
         HashMap returnMap = new HashMap();
         ArrayList variantList = new ArrayList();
 
-        Map map = MapManager.getInstance().getReferenceAssembly(speciesTypeKey);
+        final int mapKey = 360;
+        Map map = MapManager.getInstance().getMap(mapKey);
         RgdVariantDAO vdao = new RgdVariantDAO();
         MapDAO mdao = new MapDAO();
         FileDownloader fd = new FileDownloader();
