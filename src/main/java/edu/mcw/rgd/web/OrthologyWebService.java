@@ -24,6 +24,7 @@ public class OrthologyWebService {
 
     SyntenyDAO sdao = new SyntenyDAO();
 
+    /*
     @RequestMapping(value="/synteny/{chromosome}/{mapKey1}/{mapKey2}", method= RequestMethod.GET)
     @ApiOperation(value="Return a QTL for provided RGD ID", tags = "QTL")
     public List<SyntenicRegion> getQTLByRgdId(@ApiParam(value="chromosome", required=true) @PathVariable(value = "chromosome") String chromosome,
@@ -33,7 +34,7 @@ public class OrthologyWebService {
 
         return sdao.get(mapKey1,chromosome,mapKey2);
     }
-
+    */
 
 
 }
