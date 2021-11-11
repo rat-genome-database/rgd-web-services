@@ -23,6 +23,17 @@ public class SyntenyWebService {
 
     SyntenyDAO sdao = new SyntenyDAO();
 
+    @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "Synteny")
+    public List<SyntenicRegion> getBlocks(@ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
+                                          @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
+                                          @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
+                                          @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
+                                          @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {
+
+        return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
+    }
+
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "Synteny")
     public List<SyntenicRegion> getBlocks(@ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
@@ -30,13 +41,8 @@ public class SyntenyWebService {
                                           @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
                                           @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
-                                          @ApiParam(value="Chain Level (1, 2, ...)", required=false) @PathVariable(value = "chainLevel") Integer chainLevel ) throws Exception {
+                                          @ApiParam(value="Chain Level (1, 2, ...)", required=true) @PathVariable(value = "chainLevel") Integer chainLevel ) throws Exception {
 
-        if( chainLevel==null ) {
-            return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
-        } else {
-            return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, chainLevel);
-        }
+        return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, chainLevel);
     }
-
 }
