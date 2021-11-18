@@ -22,7 +22,7 @@ public class VcmapWebService {
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
-    public List<SyntenicRegion> getBlocks(
+    public List<SyntenicRegion> getBlocks1(
             @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
             @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
             @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
@@ -35,7 +35,7 @@ public class VcmapWebService {
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
-    public List<SyntenicRegion> getBlocks(
+    public List<SyntenicRegion> getBlocks2(
             @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
             @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
             @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
