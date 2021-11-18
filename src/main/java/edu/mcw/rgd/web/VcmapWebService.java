@@ -33,7 +33,7 @@ public class VcmapWebService {
         return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
     }
 
-    @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
+    @RequestMapping(value="/blocks2/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getBlocks2(
             @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
