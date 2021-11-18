@@ -1,12 +1,16 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
+import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +22,7 @@ import java.util.List;
 @RequestMapping(value = "/vcmap")
 public class VcmapWebService {
 
+    MapDAO mapDAO = new MapDAO();
     SyntenyDAO sdao = new SyntenyDAO();
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
@@ -86,4 +91,26 @@ public class VcmapWebService {
         int maxLevel = Integer.parseInt(chainLevel.substring(dashPos+1));
         return sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
     }
+
+    @RequestMapping(value="/species", method= RequestMethod.GET)
+    @ApiOperation(value="Return genomic maps for public species in RGD", tags = "VCMap")
+    public List<SpeciesMaps> getSpeciesMaps() throws Exception {
+
+        List<SpeciesMaps> results = new ArrayList<>();
+
+        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
+            if( SpeciesType.isSearchable(speciesTypeKey) ) {
+
+                SpeciesMaps sm = new SpeciesMaps();
+                sm.speciesTypeKey = speciesTypeKey;
+                sm.name = SpeciesType.getCommonName(speciesTypeKey);
+                sm.maps = mapDAO.getMaps(speciesTypeKey, "bp", "NCBI");
+                results.add(sm);
+            }
+        }
+
+        return results;
+    }
+
+
 }
