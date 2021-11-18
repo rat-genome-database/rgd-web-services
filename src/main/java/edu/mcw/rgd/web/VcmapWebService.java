@@ -27,9 +27,13 @@ public class VcmapWebService {
                                           @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
                                           @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
-                             @ApiParam(value="threshold", required=true) @RequestParam Integer threshold ) throws Exception {
+                             @ApiParam(value="(optional) Threshold: Minimum Backbone Block Size", required=false) @RequestParam Integer threshold ) throws Exception {
 
-        return sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+        if( threshold==null ) {
+            return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
+        } else {
+            return sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+        }
     }
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method= RequestMethod.GET)
