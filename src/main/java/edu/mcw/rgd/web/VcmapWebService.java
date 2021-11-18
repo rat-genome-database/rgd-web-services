@@ -2,16 +2,17 @@ package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
+import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
+import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
 import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mtutaj on 11/18/2021
@@ -112,5 +113,19 @@ public class VcmapWebService {
         return results;
     }
 
+    @RequestMapping(value="/maps/{mapKey}/chromosomes", method= RequestMethod.GET)
+    @ApiOperation(value="Return chromosome hashmap for given map key", tags = "VCMap")
+    public Map<String, ChromosomeEx> getChrMaps(@ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception {
+
+        Map<String, ChromosomeEx> results = new HashMap<>();
+
+        List<Chromosome> chrList = mapDAO.getChromosomes(mapKey);
+        for( Chromosome c: chrList ) {
+
+            ChromosomeEx chr = new ChromosomeEx(c);
+            results.put(chr.getChromosome(), chr);
+        }
+        return results;
+    }
 
 }
