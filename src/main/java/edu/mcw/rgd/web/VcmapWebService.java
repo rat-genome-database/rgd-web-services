@@ -22,19 +22,6 @@ public class VcmapWebService {
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
-    public List<SyntenicRegion> getBlocks1(
-            @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
-            @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
-            @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
-            @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey
-    ) throws Exception {
-
-        return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
-    }
-
-    @RequestMapping(value="/blocks2/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
-    @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getBlocks2(
             @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
             @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
@@ -44,7 +31,11 @@ public class VcmapWebService {
             @ApiParam(value="Minimum Backbone Block Size") @RequestParam(required = false) Integer threshold
     ) throws Exception {
 
-        return sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+        if( threshold==null ) {
+            return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
+        } else {
+            return sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+        }
     }
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method= RequestMethod.GET)
