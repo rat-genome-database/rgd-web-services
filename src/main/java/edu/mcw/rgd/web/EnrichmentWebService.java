@@ -93,7 +93,7 @@ public class EnrichmentWebService {
                             data.put("count", inputAnnotGenes);
                             data.put("refCount", refAnnotGenes);
                             data.put("pvalue", pvalue);
-                            data.put("oddsratio", oddsRatio);
+                            data.put("oddsratio", String.format("%.02f",oddsRatio));
                             data.put("refGeneCount",refGenes);
                             enrichmentData.add(data);
                         }
