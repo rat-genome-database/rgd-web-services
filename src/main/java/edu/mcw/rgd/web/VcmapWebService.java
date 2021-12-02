@@ -1,12 +1,16 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
+import edu.mcw.rgd.dao.spring.MappedGeneQuery;
 import edu.mcw.rgd.datamodel.Chromosome;
+import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
 import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
 import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
+import edu.mcw.rgd.process.Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -154,4 +158,30 @@ public class VcmapWebService {
         return results;
     }
 
+    @RequestMapping(value="/genes/map/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return genes with position given symbol prefix, f.e. symbol=hox returns all HOXxxx genes", tags = "VCMap")
+    public List<MappedGene> getGenesForSymbol(
+            @ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @ApiParam(value="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
+
+        return getActiveGenes(symbolPrefix, mapKey);
+    }
+
+    List<MappedGene> getActiveGenes(String symbolPrefix, int mapKey) throws Exception {
+
+        String sql;
+        if( Utils.isStringEmpty(symbolPrefix) ) {
+            sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
+                    "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
+                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND r.rgd_id=g.rgd_id";
+            return MappedGeneQuery.run(mapDAO, sql, mapKey);
+        } else {
+            sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
+                    "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
+                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
+            return MappedGeneQuery.run(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
+        }
+    }
 }
