@@ -166,14 +166,14 @@ public class VcmapWebService {
             // skip gaps with start position lower than block start pos
             int i;
             for (i = 0; i < gaps.size(); i++) {
-                if (gaps.get(i).getStart() >= block.getStart()) {
+                if (gaps.get(i).getBackboneStart() >= block.getBackboneStart()) {
                     break;
                 }
             }
             // add gaps that are within block
             for (; i < gaps.size(); i++) {
                 SyntenicRegion gap = gaps.get(i);
-                if (gap.getStop() <= block.getStop()) {
+                if (gap.getBackboneStop() <= block.getBackboneStop()) {
                     gapsWithinBlock.add(gap);
                 } else {
                     break;
