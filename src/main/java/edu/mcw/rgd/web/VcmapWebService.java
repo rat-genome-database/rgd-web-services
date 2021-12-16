@@ -172,18 +172,19 @@ public class VcmapWebService {
                 blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, level);
                 gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, level);
             } else {
-                gaps = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, level);
+                blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, level);
                 gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, level);
             }
-        }
-        int minLevel = Integer.parseInt(chainLevel.substring(0, dashPos));
-        int maxLevel = Integer.parseInt(chainLevel.substring(dashPos + 1));
-        if (threshold != null) {
-            blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
-            gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
         } else {
-            blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
-            gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
+            int minLevel = Integer.parseInt(chainLevel.substring(0, dashPos));
+            int maxLevel = Integer.parseInt(chainLevel.substring(dashPos + 1));
+            if (threshold != null) {
+                blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
+                gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
+            } else {
+                blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
+                gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
+            }
         }
 
         List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps);
