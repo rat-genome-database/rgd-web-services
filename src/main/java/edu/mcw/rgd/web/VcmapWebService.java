@@ -123,6 +123,56 @@ public class VcmapWebService {
         }
     }
 
+
+    @RequestMapping(value="/synteny/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "VCMap")
+    public List<Map<String,Object>> getSynteny(
+            @ApiParam(value="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
+            @ApiParam(value="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
+            @ApiParam(value="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
+            @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
+            @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @ApiParam(value="Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold
+    ) throws Exception {
+
+        List<Map<String,Object>> results = new ArrayList<>();
+
+        List<SyntenicRegion> blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
+        List<SyntenicRegion> gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
+
+        for( SyntenicRegion block: blocks ) {
+
+            Map<String, Object> synteny = new HashMap<>();
+            results.add(synteny);
+
+            synteny.put("block", block);
+
+            ArrayList<SyntenicRegion> gapsWithinBlock = new ArrayList<>();
+
+            // skip gaps with start position lower than block start pos
+            int i;
+            for( i=0; i<gaps.size(); i++ ) {
+                if( gaps.get(i).getStart() >= block.getStart() ) {
+                    break;
+                }
+            }
+            // add gaps that are within block
+            for( ; i<gaps.size(); i++ ) {
+                SyntenicRegion gap = gaps.get(i);
+                if( gap.getStop() <= block.getStop() ) {
+                    gapsWithinBlock.add(gap);
+                } else {
+                    break;
+                }
+            }
+            if( gapsWithinBlock.size()>0 ) {
+                synteny.put("gaps", gapsWithinBlock);
+            }
+        }
+        return results;
+    }
+
+
     @RequestMapping(value="/species", method= RequestMethod.GET)
     @ApiOperation(value="Return genomic maps for public species in RGD", tags = "VCMap")
     public List<SpeciesMaps> getSpeciesMaps() throws Exception {
