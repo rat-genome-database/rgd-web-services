@@ -125,7 +125,7 @@ public class VcmapWebService {
 
 
     @RequestMapping(value = "/synteny/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
-    @ApiOperation(value = "Return all synteny blocks for given backbone region", tags = "VCMap")
+    @ApiOperation(value = "Return all synteny blocks and gaps for given backbone region", tags = "VCMap")
     public List<Map<String, Object>> getSynteny(
             @ApiParam(value = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
             @ApiParam(value = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
@@ -144,6 +144,46 @@ public class VcmapWebService {
         } else {
             blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
             gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+        }
+
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps);
+        return results;
+    }
+
+    @RequestMapping(value = "/synteny/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method = RequestMethod.GET)
+    @ApiOperation(value = "Return all synteny blocks and gaps for given backbone region", tags = "VCMap")
+    public List<Map<String, Object>> getSynteny(
+            @ApiParam(value = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
+            @ApiParam(value = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
+            @ApiParam(value = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
+            @ApiParam(value = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
+            @ApiParam(value = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
+            @ApiParam(value = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(value = "chainLevel") String chainLevel,
+            @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold
+    ) throws Exception {
+
+        List<SyntenicRegion> blocks;
+        List<SyntenicRegion> gaps;
+
+        int dashPos = chainLevel.indexOf('-');
+        if (dashPos < 0) {
+            int level = Integer.parseInt(chainLevel);
+            if (threshold != null) {
+                blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, level);
+                gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, level);
+            } else {
+                gaps = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, level);
+                gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, level);
+            }
+        }
+        int minLevel = Integer.parseInt(chainLevel.substring(0, dashPos));
+        int maxLevel = Integer.parseInt(chainLevel.substring(dashPos + 1));
+        if (threshold != null) {
+            blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
+            gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey, minLevel, maxLevel);
+        } else {
+            blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
+            gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey, minLevel, maxLevel);
         }
 
         List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps);
