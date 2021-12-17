@@ -1,6 +1,6 @@
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.AbstractDAO;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
 import edu.mcw.rgd.dao.spring.MappedGeneQuery;
@@ -27,6 +27,7 @@ import java.util.*;
 @RequestMapping(value = "/vcmap")
 public class VcmapWebService {
 
+    GeneDAO geneDAO = new GeneDAO();
     MapDAO mapDAO = new MapDAO();
     SyntenyDAO sdao = new SyntenyDAO();
 
@@ -288,5 +289,31 @@ public class VcmapWebService {
                     " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
             return MappedGeneQuery.run(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
         }
+    }
+
+    @RequestMapping(value="/genes/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
+    @ApiOperation(value="Return a list of genes position and map key", tags="Gene")
+    public List<MappedGene> getMappedGenesByPosition(
+        @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+        @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
+        @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+        @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
+        @ApiParam(value = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
+
+        if( threshold==null ) {
+            return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey);
+        } else {
+            return getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey, threshold);
+        }
+    }
+
+    public List<MappedGene> getActiveMappedGenes(String chr, int startPos, int stopPos, int mapKey, int minLen) throws Exception {
+        String query = "SELECT g.*, r.species_type_key, g.gene_symbol as symbol, r.species_type_key, md.* "+
+                "FROM genes g, rgd_ids r, maps_data md "+
+                "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND md.rgd_id=g.rgd_id "+
+                "AND md.chromosome=? AND md.start_pos<=? AND md.stop_pos>=? AND md.map_key=? AND md.stop_pos-md.start_pos>? "+
+                "ORDER BY md.start_pos";
+
+        return MappedGeneQuery.run(mapDAO, query, chr, stopPos, startPos, mapKey, minLen);
     }
 }
