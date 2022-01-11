@@ -341,7 +341,7 @@ public class VcmapWebService {
                 "ORDER BY md.map_key,g.rgd_id";
         String sql2 = "SELECT g2.rgd_id,g2.gene_symbol,g2.full_name,g2.gene_type_lc,map_key,chromosome,start_pos,stop_pos,strand " +
                 "FROM genes g,genetogene_rgd_id_rlt o,maps_data md,genes g2 " +
-                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id AND md." +
+                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id " +
                 " AND dest_rgd_id=g2.rgd_id "+
                 "ORDER BY md.map_key,g.rgd_id";
 
