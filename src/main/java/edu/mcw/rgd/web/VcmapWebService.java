@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
@@ -9,6 +10,7 @@ import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
 import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
+import edu.mcw.rgd.domain.vcmap.MappedGeneEx;
 import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
 import edu.mcw.rgd.process.Utils;
 import io.swagger.annotations.Api;
@@ -16,6 +18,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 
 /**
@@ -307,7 +312,7 @@ public class VcmapWebService {
         }
     }
 
-    public List<MappedGene> getActiveMappedGenes(String chr, int startPos, int stopPos, int mapKey, int minLen) throws Exception {
+    List<MappedGene> getActiveMappedGenes(String chr, int startPos, int stopPos, int mapKey, int minLen) throws Exception {
         String query = "SELECT g.*, r.species_type_key, g.gene_symbol as symbol, r.species_type_key, md.* "+
                 "FROM genes g, rgd_ids r, maps_data md "+
                 "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND md.rgd_id=g.rgd_id "+
@@ -315,5 +320,63 @@ public class VcmapWebService {
                 "ORDER BY md.start_pos";
 
         return MappedGeneQuery.run(mapDAO, query, chr, stopPos, startPos, mapKey, minLen);
+    }
+
+
+    @RequestMapping(value="/genes/{sourceGeneId}/orthologs", method=RequestMethod.GET)
+    @ApiOperation(value="Return orthologs for a given source gene identified by gene rgd id", tags="Gene")
+    public Map<Integer, List<MappedGeneEx>> getGeneOrthologs(
+            @ApiParam(value="RGD ID of source gene", required=true) @PathVariable(value = "sourceGeneId") int sourceGeneRgdId,
+            @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
+
+        return getMappedOrthologs(sourceGeneRgdId, mapKeys);
+    }
+
+    Map<Integer, List<MappedGeneEx>> getMappedOrthologs(int srcGeneRgdId, String destMapKeyStr) throws Exception {
+
+        String sql1 = "SELECT g2.rgd_id,g2.gene_symbol,g2.full_name,g2.gene_type_lc,map_key,chromosome,start_pos,stop_pos,strand " +
+                "FROM genes g,genetogene_rgd_id_rlt o,maps_data md,genes g2 " +
+                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id AND md.map_key IN("+destMapKeyStr+") " +
+                " AND dest_rgd_id=g2.rgd_id "+
+                "ORDER BY md.map_key,g.rgd_id";
+        String sql2 = "SELECT g2.rgd_id,g2.gene_symbol,g2.full_name,g2.gene_type_lc,map_key,chromosome,start_pos,stop_pos,strand " +
+                "FROM genes g,genetogene_rgd_id_rlt o,maps_data md,genes g2 " +
+                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id " +
+                " AND dest_rgd_id=g2.rgd_id "+
+                "ORDER BY md.map_key,g.rgd_id";
+
+        String sql = Utils.isStringEmpty(destMapKeyStr) ? sql2 : sql1;
+
+        Map<Integer, List<MappedGeneEx>> results = new HashMap<>();
+
+        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection() ) {
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, srcGeneRgdId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                MappedGeneEx mg = new MappedGeneEx();
+                mg.geneRgdId = rs.getInt("rgd_id");
+                mg.geneSymbol = rs.getString("gene_symbol");
+                mg.geneName = rs.getString("full_name");
+                mg.geneType = rs.getString("gene_type_lc");
+
+                mg.mapKey = rs.getInt("map_key");
+                mg.chr = rs.getString("chromosome");
+                mg.startPos = rs.getInt("start_pos");
+                mg.stopPos = rs.getInt("stop_pos");
+                mg.strand = rs.getString("strand");
+
+                List<MappedGeneEx> genesForMapKey = results.get(mg.mapKey);
+                if( genesForMapKey==null ) {
+                    genesForMapKey = new ArrayList<>();
+                    results.put(mg.mapKey, genesForMapKey);
+                }
+                genesForMapKey.add(mg);
+            }
+        }
+
+        return results;
     }
 }
