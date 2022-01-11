@@ -324,7 +324,7 @@ public class VcmapWebService {
 
 
     @RequestMapping(value="/genes/{sourceGeneId}/orthologs", method=RequestMethod.GET)
-    @ApiOperation(value="Return orthologs for a given source gene identified by gene rgd id", tags="Gene")
+    @ApiOperation(value="Return orthologs for a given source gene identified by gene rgd id", tags="VCMap")
     public Map<Integer, List<MappedGeneEx>> getGeneOrthologs(
             @ApiParam(value="RGD ID of source gene", required=true) @PathVariable(value = "sourceGeneId") int sourceGeneRgdId,
             @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
@@ -341,7 +341,7 @@ public class VcmapWebService {
                 "ORDER BY md.map_key,g.rgd_id";
         String sql2 = "SELECT g2.rgd_id,g2.gene_symbol,g2.full_name,g2.gene_type_lc,map_key,chromosome,start_pos,stop_pos,strand " +
                 "FROM genes g,genetogene_rgd_id_rlt o,maps_data md,genes g2 " +
-                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id " +
+                "WHERE g.rgd_id=? AND g.rgd_id=src_rgd_id AND dest_rgd_id=md.rgd_id AND md." +
                 " AND dest_rgd_id=g2.rgd_id "+
                 "ORDER BY md.map_key,g.rgd_id";
 
@@ -367,6 +367,11 @@ public class VcmapWebService {
                 mg.startPos = rs.getInt("start_pos");
                 mg.stopPos = rs.getInt("stop_pos");
                 mg.strand = rs.getString("strand");
+
+                // skip rows with missing chr, start or stop pos
+                if( Utils.isStringEmpty(mg.chr) || mg.startPos<=0 || mg.stopPos<=0 ) {
+                    continue;
+                }
 
                 List<MappedGeneEx> genesForMapKey = results.get(mg.mapKey);
                 if( genesForMapKey==null ) {
