@@ -384,4 +384,97 @@ public class VcmapWebService {
 
         return results;
     }
+
+
+    @RequestMapping(value="/genes/orthologs/{sourceMapKey}/{sourceChr}/{sourceStart}/{sourceStop}}", method=RequestMethod.GET)
+    @ApiOperation(value="Return array of source genes with orthologs in a given region", tags="VCMap")
+    public List<Map<String,Map<Integer,List<MappedGeneEx>>>> getGenesWithOrthologs(
+            @ApiParam(value="source map key", required=true) @PathVariable(value = "sourceMapKey") int sourceMapKey,
+            @ApiParam(value="source chromosome", required=true) @PathVariable(value = "sourceChr") String sourceChr,
+            @ApiParam(value="source start pos", required=true) @PathVariable(value = "sourceStartPos") int sourceStartPos,
+            @ApiParam(value="source end pos", required=true) @PathVariable(value = "sourceEndPos") int sourceEndPos,
+            @ApiParam(value = "source gene size threshold (minimum gene size) (optional)") @RequestParam(required = false) Integer geneSizeThreshold,
+            @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
+
+        return getMappedOrthologs(sourceMapKey, sourceChr, sourceStartPos, sourceEndPos, geneSizeThreshold, mapKeys);
+    }
+
+    List getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, int minGeneSize, String destMapKeyStr) throws Exception {
+
+        // any source gene size, any orthologs
+        String sql = "SELECT g1.rgd_id id1,g1.gene_symbol symbol1,g1.full_name name1,g1.gene_type_lc type1,md1.map_key mapkey1,md1.chromosome chr1,md1.start_pos start1,md1.stop_pos stop1,md1.strand strand1," +
+                " g2.rgd_id id2,g2.gene_symbol symbol2,g2.full_name name2,g2.gene_type_lc type2,md2.map_key mapkey2,md2.chromosome chr2,md2.start_pos start2,md2.stop_pos stop2,md2.strand strand2 " +
+                "FROM maps_data md1,genes g1,genetogene_rgd_id_rlt o,genes g2,maps_data md2 " +
+                "WHERE md1.map_key=? AND md1.chromosome=? AND md1.stop_pos>=? AND md1.start_pos<=? " +
+                " AND g1.rgd_id=md1.rgd_id AND g1.rgd_id=src_rgd_id AND dest_rgd_id=g2.rgd_id AND g2.rgd_id=md2.rgd_id ";
+        if( minGeneSize>0 ) {
+            sql += " AND md1.stop_pos-md1.start_pos>=? ";
+        }
+        if( !Utils.isStringEmpty(destMapKeyStr) ) {
+            sql += " AND md2.map_key IN("+destMapKeyStr+") ";
+        }
+        sql += " ORDER BY md1.start_pos,md2.map_key,md2.chromosome,md2.start_pos";
+
+        List results = new ArrayList<>();
+        MappedGeneEx g = null;
+        Map<Integer, List<MappedGeneEx>> orthologs = new HashMap<>();
+
+        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection() ) {
+
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, mapKey);
+            ps.setString(2, chr);
+            ps.setInt(3, startPos);
+            ps.setInt(4, stopPos);
+            if( minGeneSize>0 ) {
+                ps.setInt(5, minGeneSize);
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int id1 = rs.getInt("id1");
+                if( g==null || g.geneRgdId!=id1 ) {
+                    g = new MappedGeneEx();
+                    g.geneRgdId = rs.getInt("id1");
+                    g.geneSymbol = rs.getString("symbol1");
+                    g.geneName = rs.getString("name1");
+                    g.geneType = rs.getString("type1");
+
+                    g.mapKey = rs.getInt("mapkey1");
+                    g.chr = rs.getString("chr1");
+                    g.startPos = rs.getInt("start1");
+                    g.stopPos = rs.getInt("stop1");
+                    g.strand = rs.getString("strand1");
+
+                    orthologs = new HashMap<>();
+                    Map<String, Object> entry = new HashMap<>();
+                    entry.put("gene", g);
+                    entry.put("orthologs", orthologs);
+                    results.add(entry);
+                }
+
+                MappedGeneEx o = new MappedGeneEx();
+                o.geneRgdId = rs.getInt("id2");
+                o.geneSymbol = rs.getString("symbol2");
+                o.geneName = rs.getString("name2");
+                o.geneType = rs.getString("type2");
+
+                o.mapKey = rs.getInt("mapkey2");
+                o.chr = rs.getString("chr2");
+                o.startPos = rs.getInt("start2");
+                o.stopPos = rs.getInt("stop2");
+                o.strand = rs.getString("strand2");
+
+                List<MappedGeneEx> genesForMapKey = orthologs.get(o.mapKey);
+                if( genesForMapKey==null ) {
+                    genesForMapKey = new ArrayList<>();
+                    orthologs.put(o.mapKey, genesForMapKey);
+                }
+                genesForMapKey.add(o);
+            }
+        }
+
+        return results;
+    }
 }
