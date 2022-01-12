@@ -433,6 +433,23 @@ public class VcmapWebService {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
+                MappedGeneEx o = new MappedGeneEx();
+                o.geneRgdId = rs.getInt("id2");
+                o.geneSymbol = rs.getString("symbol2");
+                o.geneName = rs.getString("name2");
+                o.geneType = rs.getString("type2");
+
+                o.mapKey = rs.getInt("mapkey2");
+                o.chr = rs.getString("chr2");
+                o.startPos = rs.getInt("start2");
+                o.stopPos = rs.getInt("stop2");
+                o.strand = rs.getString("strand2");
+
+                // skip rows with missing chr, start or stop pos
+                if( Utils.isStringEmpty(o.chr) || o.startPos<=0 || o.stopPos<=0 ) {
+                    continue;
+                }
+
                 int id1 = rs.getInt("id1");
                 if( g==null || g.geneRgdId!=id1 ) {
                     g = new MappedGeneEx();
@@ -453,18 +470,6 @@ public class VcmapWebService {
                     entry.put("orthologs", orthologs);
                     results.add(entry);
                 }
-
-                MappedGeneEx o = new MappedGeneEx();
-                o.geneRgdId = rs.getInt("id2");
-                o.geneSymbol = rs.getString("symbol2");
-                o.geneName = rs.getString("name2");
-                o.geneType = rs.getString("type2");
-
-                o.mapKey = rs.getInt("mapkey2");
-                o.chr = rs.getString("chr2");
-                o.startPos = rs.getInt("start2");
-                o.stopPos = rs.getInt("stop2");
-                o.strand = rs.getString("strand2");
 
                 List<MappedGeneEx> genesForMapKey = orthologs.get(o.mapKey);
                 if( genesForMapKey==null ) {
