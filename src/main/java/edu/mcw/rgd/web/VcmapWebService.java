@@ -391,12 +391,12 @@ public class VcmapWebService {
     public List<Map<String,Map<Integer,List<MappedGeneEx>>>> getGenesWithOrthologs(
             @ApiParam(value="source map key", required=true) @PathVariable(value = "sourceMapKey") int sourceMapKey,
             @ApiParam(value="source chromosome", required=true) @PathVariable(value = "sourceChr") String sourceChr,
-            @ApiParam(value="source start pos", required=true) @PathVariable(value = "sourceStartPos") int sourceStartPos,
-            @ApiParam(value="source end pos", required=true) @PathVariable(value = "sourceEndPos") int sourceEndPos,
+            @ApiParam(value="source start pos", required=true) @PathVariable(value = "sourceStart") int sourceStart,
+            @ApiParam(value="source end pos", required=true) @PathVariable(value = "sourceEnd") int sourceEnd,
             @ApiParam(value = "source gene size threshold (minimum gene size) (optional)") @RequestParam(required = false) Integer geneSizeThreshold,
             @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
 
-        return getMappedOrthologs(sourceMapKey, sourceChr, sourceStartPos, sourceEndPos, geneSizeThreshold, mapKeys);
+        return getMappedOrthologs(sourceMapKey, sourceChr, sourceStart, sourceEnd, geneSizeThreshold, mapKeys);
     }
 
     List getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, int minGeneSize, String destMapKeyStr) throws Exception {
