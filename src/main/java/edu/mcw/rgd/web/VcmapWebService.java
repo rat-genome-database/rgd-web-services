@@ -388,7 +388,7 @@ public class VcmapWebService {
 
     @RequestMapping(value="/genes/orthologs/{sourceMapKey}/{sourceChr}/{sourceStart}/{sourceStop}}", method=RequestMethod.GET)
     @ApiOperation(value="Return array of source genes with orthologs in a given region", tags="VCMap")
-    public List<Map<String,Map<Integer,List<MappedGeneEx>>>> getGenesWithOrthologs(
+    public List<Map<String, Object>>  getGenesWithOrthologs(
             @ApiParam(value="source map key", required=true) @PathVariable(value = "sourceMapKey") int sourceMapKey,
             @ApiParam(value="source chromosome", required=true) @PathVariable(value = "sourceChr") String sourceChr,
             @ApiParam(value="source start pos", required=true) @PathVariable(value = "sourceStart") int sourceStart,
@@ -399,7 +399,7 @@ public class VcmapWebService {
         return getMappedOrthologs(sourceMapKey, sourceChr, sourceStart, sourceStop, geneSizeThreshold, mapKeys);
     }
 
-    List getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, Integer minGeneSize, String destMapKeyStr) throws Exception {
+    List<Map<String, Object>> getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, Integer minGeneSize, String destMapKeyStr) throws Exception {
 
         // any source gene size, any orthologs
         String sql = "SELECT g1.rgd_id id1,g1.gene_symbol symbol1,g1.full_name name1,g1.gene_type_lc type1,md1.map_key mapkey1,md1.chromosome chr1,md1.start_pos start1,md1.stop_pos stop1,md1.strand strand1," +
@@ -415,7 +415,7 @@ public class VcmapWebService {
         }
         sql += " ORDER BY md1.start_pos,md2.map_key,md2.chromosome,md2.start_pos";
 
-        List results = new ArrayList<>();
+        List<Map<String, Object>> results = new ArrayList<>();
         MappedGeneEx g = null;
         Map<Integer, List<MappedGeneEx>> orthologs = new HashMap<>();
 
