@@ -399,7 +399,7 @@ public class VcmapWebService {
         return getMappedOrthologs(sourceMapKey, sourceChr, sourceStart, sourceStop, geneSizeThreshold, mapKeys);
     }
 
-    List getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, int minGeneSize, String destMapKeyStr) throws Exception {
+    List getMappedOrthologs(int mapKey, String chr, int startPos, int stopPos, Integer minGeneSize, String destMapKeyStr) throws Exception {
 
         // any source gene size, any orthologs
         String sql = "SELECT g1.rgd_id id1,g1.gene_symbol symbol1,g1.full_name name1,g1.gene_type_lc type1,md1.map_key mapkey1,md1.chromosome chr1,md1.start_pos start1,md1.stop_pos stop1,md1.strand strand1," +
@@ -407,7 +407,7 @@ public class VcmapWebService {
                 "FROM maps_data md1,genes g1,genetogene_rgd_id_rlt o,genes g2,maps_data md2 " +
                 "WHERE md1.map_key=? AND md1.chromosome=? AND md1.stop_pos>=? AND md1.start_pos<=? " +
                 " AND g1.rgd_id=md1.rgd_id AND g1.rgd_id=src_rgd_id AND dest_rgd_id=g2.rgd_id AND g2.rgd_id=md2.rgd_id ";
-        if( minGeneSize>0 ) {
+        if( minGeneSize!=null && minGeneSize>0 ) {
             sql += " AND md1.stop_pos-md1.start_pos>=? ";
         }
         if( !Utils.isStringEmpty(destMapKeyStr) ) {
@@ -426,7 +426,7 @@ public class VcmapWebService {
             ps.setString(2, chr);
             ps.setInt(3, startPos);
             ps.setInt(4, stopPos);
-            if( minGeneSize>0 ) {
+            if( minGeneSize!=null && minGeneSize>0 ) {
                 ps.setInt(5, minGeneSize);
             }
 
