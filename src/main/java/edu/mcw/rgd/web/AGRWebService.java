@@ -37,6 +37,7 @@ public class AGRWebService {
 
         boolean debug = true;
         int multis = 0;
+        int genesWithoutPos = 0;
 
         ArrayList geneList = new ArrayList();
 
@@ -75,9 +76,8 @@ public class AGRWebService {
             // do not submit genes without positions on primary assembly
             List<MapData> mds = getLoci(g.getRgdId(), mapKey1, mapKey2, mdao);
             if( mds.isEmpty() ) {
-                continue;
+                genesWithoutPos++;
             }
-
             // display genes with multiple loci
             if( debug && mds.size()>1) {
                 multis++;
@@ -241,22 +241,27 @@ public class AGRWebService {
                 basicGeneticEntity.put("synonyms", synonyms);
             }
 
-            List genomeLocations = new ArrayList();
+            if( !mds.isEmpty() ) {
+                List genomeLocations = new ArrayList();
 
-            for( MapData md: mds ) {
-                HashMap hm = new HashMap();
-                hm.put("assembly", assembly);
-                hm.put("startPosition", md.getStartPos());
-                hm.put("endPosition", md.getStopPos());
-                hm.put("chromosome", md.getChromosome());
-                hm.put("strand", md.getStrand());
-                genomeLocations.add(hm);
+                for (MapData md : mds) {
+                    HashMap hm = new HashMap();
+                    hm.put("assembly", assembly);
+                    hm.put("startPosition", md.getStartPos());
+                    hm.put("endPosition", md.getStopPos());
+                    hm.put("chromosome", md.getChromosome());
+                    hm.put("strand", md.getStrand());
+                    genomeLocations.add(hm);
+                }
+
+                basicGeneticEntity.put("genomeLocations", genomeLocations);
             }
-
-            basicGeneticEntity.put("genomeLocations", genomeLocations);
 
             geneList.add(map);
         }
+
+        System.out.println("multis: "+multis);
+        System.out.println("genes without pos"+genesWithoutPos);
 
         HashMap returnMap = new HashMap();
         returnMap.put("data",geneList);
@@ -267,13 +272,23 @@ public class AGRWebService {
     // get gene loci from NCBI and Ensembl assemblies, and merge the loci that overlap
     List<MapData> getLoci(int rgdId, int mapKey1, int mapKey2, MapDAO mdao) throws Exception {
 
-        List<MapData> mds = mdao.getMapData(rgdId, mapKey1);
+        List<MapData> mds1 = mdao.getMapData(rgdId, mapKey1);
+        List<MapData> mds2 = mdao.getMapData(rgdId, mapKey2);
 
-        for( MapData md2: mdao.getMapData(rgdId, mapKey2) ) {
+        List<MapData> mds = new ArrayList<>();
+        mergeLoci(mds, mds1);
+        mergeLoci(mds, mds2);
+
+        return mds;
+    }
+
+    void mergeLoci(List<MapData> mds1, List<MapData> mds2) {
+
+        for( MapData md2: mds2 ) {
 
             // look for overlapping positions
             boolean overlappingPos = false;
-            for( MapData md1: mds ) {
+            for( MapData md1: mds1 ) {
                 if( !md1.getChromosome().equals(md2.getChromosome()) ) {
                     continue;
                 }
@@ -287,11 +302,9 @@ public class AGRWebService {
                 }
             }
             if( !overlappingPos ) {
-                mds.add(md2);
+                mds1.add(md2);
             }
         }
-
-        return mds;
     }
 
     void dropTremblIfSwissProtAvailable(List<XdbId> xdbIds) {
