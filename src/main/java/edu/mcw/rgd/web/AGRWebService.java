@@ -361,7 +361,7 @@ public class AGRWebService {
             List alleleObjectRelations = new ArrayList();
             for( Gene parentGene: parentGenes ) {
                 HashMap objRel = new HashMap();
-                objRel.put("association_type", "allele_of");
+                objRel.put("associationType", "allele_of");
                 objRel.put("gene", "RGD:" + parentGenes.get(0).getRgdId());
 
                 HashMap alleleObjRel = new HashMap();
