@@ -25,7 +25,7 @@ public class NewsWebService {
 
     RGDNewsConfDAO dao = new RGDNewsConfDAO();
 
-    @RequestMapping(value="/last", method=RequestMethod.POST)
+    @RequestMapping(value="/last", method=RequestMethod.GET)
     @ApiOperation(value="Get a number of recent RGD news. Maximum ten news is returned unless 'limit' parameter is provided.", tags="News")
     public HashMap<String, HashMap<String,Object>> getLastNews(
             @ApiParam(value = "Maximum number of news items to be returned (optional)") @RequestParam(required = false) Integer limit
