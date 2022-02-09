@@ -236,7 +236,9 @@ public class VcmapWebService {
 
             // any genes in the synteny target block?
             if( withGenes ) {
-                List<MappedGene> genes = geneDAO.getActiveMappedGenes(block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+                //List<MappedGene> genes = geneDAO.getActiveMappedGenes(block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+                List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO.getConnection(), block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+
                 synteny.put("genes", genes);
             }
         }
@@ -394,7 +396,6 @@ public class VcmapWebService {
 
         return results;
     }
-
 
     @RequestMapping(value="/genes/orthologs/{sourceMapKey}/{sourceChr}/{sourceStart}/{sourceStop}}", method=RequestMethod.GET)
     @ApiOperation(value="Return array of source genes with orthologs in a given region", tags="VCMap")
