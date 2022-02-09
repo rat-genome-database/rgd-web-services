@@ -138,8 +138,11 @@ public class VcmapWebService {
             @ApiParam(value = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
             @ApiParam(value = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
             @ApiParam(value = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
-            @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold
+            @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold,
+            @ApiParam(value = "Include Genes, if set to 1 (optional)") @RequestParam(required = false) Integer includeGenes
     ) throws Exception {
+
+        boolean withGenes = includeGenes!=null && includeGenes>0;
 
         List<SyntenicRegion> blocks;
         List<SyntenicRegion> gaps;
@@ -152,7 +155,7 @@ public class VcmapWebService {
             gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes);
         return results;
     }
 
@@ -193,11 +196,11 @@ public class VcmapWebService {
             }
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false);
         return results;
     }
 
-    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps) {
+    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes) throws Exception {
 
         List<Map<String, Object>> results = new ArrayList<>();
 
@@ -228,6 +231,13 @@ public class VcmapWebService {
             }
             if (gapsWithinBlock.size() > 0) {
                 synteny.put("gaps", gapsWithinBlock);
+            }
+
+
+            // any genes in the synteny target block?
+            if( withGenes ) {
+                List<MappedGene> genes = geneDAO.getActiveMappedGenes(block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+                synteny.put("genes", genes);
             }
         }
         return results;
