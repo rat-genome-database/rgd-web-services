@@ -49,7 +49,7 @@ public class MappedGeneEx {
             MappedGeneEx mg = new MappedGeneEx();
             mg.geneRgdId = rs.getInt("rgd_id");
             mg.geneSymbol = rs.getString("gene_symbol");
-            mg.geneName = rs.getString("full_name");
+            mg.geneName = rs.getString("gene_name");
             mg.geneType = rs.getString("gene_type");
 
             mg.mapKey = mapKey;
