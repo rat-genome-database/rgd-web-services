@@ -237,7 +237,7 @@ public class VcmapWebService {
             // any genes in the synteny target block?
             if( withGenes ) {
                 //List<MappedGene> genes = geneDAO.getActiveMappedGenes(block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
-                List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO.getConnection(), block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+                List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO, block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
 
                 synteny.put("genes", genes);
             }
