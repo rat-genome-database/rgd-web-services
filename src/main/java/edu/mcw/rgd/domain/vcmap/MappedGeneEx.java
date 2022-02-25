@@ -84,5 +84,5 @@ public class MappedGeneEx {
         }
     }
 
-    static LRUMap<String, List<MappedGeneEx>> _geneLruCache = new LRUMap<>(10000, 200000);
+    static LRUMap<String, List<MappedGeneEx>> _geneLruCache = new LRUMap<>(200000, 20000);
 }
