@@ -109,7 +109,7 @@ public class GeneWebService {
 
         return geneDAO.getActiveMappedGenePositions(chr.toUpperCase(), start, stop, mapKey);
     }
-
+    
     @RequestMapping(value="/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @ApiOperation(value="Return a list of genes position and map key", tags="Gene")
     public List<Gene> getGenesByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,

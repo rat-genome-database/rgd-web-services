@@ -71,6 +71,15 @@ public class AnnotationWebService {
 
     }
 
+    @RequestMapping(value="/disease/{rgdId}", method=RequestMethod.GET)
+    @ApiOperation(value="Returns a list of disease annotations with top-level disease category by RGD ID",tags = "Annotation")
+    public List<Annotation> getAnnotationsWithDiseaseCategoryByRgdId(@ApiParam(value="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
+
+        AnnotationDAO adao = new AnnotationDAO();
+        return adao.getAnnotationsWithDiseaseCategory(rgdId);
+
+    }
+
     @RequestMapping(value="/accId/{rgdId}", method=RequestMethod.GET)
     @ApiOperation(value="Returns a list ontology term accession IDs annotated to an rgd object",tags = "Annotation")
     public List<StringMapQuery.MapPair> getTermAccIds(@ApiParam(value="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
