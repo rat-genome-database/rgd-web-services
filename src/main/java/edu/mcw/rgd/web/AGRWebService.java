@@ -63,8 +63,8 @@ public class AGRWebService {
             mapKey2 = 40;
         }else if (taxonId.equals("10116")) {
             speciesTypeKey = SpeciesType.RAT;
-            mapKey1 = 360;
-            mapKey2 = 361;
+            mapKey1 = 372;
+            mapKey2 = 373;
         }else {
             throw new Exception("Genes for Taxon ID " + taxonId + " not found");
         }
@@ -536,7 +536,7 @@ public class AGRWebService {
         HashMap returnMap = new HashMap();
         ArrayList variantList = new ArrayList();
 
-        final int mapKey = 360;
+        final int mapKey = 372;
         Map map = MapManager.getInstance().getMap(mapKey);
         RgdVariantDAO vdao = new RgdVariantDAO();
         MapDAO mdao = new MapDAO();
