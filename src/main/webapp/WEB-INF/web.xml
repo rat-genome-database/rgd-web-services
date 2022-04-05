@@ -5,7 +5,7 @@
 
 	<display-name>RGD Web Service</display-name>
 	<description>RGD Web Service Application</description>
-
+<--
 	<filter>
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -14,7 +14,7 @@
 		<filter-name>CorsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-
+-->
 	<!-- For web context -->
 	<servlet>
 		<servlet-name>dispatcher</servlet-name>
