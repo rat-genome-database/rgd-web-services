@@ -23,7 +23,8 @@ public class SwaggerConfiguration {
         return new Docket(DocumentationType.SWAGGER_2).select().apis(
                 RequestHandlerSelectors.any()).paths(PathSelectors.any()).build()
                 .apiInfo(apiInfo())
-                .tags(new Tag("NIHdatacommons","NIH Data Commons"),new Tag("Gene", ""),new Tag("QTL",""),new Tag("Phenotype",""),new Tag("Lookup",""),new Tag("Annotation", ""),new Tag("Pathway",""), new Tag("Rat Strain",""),new Tag("AGR", "Alliance of Genome Resources"));
+                .pathMapping("/") 
+               .tags(new Tag("NIHdatacommons","NIH Data Commons"),new Tag("Gene", ""),new Tag("QTL",""),new Tag("Phenotype",""),new Tag("Lookup",""),new Tag("Annotation", ""),new Tag("Pathway",""), new Tag("Rat Strain",""),new Tag("AGR", "Alliance of Genome Resources"));
     }
 
     private ApiInfo apiInfo() {
