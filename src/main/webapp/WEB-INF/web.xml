@@ -5,7 +5,7 @@
 
 	<display-name>RGD Web Service</display-name>
 	<description>RGD Web Service Application</description>
-<--
+<!--
 	<filter>
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
