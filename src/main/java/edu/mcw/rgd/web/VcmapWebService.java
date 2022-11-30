@@ -355,7 +355,7 @@ public class VcmapWebService {
     }
 
     @RequestMapping(value="/genes/{mapKey}/{chr}/{start}/{stop}", method=RequestMethod.GET)
-    @ApiOperation(value="Return a list of genes position and map key", tags="Gene")
+    @ApiOperation(value="Return a list of genes with positions in a given region", tags="Gene")
     public List<MappedGeneEx> getMappedGenesByPosition2(
             @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
@@ -365,18 +365,18 @@ public class VcmapWebService {
 
         if( threshold==null ) {
             String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
-                    "FROM genes g, rgd_ids r, maps_data md "+
-                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND md.rgd_id=g.rgd_id "+
-                    "AND md.chromosome=? AND md.start_pos<=? AND md.stop_pos>=? AND md.map_key=? "+
-                    "ORDER BY md.start_pos";
+                    "FROM genes g, rgd_ids r, maps_data m "+
+                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND m.rgd_id=g.rgd_id "+
+                    "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? "+
+                    "ORDER BY m.start_pos";
 
             return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey);
         } else {
             String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
-                    "FROM genes g, rgd_ids r, maps_data md "+
-                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND md.rgd_id=g.rgd_id "+
-                    "AND md.chromosome=? AND md.start_pos<=? AND md.stop_pos>=? AND md.map_key=? AND md.stop_pos-md.start_pos>? "+
-                    "ORDER BY md.start_pos";
+                    "FROM genes g, rgd_ids r, maps_data m "+
+                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND m.rgd_id=g.rgd_id "+
+                    "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? AND m.stop_pos-m.start_pos>? "+
+                    "ORDER BY m.start_pos";
 
             return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey, threshold);
         }
