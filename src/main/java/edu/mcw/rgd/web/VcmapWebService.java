@@ -11,6 +11,7 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
 import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
 import edu.mcw.rgd.domain.vcmap.MappedGeneEx;
+import edu.mcw.rgd.domain.vcmap.MappedGeneQueryEx;
 import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
 import edu.mcw.rgd.process.Utils;
 import io.swagger.annotations.Api;
@@ -287,11 +288,6 @@ public class VcmapWebService {
             @ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
 
-        return getActiveGenes(symbolPrefix, mapKey);
-    }
-
-    List<MappedGene> getActiveGenes(String symbolPrefix, int mapKey) throws Exception {
-
         String sql;
         if( Utils.isStringEmpty(symbolPrefix) ) {
             sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
@@ -305,6 +301,30 @@ public class VcmapWebService {
                     " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
                     " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
             return MappedGeneQuery.run(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
+        }
+    }
+
+    @RequestMapping(value="/genes/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return genes with position given symbol prefix, f.e. symbol=hox returns all HOXxxx genes", tags = "VCMap")
+    public List<MappedGeneEx> getGenesForSymbol2(
+            @ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @ApiParam(value="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
+
+        String sql;
+        if( Utils.isStringEmpty(symbolPrefix) ) {
+            sql = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
+                    "FROM genes g, rgd_ids r, maps_data m " +
+                    "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
+                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND r.rgd_id=g.rgd_id";
+            return MappedGeneQueryEx.execute(mapDAO, sql, mapKey);
+        } else {
+            sql = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
+                    "FROM genes g, rgd_ids r, maps_data m " +
+                    "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
+                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
+            return MappedGeneQueryEx.execute(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
         }
     }
 
@@ -334,6 +354,33 @@ public class VcmapWebService {
         return MappedGeneQuery.run(mapDAO, query, chr, stopPos, startPos, mapKey, minLen);
     }
 
+    @RequestMapping(value="/genes/{mapKey}/{chr}/{start}/{stop}", method=RequestMethod.GET)
+    @ApiOperation(value="Return a list of genes with positions in a given region", tags="Gene")
+    public List<MappedGeneEx> getMappedGenesByPosition2(
+            @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+            @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
+            @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+            @ApiParam(value = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
+
+        if( threshold==null ) {
+            String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
+                    "FROM genes g, rgd_ids r, maps_data m "+
+                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND m.rgd_id=g.rgd_id "+
+                    "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? "+
+                    "ORDER BY m.start_pos";
+
+            return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey);
+        } else {
+            String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
+                    "FROM genes g, rgd_ids r, maps_data m "+
+                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND m.rgd_id=g.rgd_id "+
+                    "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? AND m.stop_pos-m.start_pos>? "+
+                    "ORDER BY m.start_pos";
+
+            return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey, threshold);
+        }
+    }
 
     @RequestMapping(value="/genes/{sourceGeneId}/orthologs", method=RequestMethod.GET)
     @ApiOperation(value="Return orthologs for a given source gene identified by gene rgd id", tags="VCMap")
