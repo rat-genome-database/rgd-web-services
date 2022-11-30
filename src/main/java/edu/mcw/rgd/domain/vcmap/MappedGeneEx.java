@@ -1,7 +1,6 @@
 package edu.mcw.rgd.domain.vcmap;
 
 import edu.mcw.rgd.dao.AbstractDAO;
-import edu.mcw.rgd.process.Utils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +8,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections4.map.*;
 
 public class MappedGeneEx {
@@ -28,6 +28,31 @@ public class MappedGeneEx {
         return "RGD:"+geneRgdId+" "+geneSymbol+" "+geneType+" MAP_KEY:"+mapKey+" c"+chr+":"+startPos+".."+stopPos+" "+strand;
     }
 
+
+    public static List<MappedGeneEx> getActiveGenesInRegionNew(AbstractDAO dao, String chr, int startPos, int stopPos, int mapKey) throws Exception {
+
+        String key = chr+"|"+startPos+"|"+stopPos+"|"+mapKey;
+
+        synchronized(_geneLruCache) {
+
+            List<MappedGeneEx> results = _geneLruCache.get(key);
+            if( results!=null ) {
+                return results;
+            }
+
+            String sql = "SELECT g.rgd_id, g.gene_symbol,g.full_name,g.gene_type_lc, md.start_pos,md.stop_pos,md.strand,md.map_key,md.chromosome "+
+                    "FROM genes g, rgd_ids r, maps_data md "+
+                    "WHERE r.object_status='ACTIVE' AND r.rgd_id=g.rgd_id AND md.rgd_id=g.rgd_id "+
+                    "AND md.chromosome=? AND md.stop_pos>=? AND md.start_pos<=? AND md.map_key=? "+
+                    "ORDER BY md.start_pos";
+
+            results = MappedGeneQueryEx.execute(dao, sql, chr, startPos, stopPos, mapKey);
+
+            _geneLruCache.put(key, results);
+
+            return results;
+        }
+    }
 
     public static List<MappedGeneEx> getActiveGenesInRegion(AbstractDAO dao, String chr, int startPos, int stopPos, int mapKey) throws Exception {
 
