@@ -6,7 +6,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections4.map.*;
@@ -23,6 +25,7 @@ public class MappedGeneEx {
     public int startPos;
     public int stopPos;
     public String strand;
+    public List orthologs;
 
     public String toString() {
         return "RGD:"+geneRgdId+" "+geneSymbol+" "+geneType+" MAP_KEY:"+mapKey+" c"+chr+":"+startPos+".."+stopPos+" "+strand;
@@ -110,4 +113,55 @@ public class MappedGeneEx {
     }
 
     static LRUMap<String, List<MappedGeneEx>> _geneLruCache = new LRUMap<>(200000, 20000);
+
+
+    /// ortholog cache
+    static Map<String, Map<Integer, List<Integer>>> _orthoCache = new HashMap<>();
+
+    public static Map<Integer, List<Integer>> getOrthologMap(AbstractDAO dao, int mapKey1, int mapKey2) throws Exception {
+        String key = mapKey1 + "-" + mapKey2;
+
+        synchronized(_orthoCache) {
+
+            Map<Integer, List<Integer>> results = _orthoCache.get(key);
+            if (results != null) {
+                return results;
+            }
+
+            results = getOrthologRgdIds(dao, mapKey1, mapKey2);
+
+            _orthoCache.put(key, results);
+
+            return results;
+        }
+    }
+
+    static Map<Integer, List<Integer>> getOrthologRgdIds(AbstractDAO dao, int mapKey1, int mapKey2) throws Exception {
+
+        String sql = "SELECT distinct m1.rgd_id,m2.rgd_id FROM genetogene_rgd_id_rlt o,maps_data m1,maps_data m2 " +
+                "WHERE o.src_rgd_id=m1.rgd_id AND m1.map_key=? " +
+                "  AND o.dest_rgd_id=m2.rgd_id AND m2.map_key=?";
+
+        Map<Integer, List<Integer>> result = new HashMap<>();
+
+        try( Connection conn = dao.getConnection() ) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, mapKey1);
+            ps.setInt(2, mapKey2);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int geneRgd1 = rs.getInt(1);
+                int geneRgd2 = rs.getInt(2);
+                List<Integer> geneRgdIds = result.get(geneRgd1);
+                if (geneRgdIds == null) {
+                    geneRgdIds = new ArrayList<>();
+                    result.put(geneRgd1, geneRgdIds);
+                }
+                geneRgdIds.add(geneRgd2);
+            }
+        }
+        return result;
+    }
 }

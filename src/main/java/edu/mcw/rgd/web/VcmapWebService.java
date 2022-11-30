@@ -140,23 +140,42 @@ public class VcmapWebService {
             @ApiParam(value = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
             @ApiParam(value = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold,
-            @ApiParam(value = "Include Genes, if set to 1 (optional)") @RequestParam(required = false) Integer includeGenes
+            @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdStart,
+            @ApiParam(value = "Maximum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdEnd,
+            @ApiParam(value = "Include Genes, if set to 1 (optional)") @RequestParam(required = false) Integer includeGenes,
+            @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs
     ) throws Exception {
 
         boolean withGenes = includeGenes!=null && includeGenes>0;
+        boolean withOrthologs = includeOrthologs!=null && includeOrthologs>0;
 
         List<SyntenicRegion> blocks;
         List<SyntenicRegion> gaps;
 
-        if( threshold==null ) {
+        int minSize = 0, maxSize = 0;
+        if( threshold!=null && threshold>0 ) {
+            minSize = threshold;
+        }
+        if( thresholdStart!=null && thresholdStart>0 ) {
+            minSize = thresholdStart;
+        }
+        if( thresholdEnd!=null && thresholdEnd>0 ) {
+            maxSize = thresholdEnd;
+        }
+
+        if( minSize>0 && maxSize==0 ) {
+            maxSize = Integer.MAX_VALUE;
+        }
+
+        if( minSize==0 && maxSize==0 ) {
             blocks = sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
             gaps = sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
         } else {
-            blocks = sdao.getSizedBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
-            gaps = sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
+            blocks = sdao.getBlocksInRange(backboneMapKey, backboneChr, backboneStart, backboneStop, minSize, maxSize, mapKey);
+            gaps = sdao.getGapsInRange(backboneMapKey, backboneChr, backboneStart, backboneStop, minSize, maxSize, mapKey);
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes, withOrthologs);
         return results;
     }
 
@@ -197,11 +216,11 @@ public class VcmapWebService {
             }
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false, false);
         return results;
     }
 
-    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes) throws Exception {
+    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes, boolean withOrthologs) throws Exception {
 
         List<Map<String, Object>> results = new ArrayList<>();
 
@@ -237,8 +256,15 @@ public class VcmapWebService {
 
             // any genes in the synteny target block?
             if( withGenes ) {
-                //List<MappedGene> genes = geneDAO.getActiveMappedGenes(block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
                 List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO, block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
+
+                if( withOrthologs ) {
+                    Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), block.getBackboneMapKey());
+
+                    for( MappedGeneEx g: genes ) {
+                        g.orthologs = orthoMap.get(g.geneRgdId);
+                    }
+                }
 
                 synteny.put("genes", genes);
             }
