@@ -427,10 +427,11 @@ public class VcmapWebService {
                 for( MappedGeneEx g: genes ) {
                     List<Integer> oList = orthos.get(g.geneRgdId);
                     if( oList!=null ) {
-                        if( g.orthoMap==null ) {
-                            g.orthoMap = new HashMap();
+                        if( g.orthologs==null ) {
+                            g.orthologs = new HashMap();
                         }
-                        g.orthoMap.put(oMapKey, oList);
+                        HashMap h = (HashMap) g.orthologs;
+                        h.put(oMapKey, oList);
                     }
                 }
             }
