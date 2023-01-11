@@ -387,8 +387,8 @@ public class VcmapWebService {
             @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
             @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
             @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-            @ApiParam(value = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
-            @ApiParam(value = "Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String withOrthologs) throws Exception{
+            @ApiParam(value="Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold,
+            @ApiParam(value="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String withOrthologs) throws Exception{
 
         List<MappedGeneEx> genes;
         if( threshold==null ) {
