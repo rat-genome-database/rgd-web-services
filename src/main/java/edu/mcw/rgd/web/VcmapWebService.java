@@ -388,7 +388,7 @@ public class VcmapWebService {
             @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
             @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
             @ApiParam(value="Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold,
-            @ApiParam(value="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String withOrthologs) throws Exception{
+            @ApiParam(value="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String orthologMapKeys) throws Exception{
 
         List<MappedGeneEx> genes;
         if( threshold==null ) {
@@ -409,8 +409,8 @@ public class VcmapWebService {
             genes = MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey, threshold);
         }
 
-        if( withOrthologs!=null ) {
-            String[] mapKeyArr = withOrthologs.split("[,]");
+        if( orthologMapKeys!=null ) {
+            String[] mapKeyArr = orthologMapKeys.split("[,]");
             int[] mapKeys = new int[mapKeyArr.length];
             for( int i=0; i<mapKeys.length; i++ ) {
                 try {
