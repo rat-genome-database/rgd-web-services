@@ -25,7 +25,7 @@ public class MappedGeneEx {
     public int startPos;
     public int stopPos;
     public String strand;
-    public List orthologs;
+    public Object orthologs;
 
     public String toString() {
         return "RGD:"+geneRgdId+" "+geneSymbol+" "+geneType+" MAP_KEY:"+mapKey+" c"+chr+":"+startPos+".."+stopPos+" "+strand;
@@ -112,7 +112,7 @@ public class MappedGeneEx {
         }
     }
 
-    static LRUMap<String, List<MappedGeneEx>> _geneLruCache = new LRUMap<>(200000, 20000);
+    static LRUMap<String, List<MappedGeneEx>> _geneLruCache = new LRUMap<>(250000, 20000);
 
 
     /// ortholog cache
