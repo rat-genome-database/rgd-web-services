@@ -355,7 +355,7 @@ public class VcmapWebService {
     }
 
     @RequestMapping(value="/genes/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
-    @ApiOperation(value="Return a list of genes position and map key", tags="Gene")
+    @ApiOperation(value="Return a list of genes position and map key", tags="VCMap")
     public List<MappedGene> getMappedGenesByPosition(
         @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
         @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
@@ -381,14 +381,16 @@ public class VcmapWebService {
     }
 
     @RequestMapping(value="/genes/{mapKey}/{chr}/{start}/{stop}", method=RequestMethod.GET)
-    @ApiOperation(value="Return a list of genes with positions in a given region", tags="Gene")
+    @ApiOperation(value="Return a list of genes with positions in a given region", tags="VCMap")
     public List<MappedGeneEx> getMappedGenesByPosition2(
             @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
             @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
             @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-            @ApiParam(value = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
+            @ApiParam(value="Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold,
+            @ApiParam(value="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String orthologMapKeys) throws Exception{
 
+        List<MappedGeneEx> genes;
         if( threshold==null ) {
             String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
                     "FROM genes g, rgd_ids r, maps_data m "+
@@ -396,7 +398,7 @@ public class VcmapWebService {
                     "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? "+
                     "ORDER BY m.start_pos";
 
-            return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey);
+            genes = MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey);
         } else {
             String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
                     "FROM genes g, rgd_ids r, maps_data m "+
@@ -404,8 +406,37 @@ public class VcmapWebService {
                     "AND m.chromosome=? AND m.start_pos<=? AND m.stop_pos>=? AND m.map_key=? AND m.stop_pos-m.start_pos>? "+
                     "ORDER BY m.start_pos";
 
-            return MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey, threshold);
+            genes = MappedGeneQueryEx.execute(mapDAO, query, chr, stop, start, mapKey, threshold);
         }
+
+        if( orthologMapKeys!=null ) {
+            String[] mapKeyArr = orthologMapKeys.split("[,]");
+            int[] mapKeys = new int[mapKeyArr.length];
+            for( int i=0; i<mapKeys.length; i++ ) {
+                try {
+                    mapKeys[i] = Integer.parseInt(mapKeyArr[i]);
+                } catch( NumberFormatException ignore ) {
+                }
+            }
+
+            for( int oMapKey: mapKeys ) {
+                if( oMapKey==0 ) {
+                    continue;
+                }
+                Map<Integer, List<Integer>> orthos = MappedGeneEx.getOrthologMap(geneDAO, mapKey, oMapKey);
+                for( MappedGeneEx g: genes ) {
+                    List<Integer> oList = orthos.get(g.geneRgdId);
+                    if( oList!=null ) {
+                        if( g.orthologs==null ) {
+                            g.orthologs = new HashMap();
+                        }
+                        HashMap h = (HashMap) g.orthologs;
+                        h.put(oMapKey, oList);
+                    }
+                }
+            }
+        }
+        return genes;
     }
 
     @RequestMapping(value="/genes/{sourceGeneId}/orthologs", method=RequestMethod.GET)
