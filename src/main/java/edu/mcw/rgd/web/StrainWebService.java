@@ -1,6 +1,8 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.StrainDAO;
+import edu.mcw.rgd.datamodel.MappedGene;
+import edu.mcw.rgd.datamodel.MappedStrain;
 import edu.mcw.rgd.datamodel.Strain;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
@@ -45,5 +47,14 @@ public class StrainWebService {
         return sdao.getActiveStrainsSortedBySymbol(chr.toUpperCase(),start,stop,mapKey);
     }
 
+    @RequestMapping(value="/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
+    @ApiOperation(value="Return a list of strains position and map key", tags="Rat Strain")
+    public List<MappedStrain> getMappedGenesByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                       @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
+                                                       @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                                       @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+
+        return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);
+    }
 
 }
