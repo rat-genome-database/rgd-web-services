@@ -608,4 +608,12 @@ public class VcmapWebService {
 
         return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
     }
+    @RequestMapping(value="variants/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of variants on Gene rgdID", tags="Variants")
+    public List<VariantMapData> getVariantsByGeneAndMapKey(@ApiParam(value="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
+                                                           @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+        Gene g = geneDAO.getGene(geneRgdId);
+        MapData md = mapDAO.getMapData(g.getRgdId(),mapKey).get(0);
+        return vdao.getVariantsWithGeneLocation(mapKey, md.getChromosome(), md.getStartPos(),md.getStopPos());
+    }
 }
