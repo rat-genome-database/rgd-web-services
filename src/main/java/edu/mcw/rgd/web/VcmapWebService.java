@@ -4,11 +4,10 @@ import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
+import edu.mcw.rgd.dao.impl.variants.VariantDAO;
 import edu.mcw.rgd.dao.spring.MappedGeneQuery;
-import edu.mcw.rgd.datamodel.Chromosome;
-import edu.mcw.rgd.datamodel.MappedGene;
-import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.datamodel.SyntenicRegion;
+import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.variants.VariantMapData;
 import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
 import edu.mcw.rgd.domain.vcmap.MappedGeneEx;
 import edu.mcw.rgd.domain.vcmap.MappedGeneQueryEx;
@@ -23,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.Map;
 
 /**
  * Created by mtutaj on 11/18/2021
@@ -36,6 +36,8 @@ public class VcmapWebService {
     GeneDAO geneDAO = new GeneDAO();
     MapDAO mapDAO = new MapDAO();
     SyntenyDAO sdao = new SyntenyDAO();
+
+    VariantDAO vdao = new VariantDAO();
 
     @RequestMapping(value = "/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
     @ApiOperation(value = "Return all synteny blocks for given backbone region", tags = "VCMap")
@@ -596,5 +598,22 @@ public class VcmapWebService {
         }
 
         return results;
+    }
+    @RequestMapping(value="/variants/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
+    @ApiOperation(value="Return a list of variants and map key", tags="VCMap")
+    public List<VariantMapData> getVariantsByPositionAndMapKey(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                         @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
+                                                         @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+                                                         @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+
+        return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
+    }
+    @RequestMapping(value="/variants/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of variants on Gene rgdID", tags="VCMap")
+    public List<VariantMapData> getVariantsByGeneAndMapKey(@ApiParam(value="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
+                                                           @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+        Gene g = geneDAO.getGene(geneRgdId);
+        MapData md = mapDAO.getMapData(g.getRgdId(),mapKey).get(0);
+        return vdao.getVariantsWithGeneLocation(mapKey, md.getChromosome(), md.getStartPos(),md.getStopPos());
     }
 }
