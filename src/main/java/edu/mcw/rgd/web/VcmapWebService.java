@@ -609,11 +609,21 @@ public class VcmapWebService {
         return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
     }
     @RequestMapping(value="variants/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a list of variants on Gene rgdID", tags="Variants")
+    @ApiOperation(value="Return a list of variants on Gene rgdID", tags="VCMap")
     public List<VariantMapData> getVariantsByGeneAndMapKey(@ApiParam(value="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
                                                            @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
         Gene g = geneDAO.getGene(geneRgdId);
         MapData md = mapDAO.getMapData(g.getRgdId(),mapKey).get(0);
         return vdao.getVariantsWithGeneLocation(mapKey, md.getChromosome(), md.getStartPos(),md.getStopPos());
+    }
+
+    @RequestMapping(value="/variants/position/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of positions for variants", tags="VCMap")
+    public List<Long> getVariantPositionsByPositionAndMapKey(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                             @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
+                                                             @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+                                                             @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+
+        return vdao.getVariantStartPositionByPositionAndMapKey(mapKey, chr.toUpperCase(), start,stop);
     }
 }
