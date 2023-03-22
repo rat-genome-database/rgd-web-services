@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.MappedGene;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class GeneWebService {
 
     GeneDAO geneDAO = new GeneDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/orthologs/{rgdId}", method=RequestMethod.GET)
     @ApiOperation(value="Return a list of gene orthologs", tags="Gene")
@@ -84,6 +86,7 @@ public class GeneWebService {
     @RequestMapping(value="/{rgdId}", method=RequestMethod.GET)
     @ApiOperation(value="Get a gene record by RGD ID", tags="Gene")
     public Gene getGeneByRgdId(@ApiParam(value="The RGD ID of a Gene in RGD", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName());
         return geneDAO.getGene(rgdId);
     }
 
