@@ -1,6 +1,7 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.DataSourceFactory;
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
@@ -38,6 +39,7 @@ public class VcmapWebService {
     SyntenyDAO sdao = new SyntenyDAO();
 
     VariantDAO vdao = new VariantDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value = "/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
     @ApiOperation(value = "Return all synteny blocks for given backbone region", tags = "VCMap")
@@ -50,6 +52,7 @@ public class VcmapWebService {
             @ApiParam(value = "Minimum Backbone Block Size (optional)") @RequestParam(required = false) Integer threshold
     ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         if (threshold == null) {
             return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
         } else {
@@ -68,6 +71,7 @@ public class VcmapWebService {
             @ApiParam(value = "Chain Level (1, 2, etc or range: 1-2)", required = true) @PathVariable(value = "chainLevel") String chainLevel,
             @ApiParam(value = "Minimum Backbone Block Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int dashPos = chainLevel.indexOf('-');
         if (dashPos < 0) {
             int level = Integer.parseInt(chainLevel);
@@ -96,6 +100,7 @@ public class VcmapWebService {
             @ApiParam(value = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value = "Minimum Backbone Gap Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         if (threshold != null) {
             return sdao.getSizedGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, threshold, mapKey);
         } else {
@@ -114,6 +119,7 @@ public class VcmapWebService {
             @ApiParam(value = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(value = "chainLevel") String chainLevel,
             @ApiParam(value = "Minimum Backbone Gap Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int dashPos = chainLevel.indexOf('-');
         if (dashPos < 0) {
             int level = Integer.parseInt(chainLevel);
@@ -148,6 +154,7 @@ public class VcmapWebService {
             @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs
     ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         boolean withGenes = includeGenes!=null && includeGenes>0;
         boolean withOrthologs = includeOrthologs!=null && includeOrthologs>0;
 
@@ -193,6 +200,7 @@ public class VcmapWebService {
             @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold
     ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<SyntenicRegion> blocks;
         List<SyntenicRegion> gaps;
 
@@ -279,6 +287,7 @@ public class VcmapWebService {
     @ApiOperation(value="Return genomic maps for public species in RGD", tags = "VCMap")
     public List<SpeciesMaps> getSpeciesMaps() throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<SpeciesMaps> results = new ArrayList<>();
 
         for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
@@ -299,6 +308,7 @@ public class VcmapWebService {
     @ApiOperation(value="Return chromosome hashmap for given map key", tags = "VCMap")
     public Map<String, ChromosomeEx> getChrMaps(@ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Map<String, ChromosomeEx> results = new HashMap<>();
 
         List<Chromosome> chrList = mapDAO.getChromosomes(mapKey);
@@ -316,6 +326,7 @@ public class VcmapWebService {
             @ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         String sql;
         if( Utils.isStringEmpty(symbolPrefix) ) {
             sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
@@ -338,6 +349,7 @@ public class VcmapWebService {
             @ApiParam(value="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
             @ApiParam(value="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         String sql;
         if( Utils.isStringEmpty(symbolPrefix) ) {
             sql = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
@@ -365,6 +377,7 @@ public class VcmapWebService {
         @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
         @ApiParam(value = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         if( threshold==null ) {
             return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start, stop, mapKey);
         } else {
@@ -392,6 +405,7 @@ public class VcmapWebService {
             @ApiParam(value="Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold,
             @ApiParam(value="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String orthologMapKeys) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<MappedGeneEx> genes;
         if( threshold==null ) {
             String query = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
@@ -447,6 +461,7 @@ public class VcmapWebService {
             @ApiParam(value="RGD ID of source gene", required=true) @PathVariable(value = "sourceGeneId") int sourceGeneRgdId,
             @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return getMappedOrthologs(sourceGeneRgdId, mapKeys);
     }
 
@@ -513,6 +528,7 @@ public class VcmapWebService {
             @ApiParam(value = "source gene size threshold (minimum gene size) (optional)") @RequestParam(required = false) Integer geneSizeThreshold,
             @ApiParam(value = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return getMappedOrthologs(sourceMapKey, sourceChr, sourceStart, sourceStop, geneSizeThreshold, mapKeys);
     }
 
@@ -606,12 +622,14 @@ public class VcmapWebService {
                                                          @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
                                                          @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
     }
     @RequestMapping(value="variants/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of variants on Gene rgdID", tags="VCMap")
     public List<VariantMapData> getVariantsByGeneAndMapKey(@ApiParam(value="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
                                                            @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Gene g = geneDAO.getGene(geneRgdId);
         MapData md = mapDAO.getMapData(g.getRgdId(),mapKey).get(0);
         return vdao.getVariantsWithGeneLocation(mapKey, md.getChromosome(), md.getStartPos(),md.getStopPos());
@@ -624,6 +642,7 @@ public class VcmapWebService {
                                                              @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
                                                              @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return vdao.getVariantStartPositionByPositionAndMapKey(mapKey, chr.toUpperCase(), start,stop);
     }
 }

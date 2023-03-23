@@ -38,12 +38,14 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public Map getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
         int originalSpeciesTypeKey=SpeciesType.parse(enrichmentRequest.originalSpecies);
 
@@ -139,6 +141,7 @@ public class EnrichmentWebService {
     public Map getEnrichmentData(@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int speciesTypeKey = SpeciesType.parse(geneRequest.species);
         Map result = new ConcurrentHashMap();
         List geneData = Collections.synchronizedList(new ArrayList<>());

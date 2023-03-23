@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.RGDNewsConfDAO;
 import edu.mcw.rgd.datamodel.RGDNewsConf;
 import io.swagger.annotations.Api;
@@ -25,6 +26,7 @@ public class NewsWebService {
 
     RGDNewsConfDAO dao = new RGDNewsConfDAO();
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/last", method=RequestMethod.GET)
     @ApiOperation(value="Get a number of recent RGD news. Maximum ten news is returned unless 'limit' parameter is provided.", tags="News")
@@ -32,6 +34,7 @@ public class NewsWebService {
             @ApiParam(value = "Maximum number of news items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int newsLimit = 10;
         if( limit!=null ) {
             newsLimit = limit;
@@ -72,6 +75,7 @@ public class NewsWebService {
             @ApiParam(value = "Maximum number of items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int newsLimit = 100;
         if( limit!=null ) {
             newsLimit = limit;
@@ -112,6 +116,7 @@ public class NewsWebService {
             @ApiParam(value = "Maximum number of items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int newsLimit = 100;
         if( limit!=null ) {
             newsLimit = limit;

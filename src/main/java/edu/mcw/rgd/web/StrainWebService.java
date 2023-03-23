@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
 import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.MappedStrain;
@@ -25,16 +26,19 @@ import java.util.List;
 public class StrainWebService {
 
     StrainDAO sdao = new StrainDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @ApiOperation(value="Return a strain by RGD ID",tags = "Rat Strain")
     public Strain getStrainByRgdId(@ApiParam(value="RGD ID of the strain", required=true) @PathVariable(value = "rgdId") int rgdId ) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getStrain(rgdId);
     }
 
     @RequestMapping(value="/all", method= RequestMethod.GET)
     @ApiOperation(value="Return all active strains in RGD",tags = "Rat Strain")
     public List<Strain> getAllStrains() throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getActiveStrains();
     }
 
@@ -44,6 +48,7 @@ public class StrainWebService {
                                              @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
                                              @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                              @ApiParam(value="RGD Map Key (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getActiveStrainsSortedBySymbol(chr.toUpperCase(),start,stop,mapKey);
     }
 
@@ -54,6 +59,7 @@ public class StrainWebService {
                                                        @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                                        @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);
     }
 

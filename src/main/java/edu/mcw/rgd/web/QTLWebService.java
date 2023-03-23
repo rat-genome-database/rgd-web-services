@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.QTLDAO;
 import edu.mcw.rgd.datamodel.MappedQTL;
 import edu.mcw.rgd.datamodel.QTL;
@@ -27,11 +28,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class QTLWebService {
 
     QTLDAO qdao = new QTLDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @ApiOperation(value="Return a QTL for provided RGD ID", tags = "QTL")
     public QTL getQTLByRgdId(@ApiParam(value="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return qdao.getQTL(rgdId);
     }
 
@@ -43,6 +46,7 @@ public class QTLWebService {
                                           @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                           @ApiParam(value="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return qdao.getActiveQTLs(chr.toUpperCase(), start,stop,mapKey);
     }
     @RequestMapping( value="/mapped/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
@@ -52,6 +56,7 @@ public class QTLWebService {
                                                 @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                                 @ApiParam(value="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return qdao.getActiveMappedQTLs(chr.toUpperCase(), start,stop,mapKey);
     }
     /*

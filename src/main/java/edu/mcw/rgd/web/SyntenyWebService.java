@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
 import edu.mcw.rgd.datamodel.SyntenicRegion;
 import io.swagger.annotations.Api;
@@ -22,6 +23,7 @@ import java.util.List;
 public class SyntenyWebService {
 
     SyntenyDAO sdao = new SyntenyDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all synteny blocks for given backbone region", tags = "Synteny")
@@ -31,6 +33,7 @@ public class SyntenyWebService {
                                           @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
     }
 
@@ -43,6 +46,7 @@ public class SyntenyWebService {
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
                                           @ApiParam(value="Chain Level (1, 2, etc or range: 1-2)", required=true) @PathVariable(value = "chainLevel") String chainLevel ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int dashPos = chainLevel.indexOf('-');
         if( dashPos<0 ) {
             int level = Integer.parseInt(chainLevel);
@@ -61,6 +65,7 @@ public class SyntenyWebService {
                                           @ApiParam(value="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
     }
 
@@ -73,6 +78,7 @@ public class SyntenyWebService {
                                           @ApiParam(value="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
                                           @ApiParam(value="Chain Level (1, 2, etc, or range: '1-2')", required=true) @PathVariable(value = "chainLevel") String chainLevel ) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int dashPos = chainLevel.indexOf('-');
         if( dashPos<0 ) {
             int level = Integer.parseInt(chainLevel);
