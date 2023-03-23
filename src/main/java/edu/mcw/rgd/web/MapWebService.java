@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.Map;
@@ -21,6 +22,7 @@ import java.util.Set;
 public class MapWebService {
 
     MapDAO mdao= new MapDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/{speciesTypeKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of assemblies", tags="Map")
@@ -29,6 +31,7 @@ public class MapWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<Map> maps = mdao.getMaps(speciesTypeKey,"bp");
         return maps;
     }
@@ -40,6 +43,7 @@ public class MapWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return getChromosomesByMapKey(mapKey);
     }
 
@@ -50,6 +54,7 @@ public class MapWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int mapKey = MapManager.getInstance().getReferenceAssembly(speciesTypeKey).getKey();
         return getChromosomesByMapKey(mapKey);
     }
@@ -68,6 +73,7 @@ public class MapWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return mdao.getChromosome(mapKey,chromosome);
     }
 }

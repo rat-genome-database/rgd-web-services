@@ -1,10 +1,8 @@
 
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.GeneEnrichmentDAO;
-import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.datamodel.Ortholog;
 import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.annotation.GeneWrapper;
@@ -40,14 +38,34 @@ public class EnrichmentWebService {
     GeneOntologyEnrichmentProcess process = new GeneOntologyEnrichmentProcess();
     AnnotationDAO adao = new AnnotationDAO();
     OntologyXDAO oDao = new OntologyXDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public Map getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
-        List<Integer> geneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, speciesTypeKey);
+        int originalSpeciesTypeKey=SpeciesType.parse(enrichmentRequest.originalSpecies);
+
+        //List<Integer> ids = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes,)
+
+        List<Integer> originalGeneRgdIds = gdao.getActiveGeneRgdIdsBySymbols(enrichmentRequest.genes, originalSpeciesTypeKey);
+
+        List<Integer> geneRgdIds = new ArrayList<Integer>();
+
+        if (originalSpeciesTypeKey == speciesTypeKey) {
+            geneRgdIds = originalGeneRgdIds;
+        }else {
+            OrthologDAO odao = new OrthologDAO();
+            List<Ortholog> orthologs = odao.getOrthologsForSourceRgdIds(originalGeneRgdIds, speciesTypeKey);
+
+            for (Ortholog ortholog : orthologs) {
+                geneRgdIds.add(ortholog.getDestRgdId());
+            }
+        }
+
         List<String> termSet = new ArrayList<>();
         ArrayList<String> aspects = new ArrayList<>();
         Ontology ont = oDao.getOntology(enrichmentRequest.aspect);
@@ -93,8 +111,7 @@ public class EnrichmentWebService {
                             data.put("count", inputAnnotGenes);
                             data.put("refCount", refAnnotGenes);
                             data.put("pvalue", pvalue);
-                            data.put("oddsratio", String.format("%.02f",oddsRatio));
-                            data.put("refGeneCount",refGenes);
+                            data.put("oddsratio", oddsRatio);
                             enrichmentData.add(data);
                         }
                     }
@@ -124,6 +141,7 @@ public class EnrichmentWebService {
     public Map getEnrichmentData(@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         int speciesTypeKey = SpeciesType.parse(geneRequest.species);
         Map result = new ConcurrentHashMap();
         List geneData = Collections.synchronizedList(new ArrayList<>());

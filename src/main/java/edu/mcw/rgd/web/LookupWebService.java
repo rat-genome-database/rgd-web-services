@@ -1,9 +1,6 @@
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.MapDAO;
-import edu.mcw.rgd.dao.impl.PhenominerDAO;
-import edu.mcw.rgd.dao.impl.XdbIdDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.SpeciesType;
@@ -30,6 +27,7 @@ import java.util.List;
 
 public class LookupWebService {
 
+    AccessLogDAO ald = new AccessLogDAO();
 
     private  HashMap<String, String> getIDMapping(Integer rgdId, int xdbId) throws Exception{
         HashMap<String, String> mapping = new HashMap<String, String>();
@@ -66,6 +64,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,14);
     }
 
@@ -77,6 +76,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 14);
     }
 
@@ -88,6 +88,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,1);
     }
 
@@ -100,6 +101,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 1);
     }
 
@@ -111,6 +113,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,3);
     }
 
@@ -123,6 +126,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 3);
     }
 
@@ -144,6 +148,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 20);
     }
 
@@ -155,6 +160,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,7);
     }
 
@@ -167,6 +173,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 7);
     }
 
@@ -178,6 +185,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,27);
     }
 
@@ -190,6 +198,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 27);
     }
 
@@ -201,6 +210,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,42);
     }
 
@@ -213,6 +223,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId, 42);
     }
 
@@ -224,6 +235,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,5);
     }
 
@@ -236,7 +248,8 @@ public class LookupWebService {
 
     ) throws Exception{
 
-       return this.getIDMapping(rgdId, 5);
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        return this.getIDMapping(rgdId, 5);
     }
 
     @RequestMapping(value="/id/map/GTEx", method=RequestMethod.POST)
@@ -246,6 +259,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,65);
     }
 
@@ -258,6 +272,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId,65);
     }
 
@@ -268,6 +283,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(data,21);
     }
 
@@ -280,6 +296,7 @@ public class LookupWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return this.getIDMapping(rgdId,21);
     }
 
@@ -288,6 +305,7 @@ public class LookupWebService {
     @ApiOperation(value="Return a list assembly maps for a species", tags = "Lookup")
     public List<Map> getMaps(@ApiParam(value="RGD species type key. A full list of keys is available throught the lookup service.  1=human, 2=mouse, 3=rat,ect", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         MapDAO g = new MapDAO();
         return g.getMaps(speciesTypeKey);
     }
@@ -296,6 +314,7 @@ public class LookupWebService {
     @ApiOperation(value="Return a Map of species type keys available in RGD", tags = "Lookup")
     public java.util.Map getSpeciesTypes() throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<Integer> species = new ArrayList<Integer>(SpeciesType.getSpeciesTypeKeys());
         HashMap hm = new HashMap();
         for(Integer s: species) {
@@ -308,6 +327,7 @@ public class LookupWebService {
     @ApiOperation(value="Returns a list of gene types avialable in RGD", tags = "Lookup")
     @RequestMapping(value="/geneTypes", method=RequestMethod.GET)
     public List<String> getGeneTypes() throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         GeneDAO g = new GeneDAO();
         return g.getTypes();
     }
@@ -316,6 +336,7 @@ public class LookupWebService {
     @ApiOperation(value="Return a standardUnit for an ontology if it exists", tags = "Lookup")
     public String getMaps(@ApiParam(value="RGD term acc", required=true) @PathVariable(value = "accId") String accId) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         PhenominerDAO pdao = new PhenominerDAO();
         return pdao.getStandardUnit(accId);
     }

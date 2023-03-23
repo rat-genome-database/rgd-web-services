@@ -1,12 +1,11 @@
 package edu.mcw.rgd.web;
 
-import edu.mcw.rgd.dao.impl.OntologyXDAO;
-import edu.mcw.rgd.dao.impl.PathwayDAO;
-import edu.mcw.rgd.dao.impl.PhenominerDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.Pathway;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
+import edu.mcw.rgd.datamodel.phenominerExpectedRange.PhenominerExpectedRange;
 import edu.mcw.rgd.process.Utils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,12 +28,15 @@ import java.util.*;
 public class PhenotypeWebService {
 
     PhenominerDAO phenominerDAO = new PhenominerDAO();
+    PhenominerExpectedRangeDao pedao = new PhenominerExpectedRangeDao();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{termString}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla)", tags = "Quantitative Phenotype")
     public HashMap getChartInfo(@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
             @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<String> sampleIds = new ArrayList<String>();
         List mmIds = new ArrayList<String>();
         List cmIds = new ArrayList<String>();
@@ -75,6 +77,7 @@ public class PhenotypeWebService {
 			@ApiParam(value="Reference RGD ID for a study", required=true) @PathVariable(value = "refRgdId") int refRgdId,
             @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<String> sampleIds = new ArrayList<String>();
         List mmIds = new ArrayList<String>();
         List cmIds = new ArrayList<String>();
@@ -205,9 +208,20 @@ public class PhenotypeWebService {
 
         for (String measurement: measurements.keySet()) {
             HashMap map = new HashMap();
+            List<PhenominerExpectedRange> normalRanges = pedao.getNormalRangesByCMId(measurement);
             map.put("accId", measurement);
             map.put("term", termResolver.get(measurement).getTerm());
 
+            HashMap ranges = new HashMap();
+            for(PhenominerExpectedRange range: normalRanges){
+                HashMap rmap = new HashMap();
+                rmap.put("mean",range.getRangeValue());
+                rmap.put("low",range.getRangeLow());
+                rmap.put("high",range.getRangeHigh());
+                rmap.put("sd",range.getRangeSD());
+                ranges.put(range.getSex(),rmap);
+            }
+            map.put("normalRanges",ranges);
             measurementList.add(map);
         }
         hm.put("measurements", measurementList);

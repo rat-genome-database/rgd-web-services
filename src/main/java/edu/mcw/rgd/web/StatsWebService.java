@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.stats.ScoreBoardManager;
@@ -25,12 +26,14 @@ public class StatsWebService {
 
     ScoreBoardManager sbm = new ScoreBoardManager();
     static SimpleDateFormat sdt = new SimpleDateFormat("yyyyMMdd");
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/count/objectStatus/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
     @ApiOperation(value="Count of objects with given status, for specified species and date",tags="Statistics")
     public Map<String,String> getObjectStatusCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getRGDObjectCount(speciesTypeKey, date);
     }
@@ -41,6 +44,7 @@ public class StatsWebService {
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                               @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffRGDObjectCount(speciesTypeKey, dateFrom, dateTo);
@@ -52,6 +56,7 @@ public class StatsWebService {
     public Map<String,String> getActiveObjectCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getActiveCount(speciesTypeKey, date);
     }
@@ -62,6 +67,7 @@ public class StatsWebService {
                                                   @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                   @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffActiveCount(speciesTypeKey, dateFrom, dateTo);
@@ -73,6 +79,7 @@ public class StatsWebService {
     public Map<String,String> getWithdrawnObjectCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getWithdrawnCount(speciesTypeKey, date);
     }
@@ -83,6 +90,7 @@ public class StatsWebService {
                                                   @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                   @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffWithdrawnCount(speciesTypeKey, dateFrom, dateTo);
@@ -94,6 +102,7 @@ public class StatsWebService {
     public Map<String,String> getRetiredObjectCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                     @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getRetiredCount(speciesTypeKey, date);
     }
@@ -104,6 +113,7 @@ public class StatsWebService {
                                                    @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                    @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffRetiredCount(speciesTypeKey, dateFrom, dateTo);
@@ -115,6 +125,7 @@ public class StatsWebService {
     public Map<String,String> getProteinInteractionCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                     @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getProteinInteractionCount(speciesTypeKey, date);
     }
@@ -125,6 +136,7 @@ public class StatsWebService {
                                                    @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                    @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffProteinInteractionCount(speciesTypeKey, dateFrom, dateTo);
@@ -136,6 +148,7 @@ public class StatsWebService {
     public Map<String,String> getGeneTypeCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getGeneTypeCount(speciesTypeKey, date);
     }
@@ -146,6 +159,7 @@ public class StatsWebService {
                                                @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffGeneTypeCount(speciesTypeKey, dateFrom, dateTo);
@@ -157,6 +171,7 @@ public class StatsWebService {
     public Map<String,String> getStrainTypeCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getStrainTypeCount(speciesTypeKey, date);
     }
@@ -167,6 +182,7 @@ public class StatsWebService {
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                               @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffStrainTypeCount(speciesTypeKey, dateFrom, dateTo);
@@ -178,6 +194,7 @@ public class StatsWebService {
     public Map<String,String> getQtlInheritanceTypeCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                  @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getQTLInheritanceTypeCount(speciesTypeKey, date);
     }
@@ -188,6 +205,7 @@ public class StatsWebService {
                                                 @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                 @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffQTLInheritanceTypeCount(speciesTypeKey, dateFrom, dateTo);
@@ -199,6 +217,7 @@ public class StatsWebService {
     public Map<String,String> getObjectsWithReferenceCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                          @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getObjectReferenceCount(speciesTypeKey, date);
     }
@@ -209,6 +228,7 @@ public class StatsWebService {
                                                         @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                         @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffObjectReferenceCount(speciesTypeKey, dateFrom, dateTo);
@@ -220,6 +240,7 @@ public class StatsWebService {
     public Map<String,String> getObjectsWithRefSeqCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                         @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getObjectWithReferenceSequenceCount(speciesTypeKey, date);
     }
@@ -230,6 +251,7 @@ public class StatsWebService {
                                                        @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                        @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffObjectWithReferenceSequenceCount(speciesTypeKey, dateFrom, dateTo);
@@ -242,6 +264,7 @@ public class StatsWebService {
                                                @PathVariable(value = "objectKey") int objectKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getObjectsWithXDBsCount(speciesTypeKey, objectKey, date);
     }
@@ -253,6 +276,7 @@ public class StatsWebService {
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                               @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffObjectsWithXDBsCount(speciesTypeKey, objectKey, dateFrom, dateTo);
@@ -264,6 +288,7 @@ public class StatsWebService {
     public Map<String,String> getXdbsCount(@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                           @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date date = sdt.parse(dateStr);
         return sbm.getXDBsCount(speciesTypeKey, date);
     }
@@ -274,6 +299,7 @@ public class StatsWebService {
                                           @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                           @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         Date dateFrom = sdt.parse(dateFromStr);
         Date dateTo = sdt.parse(dateToStr);
         return sbm.diffXDBsCount(speciesTypeKey, dateFrom, dateTo);
@@ -284,6 +310,7 @@ public class StatsWebService {
     public Map<String, Integer> getTermStats(@PathVariable(value = "accId") String accId,
                                           @PathVariable(value = "filterAccId") String filterAccId) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         //Map<String, Integer>
         OntologyXDAO xdao = new OntologyXDAO();
         TermWithStats tws = xdao.getTermWithStats(accId,null,filterAccId);
