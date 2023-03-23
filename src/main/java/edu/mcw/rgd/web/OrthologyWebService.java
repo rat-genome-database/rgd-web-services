@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.QTLDAO;
 import edu.mcw.rgd.dao.impl.SyntenyDAO;
 import edu.mcw.rgd.datamodel.QTL;
@@ -23,6 +24,7 @@ import java.util.List;
 public class OrthologyWebService {
 
     SyntenyDAO sdao = new SyntenyDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     /*
     @RequestMapping(value="/synteny/{chromosome}/{mapKey1}/{mapKey2}", method= RequestMethod.GET)
@@ -32,7 +34,8 @@ public class OrthologyWebService {
                                               @ApiParam(value="mapKey2", required=true) @PathVariable(value = "mapKey2") int mapKey2
                              ) throws Exception{
 
-        return sdao.get(mapKey1,chromosome,mapKey2);
+          ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+      return sdao.get(mapKey1,chromosome,mapKey2);
     }
     */
 

@@ -1,5 +1,6 @@
 package edu.mcw.rgd.web;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
@@ -21,6 +22,7 @@ import java.util.List;
 public class OntologyWebService {
 
     OntologyXDAO oDAO = new OntologyXDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/term/{accId}", method=RequestMethod.GET)
     @ApiOperation(value="Returns term for Accession ID", tags="Ontology")
@@ -31,6 +33,7 @@ public class OntologyWebService {
     ) throws Exception{
 
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return oDAO.getTermByAccId(accId);
 
     }
@@ -44,6 +47,7 @@ public class OntologyWebService {
 
     ) throws Exception{
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return oDAO.isDescendantOf(accId1,accId2);
 
     }
@@ -57,6 +61,7 @@ public class OntologyWebService {
     ) throws Exception{
 
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         List<String> childTerms = oDAO.getAllActiveTermDescendantAccIds(accId);
         List<String> parentTerms = oDAO.getAllActiveTermAncestorAccIds(accId);
         HashMap<String,List<String>> data = new HashMap<>();

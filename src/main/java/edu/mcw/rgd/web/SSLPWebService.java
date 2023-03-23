@@ -1,6 +1,7 @@
 package edu.mcw.rgd.web;
 
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.SSLPDAO;
 import edu.mcw.rgd.datamodel.MappedSSLP;
 import io.swagger.annotations.Api;
@@ -20,6 +21,7 @@ import java.util.List;
 public class SSLPWebService {
 
     SSLPDAO sdao = new SSLPDAO();
+    AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value = "/mapped/{chr}/{start}/{stop}/{mapKey}", method = RequestMethod.GET)
     @ApiOperation(value = "Returns a list SSLP for given position and assembly map", tags = "SSLP")
@@ -28,6 +30,7 @@ public class SSLPWebService {
                                                     @ApiParam(value = "Stop Position", required = true) @PathVariable(value = "stop") long stop,
                                                     @ApiParam(value = "A list of assembly map keys can be found using the lookup service", required = true) @PathVariable(value = "mapKey") int mapKey) throws Exception {
 
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return sdao.getActiveMappedSSLPs(chr.toUpperCase(), start, stop, mapKey);
     }
 }
