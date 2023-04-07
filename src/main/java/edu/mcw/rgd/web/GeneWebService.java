@@ -90,7 +90,7 @@ public class GeneWebService {
 
     @RequestMapping(value="/{rgdId}", method=RequestMethod.GET)
     @ApiOperation(value="Get a gene record by RGD ID", tags="Gene")
-    public Gene getGeneByRgdId(@ApiParam(value="The RGD ID of a Gene in RGD", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
+    public Gene getGeneByRgdId(HttpServletRequest request,@ApiParam(value="The RGD ID of a Gene in RGD", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
         return geneDAO.getGene(rgdId);
     }
