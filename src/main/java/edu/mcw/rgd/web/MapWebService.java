@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.Set;
@@ -26,35 +27,35 @@ public class MapWebService {
 
     @RequestMapping(value="/{speciesTypeKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of assemblies", tags="Map")
-    public List<Map> getMapsBySpecies(
-            @ApiParam(value="species Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
+    public List<Map> getMapsBySpecies(HttpServletRequest request,
+                                      @ApiParam(value="species Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
 
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<Map> maps = mdao.getMaps(speciesTypeKey,"bp");
         return maps;
     }
 
     @RequestMapping(value="/chr/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
-    public Set<String> getChromosomesByAssembly(
+    public Set<String> getChromosomesByAssembly(HttpServletRequest request,
             @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return getChromosomesByMapKey(mapKey);
     }
 
     @RequestMapping(value="/chrForSpecies/{speciesTypeKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes for primary assembly of given species", tags="Chromosome")
-    public Set<String> getChromosomesByPrimaryAssembly(
+    public Set<String> getChromosomesByPrimaryAssembly(HttpServletRequest request,
             @ApiParam(value="Species Type Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
 
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int mapKey = MapManager.getInstance().getReferenceAssembly(speciesTypeKey).getKey();
         return getChromosomesByMapKey(mapKey);
     }
@@ -66,14 +67,14 @@ public class MapWebService {
 
     @RequestMapping(value="/chr/{chromosome}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of chromosomes", tags="Chromosome")
-    public Chromosome getChromosomeByAssembly(
+    public Chromosome getChromosomeByAssembly(HttpServletRequest request,
             @ApiParam(value="chromosome", required=true) @PathVariable(value = "chromosome") String chromosome,
             @ApiParam(value="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
 
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return mdao.getChromosome(mapKey,chromosome);
     }
 }
