@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -33,10 +34,10 @@ public class PhenotypeWebService {
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{termString}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla)", tags = "Quantitative Phenotype")
-    public HashMap getChartInfo(@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
-            @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
+    public HashMap getChartInfo(HttpServletRequest request, @ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+                                @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<String> sampleIds = new ArrayList<String>();
         List mmIds = new ArrayList<String>();
         List cmIds = new ArrayList<String>();
@@ -73,11 +74,11 @@ public class PhenotypeWebService {
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{refRgdId}/{termString}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla).  Reference RGD ID for a study works like a filter.", tags = "Quantitative Phenotype")
-    public HashMap getChartInfo(@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+    public HashMap getChartInfo(HttpServletRequest request,@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
 			@ApiParam(value="Reference RGD ID for a study", required=true) @PathVariable(value = "refRgdId") int refRgdId,
             @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<String> sampleIds = new ArrayList<String>();
         List mmIds = new ArrayList<String>();
         List cmIds = new ArrayList<String>();

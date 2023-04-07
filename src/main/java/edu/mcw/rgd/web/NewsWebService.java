@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,11 +31,11 @@ public class NewsWebService {
 
     @RequestMapping(value="/last", method=RequestMethod.GET)
     @ApiOperation(value="Get a number of recent RGD news. Maximum ten news is returned unless 'limit' parameter is provided.", tags="News")
-    public HashMap<String, HashMap<String,Object>> getLastNews(
-            @ApiParam(value = "Maximum number of news items to be returned (optional)") @RequestParam(required = false) Integer limit
+    public HashMap<String, HashMap<String,Object>> getLastNews(HttpServletRequest request,
+                                                               @ApiParam(value = "Maximum number of news items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int newsLimit = 10;
         if( limit!=null ) {
             newsLimit = limit;
@@ -71,11 +72,11 @@ public class NewsWebService {
 
     @RequestMapping(value="/meetings", method=RequestMethod.GET)
     @ApiOperation(value="Get upcoming meetings and conferences relevant to RGD.", tags="News")
-    public HashMap<String, HashMap<String,Object>> getMeetings(
+    public HashMap<String, HashMap<String,Object>> getMeetings(HttpServletRequest request,
             @ApiParam(value = "Maximum number of items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int newsLimit = 100;
         if( limit!=null ) {
             newsLimit = limit;
@@ -112,11 +113,11 @@ public class NewsWebService {
 
     @RequestMapping(value="/videos", method=RequestMethod.GET)
     @ApiOperation(value="Get list of tutorial videos for RGD.", tags="News")
-    public HashMap<String, HashMap<String,Object>> getVideos(
+    public HashMap<String, HashMap<String,Object>> getVideos(HttpServletRequest request,
             @ApiParam(value = "Maximum number of items to be returned (optional)") @RequestParam(required = false) Integer limit
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int newsLimit = 100;
         if( limit!=null ) {
             newsLimit = limit;

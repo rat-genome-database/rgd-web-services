@@ -18,6 +18,7 @@ import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -42,10 +43,10 @@ public class EnrichmentWebService {
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
-    public Map getEnrichmentData(@RequestBody(required = true) EnrichmentRequest enrichmentRequest)
+    public Map getEnrichmentData(HttpServletRequest request, @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int speciesTypeKey = SpeciesType.parse(enrichmentRequest.species);
         int originalSpeciesTypeKey=SpeciesType.parse(enrichmentRequest.originalSpecies);
 
@@ -138,10 +139,10 @@ public class EnrichmentWebService {
 
     @RequestMapping(value = "/annotatedGenes", method = RequestMethod.POST)
     @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
-    public Map getEnrichmentData(@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
+    public Map getEnrichmentData(HttpServletRequest request,@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int speciesTypeKey = SpeciesType.parse(geneRequest.species);
         Map result = new ConcurrentHashMap();
         List geneData = Collections.synchronizedList(new ArrayList<>());

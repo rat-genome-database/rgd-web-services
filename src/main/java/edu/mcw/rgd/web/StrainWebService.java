@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -30,36 +31,36 @@ public class StrainWebService {
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @ApiOperation(value="Return a strain by RGD ID",tags = "Rat Strain")
-    public Strain getStrainByRgdId(@ApiParam(value="RGD ID of the strain", required=true) @PathVariable(value = "rgdId") int rgdId ) throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+    public Strain getStrainByRgdId(HttpServletRequest request, @ApiParam(value="RGD ID of the strain", required=true) @PathVariable(value = "rgdId") int rgdId ) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getStrain(rgdId);
     }
 
     @RequestMapping(value="/all", method= RequestMethod.GET)
     @ApiOperation(value="Return all active strains in RGD",tags = "Rat Strain")
-    public List<Strain> getAllStrains() throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+    public List<Strain> getAllStrains(HttpServletRequest request) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveStrains();
     }
 
     @RequestMapping(value="/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
     @ApiOperation(value="Return all active strains by position",tags = "Rat Strain")
-    public List<Strain> getStrainsByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+    public List<Strain> getStrainsByPosition(HttpServletRequest request,@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
                                              @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
                                              @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                              @ApiParam(value="RGD Map Key (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveStrainsSortedBySymbol(chr.toUpperCase(),start,stop,mapKey);
     }
 
     @RequestMapping(value="/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @ApiOperation(value="Return a list of strains position and map key", tags="Rat Strain")
-    public List<MappedStrain> getMappedGenesByPosition(@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+    public List<MappedStrain> getMappedGenesByPosition(HttpServletRequest request,@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
                                                        @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
                                                        @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
                                                        @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);
     }
 

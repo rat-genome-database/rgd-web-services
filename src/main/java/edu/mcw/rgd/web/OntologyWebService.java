@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,20 +27,20 @@ public class OntologyWebService {
 
     @RequestMapping(value="/term/{accId}", method=RequestMethod.GET)
     @ApiOperation(value="Returns term for Accession ID", tags="Ontology")
-    public Term getTerm(
-            @ApiParam(value="Term Accession ID", required=true)
+    public Term getTerm(HttpServletRequest request,
+                        @ApiParam(value="Term Accession ID", required=true)
             @PathVariable(value = "accId") String accId
 
     ) throws Exception{
 
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return oDAO.getTermByAccId(accId);
 
     }
     @RequestMapping(value="/term/{accId1}/{accId2}", method=RequestMethod.GET)
     @ApiOperation(value="Returns true or false for terms", tags="Ontology")
-    public boolean isDescendantOf(
+    public boolean isDescendantOf(HttpServletRequest request,
             @ApiParam(value="Child Term Accession ID", required=true)
             @PathVariable(value = "accId1") String accId1,
             @ApiParam(value="Parent Term Accession ID", required=true)
@@ -47,21 +48,21 @@ public class OntologyWebService {
 
     ) throws Exception{
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return oDAO.isDescendantOf(accId1,accId2);
 
     }
 
     @RequestMapping(value="/ont/{accId}", method=RequestMethod.GET)
     @ApiOperation(value="Returns child and parent terms for Accession ID", tags="Ontology")
-    public HashMap<String,List<String>> getOntDags(
+    public HashMap<String,List<String>> getOntDags(HttpServletRequest request,
             @ApiParam(value="Accession ID", required=true)
             @PathVariable(value = "accId") String accId
 
     ) throws Exception{
 
 
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<String> childTerms = oDAO.getAllActiveTermDescendantAccIds(accId);
         List<String> parentTerms = oDAO.getAllActiveTermAncestorAccIds(accId);
         HashMap<String,List<String>> data = new HashMap<>();
