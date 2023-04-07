@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -28,15 +29,15 @@ public class PathwayWebService {
 
     @RequestMapping(value="/diagrams/search/{searchString}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of pathways based on search term", tags = "Pathway")
-    public List<Pathway> searchPathways(@ApiParam(value="Free text search string", required=true) @PathVariable(value = "searchString") String searchString) throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+    public List<Pathway> searchPathways(HttpServletRequest request, @ApiParam(value="Free text search string", required=true) @PathVariable(value = "searchString") String searchString) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return pathwayDAO.searchPathways(searchString);
     }
 
     @RequestMapping(value="/diagramsForCategory/{category}", method= RequestMethod.GET)
     @ApiOperation(value="Return a list of pathways based on category provided", tags = "Pathway")
-    public List<Pathway> getPathwaysWithDiagramsForCategory(@ApiParam(value="Pathway Category", required=true) @PathVariable(value = "category") String category) throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());
+    public List<Pathway> getPathwaysWithDiagramsForCategory(HttpServletRequest request,@ApiParam(value="Pathway Category", required=true) @PathVariable(value = "category") String category) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         if( Utils.NVL(category, "all").equals("all") ) {
             category = null;
         }
