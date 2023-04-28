@@ -292,7 +292,7 @@ public class VcmapWebService {
                     List<MappedGeneEx> genes2 = cloneGeneList(genes);
 
                     for( int orthologMapKey: orthologMapKeys ) {
-                        Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, orthologMapKey, block.getBackboneMapKey());
+                        Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), orthologMapKey);
 
                         for (MappedGeneEx g : genes2) {
                             List<Integer> orthoGenes = orthoMap.get(g.geneRgdId);
