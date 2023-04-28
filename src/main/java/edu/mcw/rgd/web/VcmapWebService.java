@@ -241,7 +241,7 @@ public class VcmapWebService {
             }
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false, false);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false, false, null);
         return results;
     }
 
@@ -298,10 +298,12 @@ public class VcmapWebService {
                         Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, orthologMapKey, block.getBackboneMapKey());
 
                         for (MappedGeneEx g : genes) {
-                            if( g.orthologs==null ) {
-                                g.orthologs = new HashMap<Integer, List<Integer>>();
+                            HashMap<Integer, List<Integer>> orthoMap2 = (HashMap<Integer, List<Integer>>) g.orthologs;
+                            if( orthoMap2==null ) {
+                                orthoMap2 = new HashMap<>();
+                                g.orthologs = orthoMap2;
                             }
-                            g.orthologs.put(orthologMapKey, orthoMap.get(g.geneRgdId));
+                            orthoMap2.put(orthologMapKey, orthoMap.get(g.geneRgdId));
                         }
                     }
                 }
