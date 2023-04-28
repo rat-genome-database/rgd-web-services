@@ -152,12 +152,26 @@ public class VcmapWebService {
             @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdStart,
             @ApiParam(value = "Maximum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdEnd,
             @ApiParam(value = "Include Genes, if set to 1 (optional)") @RequestParam(required = false) Integer includeGenes,
-            @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs
+            @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs,
+            @ApiParam(value = "Include Orthologs for the map keys specified (optional)") @RequestParam(required = false) String orthologMapKeys
     ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         boolean withGenes = includeGenes!=null && includeGenes>0;
         boolean withOrthologs = includeOrthologs!=null && includeOrthologs>0;
+
+        List<Integer> orthologMapKeyList = null;
+        if( !Utils.isStringEmpty(orthologMapKeys) ) {
+            try {
+                String[] orthos = orthologMapKeys.split("[,]");
+                List<Integer> orthoValues = new ArrayList<>();
+                for( String ortho: orthos ) {
+                    int orthoMapKey = Integer.parseInt(ortho);
+                    orthoValues.add(orthoMapKey);
+                }
+                orthologMapKeyList = orthoValues;
+            } catch( Exception ignore ) {} // ignore if not a list of integers
+        }
 
         List<SyntenicRegion> blocks;
         List<SyntenicRegion> gaps;
@@ -185,7 +199,7 @@ public class VcmapWebService {
             gaps = sdao.getGapsInRange(backboneMapKey, backboneChr, backboneStart, backboneStop, minSize, maxSize, mapKey);
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes, withOrthologs);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes, withOrthologs, orthologMapKeyList);
         return results;
     }
 
@@ -231,7 +245,8 @@ public class VcmapWebService {
         return results;
     }
 
-    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes, boolean withOrthologs) throws Exception {
+    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes,
+                                                   boolean withOrthologs, List<Integer> orthologMapKeys) throws Exception {
 
         List<Map<String, Object>> results = new ArrayList<>();
 
@@ -274,6 +289,20 @@ public class VcmapWebService {
 
                     for( MappedGeneEx g: genes ) {
                         g.orthologs = orthoMap.get(g.geneRgdId);
+                    }
+                }
+
+                if( orthologMapKeys!=null ) {
+
+                    for( int orthologMapKey: orthologMapKeys ) {
+                        Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, orthologMapKey, block.getBackboneMapKey());
+
+                        for (MappedGeneEx g : genes) {
+                            if( g.orthologs==null ) {
+                                g.orthologs = new HashMap<Integer, List<Integer>>();
+                            }
+                            g.orthologs.put(orthologMapKey, orthoMap.get(g.geneRgdId));
+                        }
                     }
                 }
 
