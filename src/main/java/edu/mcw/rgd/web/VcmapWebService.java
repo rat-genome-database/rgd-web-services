@@ -152,12 +152,27 @@ public class VcmapWebService {
             @ApiParam(value = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdStart,
             @ApiParam(value = "Maximum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdEnd,
             @ApiParam(value = "Include Genes, if set to 1 (optional)") @RequestParam(required = false) Integer includeGenes,
-            @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs
+            @ApiParam(value = "Include Orthologs, if set to 1 (optional)") @RequestParam(required = false) Integer includeOrthologs,
+            @ApiParam(value = "Include Orthologs for the map keys specified (optional), f.e. orthologMapKeys=35,38") @RequestParam(required = false) String orthologMapKeys
     ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         boolean withGenes = includeGenes!=null && includeGenes>0;
         boolean withOrthologs = includeOrthologs!=null && includeOrthologs>0;
+
+        List<Integer> orthologMapKeyList = null;
+        if( !Utils.isStringEmpty(orthologMapKeys) ) {
+            try {
+                String[] orthos = orthologMapKeys.split("[,]");
+                List<Integer> orthoValues = new ArrayList<>();
+                for( String ortho: orthos ) {
+                    int orthoMapKey = Integer.parseInt(ortho);
+                    orthoValues.add(orthoMapKey);
+                }
+                orthologMapKeyList = orthoValues;
+                withOrthologs = false;
+            } catch( Exception ignore ) {} // ignore if not a list of integers
+        }
 
         List<SyntenicRegion> blocks;
         List<SyntenicRegion> gaps;
@@ -185,7 +200,7 @@ public class VcmapWebService {
             gaps = sdao.getGapsInRange(backboneMapKey, backboneChr, backboneStart, backboneStop, minSize, maxSize, mapKey);
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes, withOrthologs);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, withGenes, withOrthologs, orthologMapKeyList);
         return results;
     }
 
@@ -227,11 +242,12 @@ public class VcmapWebService {
             }
         }
 
-        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false, false);
+        List<Map<String, Object>> results = combineBlocksAndGaps(blocks, gaps, false, false, null);
         return results;
     }
 
-    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes, boolean withOrthologs) throws Exception {
+    List<Map<String, Object>> combineBlocksAndGaps(List<SyntenicRegion> blocks, List<SyntenicRegion> gaps, boolean withGenes,
+                                                   boolean withOrthologs, List<Integer> orthologMapKeys) throws Exception {
 
         List<Map<String, Object>> results = new ArrayList<>();
 
@@ -269,20 +285,56 @@ public class VcmapWebService {
             if( withGenes ) {
                 List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO, block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
 
-                if( withOrthologs ) {
+                if( orthologMapKeys!=null ) {
+
+                    // note: 'genes' object is coming from a shared cache -- if you modify any fields, like orthologs,
+                    //       you have to create a copy first
+                    List<MappedGeneEx> genes2 = cloneGeneList(genes);
+
+                    for( int orthologMapKey: orthologMapKeys ) {
+                        Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), orthologMapKey);
+
+                        for (MappedGeneEx g : genes2) {
+                            List<Integer> orthoGenes = orthoMap.get(g.geneRgdId);
+                            if( orthoGenes!=null ) {
+                                HashMap<Integer, List<Integer>> omap = (HashMap<Integer, List<Integer>>) g.orthologs;
+                                if (omap == null) {
+                                    omap = new HashMap<>();
+                                    g.orthologs = omap;
+                                }
+                                omap.put(orthologMapKey, orthoGenes);
+                            }
+                        }
+                    }
+                    synteny.put("genes", genes2);
+                }
+                else if( withOrthologs ) {
+                    // note: 'genes' object is coming from a shared cache -- if you modify any fields, like orthologs,
+                    //       you have to create a copy first
+                    List<MappedGeneEx> genes2 = cloneGeneList(genes);
+
                     Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), block.getBackboneMapKey());
 
-                    for( MappedGeneEx g: genes ) {
+                    for( MappedGeneEx g: genes2 ) {
                         g.orthologs = orthoMap.get(g.geneRgdId);
                     }
-                }
+                    synteny.put("genes", genes2);
 
-                synteny.put("genes", genes);
+                } else {
+                    synteny.put("genes", genes);
+                }
             }
         }
         return results;
     }
 
+    List<MappedGeneEx> cloneGeneList(List<MappedGeneEx> genes) throws CloneNotSupportedException {
+        List<MappedGeneEx> result = new ArrayList<>(genes.size());
+        for( int i=0; i<genes.size(); i++ ) {
+            result.add( (MappedGeneEx) genes.get(i).clone() );
+        }
+        return result;
+    }
 
     @RequestMapping(value="/species", method= RequestMethod.GET)
     @ApiOperation(value="Return genomic maps for public species in RGD", tags = "VCMap")
