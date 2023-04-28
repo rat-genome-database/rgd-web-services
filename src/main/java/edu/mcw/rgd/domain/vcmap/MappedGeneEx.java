@@ -13,7 +13,7 @@ import java.util.Map;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.collections4.map.*;
 
-public class MappedGeneEx {
+public class MappedGeneEx implements Cloneable {
 
     public int geneRgdId;
     public String geneSymbol;
@@ -31,6 +31,9 @@ public class MappedGeneEx {
         return "RGD:"+geneRgdId+" "+geneSymbol+" "+geneType+" MAP_KEY:"+mapKey+" c"+chr+":"+startPos+".."+stopPos+" "+strand;
     }
 
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public static List<MappedGeneEx> getActiveGenesInRegionNew(AbstractDAO dao, String chr, int startPos, int stopPos, int mapKey) throws Exception {
 

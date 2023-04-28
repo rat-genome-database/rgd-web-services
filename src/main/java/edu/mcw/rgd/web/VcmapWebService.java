@@ -170,6 +170,7 @@ public class VcmapWebService {
                     orthoValues.add(orthoMapKey);
                 }
                 orthologMapKeyList = orthoValues;
+                withOrthologs = false;
             } catch( Exception ignore ) {} // ignore if not a list of integers
         }
 
@@ -284,36 +285,56 @@ public class VcmapWebService {
             if( withGenes ) {
                 List<MappedGeneEx> genes = MappedGeneEx.getActiveGenesInRegion(mapDAO, block.getChromosome(), block.getStart(), block.getStop(), block.getMapKey());
 
-                if( withOrthologs ) {
-                    Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), block.getBackboneMapKey());
-
-                    for( MappedGeneEx g: genes ) {
-                        g.orthologs = orthoMap.get(g.geneRgdId);
-                    }
-                }
-
                 if( orthologMapKeys!=null ) {
+
+                    // note: 'genes' object is coming from a shared cache -- if you modify any fields, like orthologs,
+                    //       you have to create a copy first
+                    List<MappedGeneEx> genes2 = cloneGeneList(genes);
 
                     for( int orthologMapKey: orthologMapKeys ) {
                         Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, orthologMapKey, block.getBackboneMapKey());
 
-                        for (MappedGeneEx g : genes) {
-                            HashMap<Integer, List<Integer>> orthoMap2 = (HashMap<Integer, List<Integer>>) g.orthologs;
-                            if( orthoMap2==null ) {
-                                orthoMap2 = new HashMap<>();
-                                g.orthologs = orthoMap2;
+                        for (MappedGeneEx g : genes2) {
+                            List<Integer> orthoGenes = orthoMap.get(g.geneRgdId);
+                            if( orthoGenes!=null ) {
+                                HashMap<Integer, List<Integer>> omap = (HashMap<Integer, List<Integer>>) g.orthologs;
+                                if (omap == null) {
+                                    omap = new HashMap<>();
+                                    g.orthologs = omap;
+                                }
+                                omap.put(orthologMapKey, orthoGenes);
                             }
-                            orthoMap2.put(orthologMapKey, orthoMap.get(g.geneRgdId));
                         }
                     }
+                    synteny.put("genes", genes2);
                 }
+                else if( withOrthologs ) {
+                    // note: 'genes' object is coming from a shared cache -- if you modify any fields, like orthologs,
+                    //       you have to create a copy first
+                    List<MappedGeneEx> genes2 = cloneGeneList(genes);
 
-                synteny.put("genes", genes);
+                    Map<Integer, List<Integer>> orthoMap = MappedGeneEx.getOrthologMap(mapDAO, block.getMapKey(), block.getBackboneMapKey());
+
+                    for( MappedGeneEx g: genes2 ) {
+                        g.orthologs = orthoMap.get(g.geneRgdId);
+                    }
+                    synteny.put("genes", genes2);
+
+                } else {
+                    synteny.put("genes", genes);
+                }
             }
         }
         return results;
     }
 
+    List<MappedGeneEx> cloneGeneList(List<MappedGeneEx> genes) throws CloneNotSupportedException {
+        List<MappedGeneEx> result = new ArrayList<>(genes.size());
+        for( int i=0; i<genes.size(); i++ ) {
+            result.add( (MappedGeneEx) genes.get(i).clone() );
+        }
+        return result;
+    }
 
     @RequestMapping(value="/species", method= RequestMethod.GET)
     @ApiOperation(value="Return genomic maps for public species in RGD", tags = "VCMap")
