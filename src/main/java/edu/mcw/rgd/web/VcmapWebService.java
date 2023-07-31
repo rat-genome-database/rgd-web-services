@@ -1,10 +1,7 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.DataSourceFactory;
-import edu.mcw.rgd.dao.impl.AccessLogDAO;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.MapDAO;
-import edu.mcw.rgd.dao.impl.SyntenyDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.impl.variants.VariantDAO;
 import edu.mcw.rgd.dao.spring.MappedGeneQuery;
 import edu.mcw.rgd.datamodel.*;
@@ -38,6 +35,8 @@ public class VcmapWebService {
     GeneDAO geneDAO = new GeneDAO();
     MapDAO mapDAO = new MapDAO();
     SyntenyDAO sdao = new SyntenyDAO();
+
+    GenomeSignalDAO gsdao = new GenomeSignalDAO();
 
     VariantDAO vdao = new VariantDAO();
     AccessLogDAO ald = new AccessLogDAO();
@@ -698,4 +697,29 @@ public class VcmapWebService {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return vdao.getVariantStartPositionByPositionAndMapKey(mapKey, chr.toUpperCase(), start,stop);
     }
+
+
+    @RequestMapping(value="/signal/position/{chr}/{start}/{stop}/{setId}", method= RequestMethod.GET)
+    @ApiOperation(value="Return a list of signal values", tags="VCMap")
+    public List<Long> getSignalByPositionAndMapKey(HttpServletRequest request,@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                   @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") int start,
+                                                   @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+                                                   @ApiParam(value="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "setId") int setId) throws Exception{
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        List<GenomeSignal> signal = gsdao.getGenomeSignal(chr,setId,stop,start);
+
+        List<Long> lst = new ArrayList<Long>();
+
+        for (GenomeSignal gs: signal) {
+
+            for (int i=0; i< gs.getSignalValue(); i++) {
+                lst.add(gs.getPosition());
+            }
+        }
+
+        return lst;
+    }
+
 }
