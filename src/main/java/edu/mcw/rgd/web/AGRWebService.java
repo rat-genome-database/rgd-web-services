@@ -713,11 +713,11 @@ public class AGRWebService {
 
         if( a.getDataSrc().equals("HPO") ) {
 
-            if( Utils.isStringEmpty(a.getNotes()) ) {
+            if( Utils.isStringEmpty(a.getXrefSource()) ) {
                 return evidenceList;
             }
             // notes contain multiple space separated OMIM:xxx or ORPHA:xxxx ids
-            String[] omimOrphaIds = a.getNotes().split("[\\s]");
+            String[] omimOrphaIds = a.getXrefSource().split("[|,\\s]");
             for( String omimOrphaId: omimOrphaIds ) {
 
                 HashMap evidence = new HashMap<>();
