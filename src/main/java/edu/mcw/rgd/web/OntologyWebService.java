@@ -4,12 +4,13 @@ import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
  * Created by mtutaj on 11/1/2016.
  */
 @RestController
-@Api(tags="Ontology")
+@Tag(name="Ontology")
 @RequestMapping(value = "/ontology")
 public class OntologyWebService {
 
@@ -26,9 +27,9 @@ public class OntologyWebService {
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/term/{accId}", method=RequestMethod.GET)
-    @ApiOperation(value="Returns term for Accession ID", tags="Ontology")
+    @Operation(summary="Returns term for Accession ID", tags="Ontology")
     public Term getTerm(HttpServletRequest request,
-                        @ApiParam(value="Term Accession ID", required=true)
+                        @Parameter(description="Term Accession ID", required=true)
             @PathVariable(value = "accId") String accId
 
     ) throws Exception{
@@ -39,11 +40,11 @@ public class OntologyWebService {
 
     }
     @RequestMapping(value="/term/{accId1}/{accId2}", method=RequestMethod.GET)
-    @ApiOperation(value="Returns true or false for terms", tags="Ontology")
+    @Operation(summary="Returns true or false for terms", tags="Ontology")
     public boolean isDescendantOf(HttpServletRequest request,
-            @ApiParam(value="Child Term Accession ID", required=true)
+            @Parameter(description="Child Term Accession ID", required=true)
             @PathVariable(value = "accId1") String accId1,
-            @ApiParam(value="Parent Term Accession ID", required=true)
+            @Parameter(description="Parent Term Accession ID", required=true)
             @PathVariable(value = "accId2") String accId2
 
     ) throws Exception{
@@ -54,9 +55,9 @@ public class OntologyWebService {
     }
 
     @RequestMapping(value="/ont/{accId}", method=RequestMethod.GET)
-    @ApiOperation(value="Returns child and parent terms for Accession ID", tags="Ontology")
+    @Operation(summary="Returns child and parent terms for Accession ID", tags="Ontology")
     public HashMap<String,List<String>> getOntDags(HttpServletRequest request,
-            @ApiParam(value="Accession ID", required=true)
+            @Parameter(description="Accession ID", required=true)
             @PathVariable(value = "accId") String accId
 
     ) throws Exception{
