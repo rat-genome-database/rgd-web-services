@@ -7,13 +7,13 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.XdbId;
 import edu.mcw.rgd.domain.AnnotatedGeneRequest;
 import edu.mcw.rgd.domain.RGDIDListRequest;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ import java.util.List;
  * Created by jdepons on 7/27/2016.
  */
 @RestController
-@Api(tags="Lookup")
+@Tag(name="Lookup")
 @RequestMapping(value = "/lookup")
 
 public class LookupWebService {
@@ -59,7 +59,7 @@ public class LookupWebService {
 
     //UniProt Service
     @RequestMapping(value="/id/map/UniProt", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to UniProt IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to UniProt IDs", tags="Lookup")
     public HashMap<String, String> getUniProtMapping(HttpServletRequest request,
                                                      @RequestBody(required = false) RGDIDListRequest data
 
@@ -70,9 +70,9 @@ public class LookupWebService {
     }
 
     @RequestMapping(value="id/map/UniProt/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to a UniProt ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to a UniProt ID", tags="Lookup")
     public HashMap<String, String> getUniProtMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -83,7 +83,7 @@ public class LookupWebService {
 
     //GenBank Nucleotide Service
     @RequestMapping(value="/id/map/GenBankNucleotide", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to GenBank Nucleotide IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to GenBank Nucleotide IDs", tags="Lookup")
     public HashMap<String, String> getGenBankNucleotideMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -95,9 +95,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/GenBankNucleotide/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to a GenBank Nucleotide ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to a GenBank Nucleotide ID", tags="Lookup")
     public HashMap<String, String> getGenBankNucleotideMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -108,7 +108,7 @@ public class LookupWebService {
 
     //NCBI Gene Service
     @RequestMapping(value="/id/map/NCBIGene", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to NCBI Gene IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to NCBI Gene IDs", tags="Lookup")
     public HashMap<String, String> getNCBIGeneMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -120,9 +120,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/NCBIGene/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an NCBI Gene ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an NCBI Gene ID", tags="Lookup")
     public HashMap<String, String> getNCBIGeneMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -133,7 +133,7 @@ public class LookupWebService {
 
     //EnsemblGene Service
     @RequestMapping(value="/id/map/EnsemblGene", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to Ensembl Gene IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to Ensembl Gene IDs", tags="Lookup")
     public HashMap<String, String> getEnsemblGeneMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -143,9 +143,9 @@ public class LookupWebService {
         return this.getIDMapping(data,20);
     }
     @RequestMapping(value="id/map/EnsemblGene/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an Ensembl Gene  ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an Ensembl Gene  ID", tags="Lookup")
     public HashMap<String, String> getEnsemblGeneMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -156,7 +156,7 @@ public class LookupWebService {
 
     //GenBankProtein Service
     @RequestMapping(value="/id/map/GenBankProtein", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to GenBank Protein IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to GenBank Protein IDs", tags="Lookup")
     public HashMap<String, String> getGenBankProteinMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -168,9 +168,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/GenBankProtein/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to a GenBank Protein ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to a GenBank Protein ID", tags="Lookup")
     public HashMap<String, String> getGenBankProteinMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -181,7 +181,7 @@ public class LookupWebService {
 
     //EnsemblProtein Service
     @RequestMapping(value="/id/map/EnsemblProtein", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to Ensembl Protein IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to Ensembl Protein IDs", tags="Lookup")
     public HashMap<String, String> getEnsemblProteinMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -193,9 +193,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/EnsemblProtein/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an Ensembl Protein ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an Ensembl Protein ID", tags="Lookup")
     public HashMap<String, String> getEnsemblProteinMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -206,7 +206,7 @@ public class LookupWebService {
 
     //EnsemblTranscript Service
     @RequestMapping(value="/id/map/EnsemblTranscript", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to Ensembl Transcript IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to Ensembl Transcript IDs", tags="Lookup")
     public HashMap<String, String> getEnsemblTranscriptMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -218,9 +218,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/EnsemblTranscript/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an Ensembl Transcript ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an Ensembl Transcript ID", tags="Lookup")
     public HashMap<String, String> getEnsemblTranscriptMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -231,7 +231,7 @@ public class LookupWebService {
 
     //MGI Service
     @RequestMapping(value="/id/map/MGI", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to MGI IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to MGI IDs", tags="Lookup")
     public HashMap<String, String> getMGIMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -243,9 +243,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/MGI/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an MGI ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an MGI ID", tags="Lookup")
     public HashMap<String, String> getMGIMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -255,7 +255,7 @@ public class LookupWebService {
     }
 
     @RequestMapping(value="/id/map/GTEx", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to GTEx IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to GTEx IDs", tags="Lookup")
     public HashMap<String, String> getGTEXMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -267,9 +267,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/GTEx/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an GTEx ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an GTEx ID", tags="Lookup")
     public HashMap<String, String> getGTEXMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -279,7 +279,7 @@ public class LookupWebService {
     }
 
     @RequestMapping(value="/id/map/HGNC", method=RequestMethod.POST)
-    @ApiOperation(value="Translate RGD IDs to HGNC IDs", tags="Lookup")
+    @Operation(summary="Translate RGD IDs to HGNC IDs", tags="Lookup")
     public HashMap<String, String> getHGNCMapping(HttpServletRequest request,
             @RequestBody(required = false) RGDIDListRequest data
 
@@ -291,9 +291,9 @@ public class LookupWebService {
 
 
     @RequestMapping(value="id/map/HGNC/{rgdId}", method=RequestMethod.GET)
-    @ApiOperation(value="Translate an RGD ID to an HGNC ID", tags="Lookup")
+    @Operation(summary="Translate an RGD ID to an HGNC ID", tags="Lookup")
     public HashMap<String, String> getHGNCMapping(HttpServletRequest request,
-            @ApiParam(value="RGD ID", required=false)
+            @Parameter(description="RGD ID", required=false)
             @PathVariable(value = "rgdId") Integer rgdId
 
     ) throws Exception{
@@ -304,8 +304,8 @@ public class LookupWebService {
 
 
     @RequestMapping(value="/maps/{speciesTypeKey}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a list assembly maps for a species", tags = "Lookup")
-    public List<Map> getMaps(HttpServletRequest request,@ApiParam(value="RGD species type key. A full list of keys is available throught the lookup service.  1=human, 2=mouse, 3=rat,ect", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
+    @Operation(summary="Return a list assembly maps for a species", tags = "Lookup")
+    public List<Map> getMaps(HttpServletRequest request,@Parameter(description="RGD species type key. A full list of keys is available throught the lookup service.  1=human, 2=mouse, 3=rat,ect", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         MapDAO g = new MapDAO();
@@ -313,7 +313,7 @@ public class LookupWebService {
     }
 
     @RequestMapping(value="/speciesTypeKeys", method= RequestMethod.GET)
-    @ApiOperation(value="Return a Map of species type keys available in RGD", tags = "Lookup")
+    @Operation(summary="Return a Map of species type keys available in RGD", tags = "Lookup")
     public java.util.Map getSpeciesTypes(HttpServletRequest request) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -326,7 +326,7 @@ public class LookupWebService {
         return hm;
     }
 
-    @ApiOperation(value="Returns a list of gene types avialable in RGD", tags = "Lookup")
+    @Operation(summary="Returns a list of gene types avialable in RGD", tags = "Lookup")
     @RequestMapping(value="/geneTypes", method=RequestMethod.GET)
     public List<String> getGeneTypes(HttpServletRequest request) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -335,8 +335,8 @@ public class LookupWebService {
     }
 
     @RequestMapping(value="/standardUnit/{accId}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a standardUnit for an ontology if it exists", tags = "Lookup")
-    public String getMaps(HttpServletRequest request,@ApiParam(value="RGD term acc", required=true) @PathVariable(value = "accId") String accId) throws Exception{
+    @Operation(summary="Return a standardUnit for an ontology if it exists", tags = "Lookup")
+    public String getMaps(HttpServletRequest request,@Parameter(description="RGD term acc", required=true) @PathVariable(value = "accId") String accId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         PhenominerDAO pdao = new PhenominerDAO();

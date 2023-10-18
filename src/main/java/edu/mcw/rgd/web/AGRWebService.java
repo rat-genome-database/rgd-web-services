@@ -7,15 +7,16 @@ import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.process.FileDownloader;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -24,15 +25,15 @@ import java.util.*;
  */
 
 @RestController
-@Api(tags="AGR")
+@Tag(name="AGR")
 @RequestMapping(value = "/agr")
 public class AGRWebService {
 
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get gene records submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getGenesForLatestAssembly(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get gene records submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getGenesForLatestAssembly(HttpServletRequest request, @Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         //rat taxon : 10116
         //human taxon : 9606
@@ -329,8 +330,8 @@ public class AGRWebService {
 
 
     @RequestMapping(value="/alleles/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get gene allele records submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getAllelesForTaxon(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get gene allele records submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getAllelesForTaxon(HttpServletRequest request,@Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         //rat taxon : 10116
@@ -424,8 +425,8 @@ public class AGRWebService {
     }
 
     @RequestMapping(value="/affectedGenomicModels/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get affected genomic models (rat strains with gene alleles) submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getAffectedGenomicModels(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get affected genomic models (rat strains with gene alleles) submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getAffectedGenomicModels(HttpServletRequest request,@Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         //rat taxon : 10116
@@ -532,8 +533,8 @@ public class AGRWebService {
     }
 
     @RequestMapping(value="/variants/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getVariantsForTaxon(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get basic variant records submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getVariantsForTaxon(HttpServletRequest request,@Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         //rat taxon : 10116
@@ -615,8 +616,8 @@ public class AGRWebService {
     }
 
     @RequestMapping(value="/phenotypes/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get phenotype annotations submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getPhenotypesForTaxon(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get phenotype annotations submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getPhenotypesForTaxon(HttpServletRequest request,@Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         HashMap returnMap = new HashMap();
@@ -789,8 +790,8 @@ public class AGRWebService {
     }
 
     @RequestMapping(value="/expression/{taxonId}", method= RequestMethod.GET)
-    @ApiOperation(value="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
-    public HashMap getExpressionForTaxon(HttpServletRequest request,@ApiParam(value="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
+    @Operation(summary="Get expression annotations submitted by RGD to AGR by taxonId", tags="AGR")
+    public HashMap getExpressionForTaxon(HttpServletRequest request,@Parameter(description="The taxon ID for species", required=true) @PathVariable(value = "taxonId") String taxonId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         HashMap returnMap = new HashMap();

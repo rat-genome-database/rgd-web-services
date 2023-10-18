@@ -5,14 +5,17 @@ import edu.mcw.rgd.dao.impl.QTLDAO;
 import edu.mcw.rgd.datamodel.MappedQTL;
 import edu.mcw.rgd.datamodel.QTL;
 
-import io.swagger.annotations.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by jdepons on 5/31/2016.
  */
 @RestController
-@Api(tags="QTL")
+@Tag(name="QTL")
 @RequestMapping(value = "/qtls")
 public class QTLWebService {
 
@@ -32,8 +35,8 @@ public class QTLWebService {
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a QTL for provided RGD ID", tags = "QTL")
-    public QTL getQTLByRgdId(HttpServletRequest request, @ApiParam(value="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
+    @Operation(summary="Return a QTL for provided RGD ID", tags = "QTL")
+    public QTL getQTLByRgdId(HttpServletRequest request, @Parameter(description="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return qdao.getQTL(rgdId);
@@ -41,21 +44,21 @@ public class QTLWebService {
 
 
     @RequestMapping( value="/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
-    @ApiOperation(value="Returns a list QTL for given position and assembly map", tags = "QTL")
-    public List<QTL> getQtlListByPosition(HttpServletRequest request,@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                          @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
-                                          @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                          @ApiParam(value="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    @Operation(summary="Returns a list QTL for given position and assembly map", tags = "QTL")
+    public List<QTL> getQtlListByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                          @Parameter(description="Start Position", required=true) @PathVariable(value = "start") long start,
+                                          @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                          @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return qdao.getActiveQTLs(chr.toUpperCase(), start,stop,mapKey);
     }
     @RequestMapping( value="/mapped/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
-    @ApiOperation(value="Returns a list QTL for given position and assembly map", tags = "QTL")
-    public List<MappedQTL> getMappedQTLByPosition(HttpServletRequest request,@ApiParam(value="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                @ApiParam(value="Start Position", required=true) @PathVariable(value = "start") long start,
-                                                @ApiParam(value="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                                @ApiParam(value="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    @Operation(summary="Returns a list QTL for given position and assembly map", tags = "QTL")
+    public List<MappedQTL> getMappedQTLByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                @Parameter(description="Start Position", required=true) @PathVariable(value = "start") long start,
+                                                @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                                @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return qdao.getActiveMappedQTLs(chr.toUpperCase(), start,stop,mapKey);
@@ -64,7 +67,7 @@ public class QTLWebService {
     Map<Long, NewsEntry> entries = new ConcurrentHashMap<Long, NewsEntry>();
 
     @RequestMapping(value = "/qtl/hey", method = RequestMethod.GET)
-    @ApiOperation(value = "Get News", notes = "Returns news items")
+    @Operation(summary = "Get News", notes = "Returns news items")
     Collection<NewsEntry> entries() {
         return this.entries.values();
     }
@@ -74,7 +77,7 @@ public class QTLWebService {
 
 
 /*
-    @ApiOperation(value = "Finds Pets by status", notes = "Multiple status values can be provided with comma separated strings", response = QTL.class, responseContainer = "List", authorizations = {
+    @Operation(summary = "Finds Pets by status", notes = "Multiple status values can be provided with comma separated strings", response = QTL.class, responseContainer = "List", authorizations = {
             @Authorization(value = "petstore_auth", scopes = {
                     @AuthorizationScope(scope = "write:pets", description = "modify pets in your account"),
                     @AuthorizationScope(scope = "read:pets", description = "read your pets")
@@ -87,7 +90,7 @@ public class QTLWebService {
             produces = "application/json",
             consumes = "application/json",
             method = RequestMethod.GET)
-    ResponseEntity<List<QTL>> findPetsByStatus(@ApiParam(value = "Status values that need to be considered for filter", required = true) @RequestParam(value = "status", required = true) List<String> status) throws Exception{
+    ResponseEntity<List<QTL>> findPetsByStatus(@Parameter(description = "Status values that need to be considered for filter", required = true) @RequestParam(value = "status", required = true) List<String> status) throws Exception{
 
         ArrayList al = new ArrayList();
         QTL q = new QTL();
