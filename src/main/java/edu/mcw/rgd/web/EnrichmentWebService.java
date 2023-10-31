@@ -15,10 +15,10 @@ import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -42,7 +42,7 @@ public class EnrichmentWebService {
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
-    @ApiOperation(value = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
+    @Operation(summary = "Return a chart of ontology terms annotated to the genes.Genes are rgdids separated by comma.Species type is an integer value.Aspect is the Ontology group")
     public Map getEnrichmentData(HttpServletRequest request, @RequestBody(required = true) EnrichmentRequest enrichmentRequest)
             throws Exception {
 
@@ -138,7 +138,7 @@ public class EnrichmentWebService {
     }
 
     @RequestMapping(value = "/annotatedGenes", method = RequestMethod.POST)
-    @ApiOperation(value = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
+    @Operation(summary = "Return a list of genes annotated to the term.Genes are rgdids separated by comma.Species type is an integer value.term is the ontology")
     public Map getEnrichmentData(HttpServletRequest request,@RequestBody(required = true) EnrichmentGeneRequest geneRequest)
             throws Exception {
 

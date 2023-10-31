@@ -4,14 +4,15 @@ import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.stats.ScoreBoardManager;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import java.util.Map;
  * Created by mtutaj on 10/4/2016.
  */
 @RestController
-@Api(tags="Statistics")
+@Tag(name="Statistics")
 @RequestMapping(value = "/stats")
 public class StatsWebService {
 
@@ -30,7 +31,7 @@ public class StatsWebService {
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/count/objectStatus/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of objects with given status, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of objects with given status, for specified species and date",tags="Statistics")
     public Map<String,String> getObjectStatusCount(HttpServletRequest request, @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -40,7 +41,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/objectStatus/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of objects with given status, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of objects with given status, for specified species and date range",tags="Statistics")
     public Map<String,String> getObjectStatusDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                               @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -53,7 +54,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/activeObject/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of active objects by type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of active objects by type, for specified species and date",tags="Statistics")
     public Map<String,String> getActiveObjectCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -63,7 +64,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/activeObject/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of active objects, by type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of active objects, by type, for specified species and date range",tags="Statistics")
     public Map<String,String> getActiveObjectDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                   @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                   @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -76,7 +77,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/withdrawnObject/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of withdrawn objects by type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of withdrawn objects by type, for specified species and date",tags="Statistics")
     public Map<String,String> getWithdrawnObjectCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -86,7 +87,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/withdrawnObject/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of withdrawn objects, by type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of withdrawn objects, by type, for specified species and date range",tags="Statistics")
     public Map<String,String> getWithdrawnObjectDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                   @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                   @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -99,7 +100,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/retiredObject/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of retired objects by type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of retired objects by type, for specified species and date",tags="Statistics")
     public Map<String,String> getRetiredObjectCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                     @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -109,7 +110,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/retiredObject/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of retired objects, by type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of retired objects, by type, for specified species and date range",tags="Statistics")
     public Map<String,String> getRetiredObjectDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                    @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -122,7 +123,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/proteinInteraction/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of protein interactions, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of protein interactions, for specified species and date",tags="Statistics")
     public Map<String,String> getProteinInteractionCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                     @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -132,7 +133,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/proteinInteraction/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of protein interactions, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of protein interactions, for specified species and date range",tags="Statistics")
     public Map<String,String> getProteinInteractionDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                    @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                    @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -145,7 +146,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/geneType/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of gene types, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of gene types, for specified species and date",tags="Statistics")
     public Map<String,String> getGeneTypeCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -155,7 +156,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/geneType/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of gene types, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of gene types, for specified species and date range",tags="Statistics")
     public Map<String,String> getGeneTypeDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -168,7 +169,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/strainType/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of strain types, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of strain types, for specified species and date",tags="Statistics")
     public Map<String,String> getStrainTypeCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -178,7 +179,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/strainType/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of strain types, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of strain types, for specified species and date range",tags="Statistics")
     public Map<String,String> getStrainTypeDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                               @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -191,7 +192,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/qtlInheritanceType/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of strains, by qtl inheritance type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of strains, by qtl inheritance type, for specified species and date",tags="Statistics")
     public Map<String,String> getQtlInheritanceTypeCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                  @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -201,7 +202,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/qtlInheritanceType/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of strains, by qtl inheritance type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of strains, by qtl inheritance type, for specified species and date range",tags="Statistics")
     public Map<String,String> getQtlInheritanceTypeDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                 @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                 @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -214,7 +215,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/objectWithReference/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of objects with reference, by object type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of objects with reference, by object type, for specified species and date",tags="Statistics")
     public Map<String,String> getObjectsWithReferenceCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                          @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -224,7 +225,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/objectWithReference/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of objects with reference, by object type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of objects with reference, by object type, for specified species and date range",tags="Statistics")
     public Map<String,String> getObjectsWithReferenceDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                         @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                         @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -237,7 +238,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/objectWithRefSeq/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of objects with reference sequence(s), by object type, for specified species and date",tags="Statistics")
+    @Operation(summary="Count of objects with reference sequence(s), by object type, for specified species and date",tags="Statistics")
     public Map<String,String> getObjectsWithRefSeqCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                         @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -247,7 +248,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/objectWithRefSeq/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of objects with reference sequence(s), by object type, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of objects with reference sequence(s), by object type, for specified species and date range",tags="Statistics")
     public Map<String,String> getObjectsWithRefSeqDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                        @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                                        @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -260,7 +261,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/objectWithXdb/{speciesTypeKey}/{objectKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of objects with external database ids, by database id, for specified species, object type and date",tags="Statistics")
+    @Operation(summary="Count of objects with external database ids, by database id, for specified species, object type and date",tags="Statistics")
     public Map<String,String> getObjectsWithXDBsCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                                @PathVariable(value = "objectKey") int objectKey,
                                                @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
@@ -271,7 +272,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/objectWithXdb/{speciesTypeKey}/{objectKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of objects with external database ids, by database id, for specified species, object type and date range",tags="Statistics")
+    @Operation(summary="Count difference of objects with external database ids, by database id, for specified species, object type and date range",tags="Statistics")
     public Map<String,String> getObjectsWithXDBsDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                               @PathVariable(value = "objectKey") int objectKey,
                                               @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
@@ -285,7 +286,7 @@ public class StatsWebService {
 
 
     @RequestMapping(value="/count/xdb/{speciesTypeKey}/{dateYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count of external database ids, for specied species and date",tags="Statistics")
+    @Operation(summary="Count of external database ids, for specied species and date",tags="Statistics")
     public Map<String,String> getXdbsCount(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                           @PathVariable(value = "dateYYYYMMDD") String dateStr) throws Exception{
 
@@ -295,7 +296,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/diff/xdb/{speciesTypeKey}/{dateFromYYYYMMDD}/{dateToYYYYMMDD}", method=RequestMethod.GET)
-    @ApiOperation(value="Count difference of external database ids, for specified species and date range",tags="Statistics")
+    @Operation(summary="Count difference of external database ids, for specified species and date range",tags="Statistics")
     public Map<String,String> getXdbsDiff(HttpServletRequest request,@PathVariable(value = "speciesTypeKey") int speciesTypeKey,
                                           @PathVariable(value = "dateFromYYYYMMDD") String dateFromStr,
                                           @PathVariable(value = "dateToYYYYMMDD") String dateToStr) throws Exception{
@@ -307,7 +308,7 @@ public class StatsWebService {
     }
 
     @RequestMapping(value="/term/{accId}/{filterAccId}", method=RequestMethod.GET)
-    @ApiOperation(value="",tags="Statistics")
+    @Operation(summary="",tags="Statistics")
     public Map<String, Integer> getTermStats(HttpServletRequest request,@PathVariable(value = "accId") String accId,
                                           @PathVariable(value = "filterAccId") String filterAccId) throws Exception{
 

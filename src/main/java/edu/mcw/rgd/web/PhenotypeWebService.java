@@ -6,16 +6,16 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.datamodel.phenominerExpectedRange.PhenominerExpectedRange;
-import edu.mcw.rgd.process.Utils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -24,7 +24,7 @@ import java.util.*;
  * Created by mtutaj on 11/1/2016.
  */
 @RestController
-@Api(tags="Quantitative Phenotype")
+@Tag(name="Quantitative Phenotype")
 @RequestMapping(value = "/phenotype")
 public class PhenotypeWebService {
 
@@ -33,9 +33,9 @@ public class PhenotypeWebService {
     AccessLogDAO ald = new AccessLogDAO();
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{termString}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla)", tags = "Quantitative Phenotype")
-    public HashMap getChartInfo(HttpServletRequest request, @ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
-                                @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
+    @Operation(summary="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla)", tags = "Quantitative Phenotype")
+    public HashMap getChartInfo(HttpServletRequest request, @Parameter(description="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+                                @Parameter(description="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<String> sampleIds = new ArrayList<String>();
@@ -73,10 +73,10 @@ public class PhenotypeWebService {
     }
 
     @RequestMapping(value="/phenominer/chart/{speciesTypeKey}/{refRgdId}/{termString}", method= RequestMethod.GET)
-    @ApiOperation(value="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla).  Reference RGD ID for a study works like a filter.", tags = "Quantitative Phenotype")
-    public HashMap getChartInfo(HttpServletRequest request,@ApiParam(value="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
-			@ApiParam(value="Reference RGD ID for a study", required=true) @PathVariable(value = "refRgdId") int refRgdId,
-            @ApiParam(value="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
+    @Operation(summary="Return a list of quantitative phenotypes values based on a combination of Clinical Measurement, Experimental Condition, Rat Strain, and/or Measurement Method ontology terms.  Results will be all records that match all terms submitted.  Ontology ids should be submitted as a comma delimited list (ex. RS:0000029,CMO:0000155,CMO:0000139).  Species type is an integer value (3=rat, 4=chinchilla).  Reference RGD ID for a study works like a filter.", tags = "Quantitative Phenotype")
+    public HashMap getChartInfo(HttpServletRequest request,@Parameter(description="Species Type Key - 3=rat 4=chinchilla ", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey,
+			@Parameter(description="Reference RGD ID for a study", required=true) @PathVariable(value = "refRgdId") int refRgdId,
+            @Parameter(description="List of term accession IDs", required=true) @PathVariable(value = "termString") String termString) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         List<String> sampleIds = new ArrayList<String>();
