@@ -28,9 +28,9 @@ public class OrthologyWebService {
     /*
     @RequestMapping(value="/synteny/{chromosome}/{mapKey1}/{mapKey2}", method= RequestMethod.GET)
     @Operation(summary="Return a QTL for provided RGD ID", tags = "QTL")
-    public List<SyntenicRegion> getQTLByRgdId(@Parameter(description="chromosome", required=true) @PathVariable(value = "chromosome") String chromosome,
-                                              @Parameter(description="mapKey1", required=true) @PathVariable(value = "mapKey1") int mapKey1,
-                                              @Parameter(description="mapKey2", required=true) @PathVariable(value = "mapKey2") int mapKey2
+    public List<SyntenicRegion> getQTLByRgdId(@Parameter(description="chromosome", required=true) @PathVariable(name = "chromosome") String chromosome,
+                                              @Parameter(description="mapKey1", required=true) @PathVariable(name = "mapKey1") int mapKey1,
+                                              @Parameter(description="mapKey2", required=true) @PathVariable(name = "mapKey2") int mapKey2
                              ) throws Exception{
 
           ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName());

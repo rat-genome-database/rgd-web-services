@@ -30,7 +30,7 @@ public class OntologyWebService {
     @Operation(summary="Returns term for Accession ID", tags="Ontology")
     public Term getTerm(HttpServletRequest request,
                         @Parameter(description="Term Accession ID", required=true)
-            @PathVariable(value = "accId") String accId
+            @PathVariable(name = "accId") String accId
 
     ) throws Exception{
 
@@ -43,9 +43,9 @@ public class OntologyWebService {
     @Operation(summary="Returns true or false for terms", tags="Ontology")
     public boolean isDescendantOf(HttpServletRequest request,
             @Parameter(description="Child Term Accession ID", required=true)
-            @PathVariable(value = "accId1") String accId1,
+            @PathVariable(name = "accId1") String accId1,
             @Parameter(description="Parent Term Accession ID", required=true)
-            @PathVariable(value = "accId2") String accId2
+            @PathVariable(name = "accId2") String accId2
 
     ) throws Exception{
 
@@ -58,7 +58,7 @@ public class OntologyWebService {
     @Operation(summary="Returns child and parent terms for Accession ID", tags="Ontology")
     public HashMap<String,List<String>> getOntDags(HttpServletRequest request,
             @Parameter(description="Accession ID", required=true)
-            @PathVariable(value = "accId") String accId
+            @PathVariable(name = "accId") String accId
 
     ) throws Exception{
 
