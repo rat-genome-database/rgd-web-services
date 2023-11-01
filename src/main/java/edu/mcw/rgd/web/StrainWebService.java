@@ -30,7 +30,7 @@ public class StrainWebService {
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @Operation(summary="Return a strain by RGD ID",tags = "Rat Strain")
-    public Strain getStrainByRgdId(HttpServletRequest request, @Parameter(name="rgdId", description="RGD ID of the strain", required=true) @PathVariable(value = "rgdId") int rgdId ) throws Exception{
+    public Strain getStrainByRgdId(HttpServletRequest request, @Parameter(name="rgdId", description="RGD ID of the strain", required=true) @PathVariable(name = "rgdId") int rgdId ) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getStrain(rgdId);
     }
@@ -44,20 +44,20 @@ public class StrainWebService {
 
     @RequestMapping(value="/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return all active strains by position",tags = "Rat Strain")
-    public List<Strain> getStrainsByPosition(HttpServletRequest request,@Parameter(name="chr",description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                             @Parameter(name="start", description="Start Position", required=true) @PathVariable(value = "start") long start,
-                                             @Parameter(name="stop", description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                             @Parameter(name="mapKey", description="RGD Map Key (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<Strain> getStrainsByPosition(HttpServletRequest request,@Parameter(name="chr",description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                             @Parameter(name="start", description="Start Position", required=true) @PathVariable(name = "start") long start,
+                                             @Parameter(name="stop", description="Stop Position", required=true) @PathVariable(name = "stop") long stop,
+                                             @Parameter(name="mapKey", description="RGD Map Key (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveStrainsSortedBySymbol(chr.toUpperCase(),start,stop,mapKey);
     }
 
     @RequestMapping(value="/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of strains position and map key", tags="Rat Strain")
-    public List<MappedStrain> getMappedGenesByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                       @Parameter(description="Start Position", required=true) @PathVariable(value = "start") long start,
-                                                       @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                                       @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<MappedStrain> getMappedGenesByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                                       @Parameter(description="Start Position", required=true) @PathVariable(name = "start") long start,
+                                                       @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") long stop,
+                                                       @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);

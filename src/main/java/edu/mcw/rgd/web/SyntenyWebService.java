@@ -29,8 +29,8 @@ public class SyntenyWebService {
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return all synteny blocks for given backbone region", tags = "Synteny")
-    public List<SyntenicRegion> getBlocks(HttpServletRequest request, @Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
+    public List<SyntenicRegion> getBlocks(HttpServletRequest request, @Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(name = "backboneChr") String backboneChr,
                                           @Parameter(description="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
                                           @Parameter(description="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
                                           @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {

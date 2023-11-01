@@ -33,22 +33,22 @@ public class VariantWebService {
 
 //    @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
 //    @Operation(summary="Return a list of variants on variant rgdID", tags="Variants")
-//    public List<VariantMapData> getVariantsByVariantRgdId(@Parameter(description="Variant RGD Id", required=true) @PathVariable(value = "rgdId") int variantRgdId) throws Exception{
+//    public List<VariantMapData> getVariantsByVariantRgdId(@Parameter(description="Variant RGD Id", required=true) @PathVariable(name = "rgdId") int variantRgdId) throws Exception{
 //
 //        return vdao.getVariantsByRgdId(variantRgdId);
 //    }
 
     @RequestMapping(value="/{rsId}", method= RequestMethod.GET)
     @Operation(summary="Return a list of variants based off of rsID", tags="Variants")
-    public List<VariantMapData> getVariantsByRsId(HttpServletRequest request, @Parameter(description="rsId", required=true) @PathVariable(value = "rsId") String rsId) throws Exception{
+    public List<VariantMapData> getVariantsByRsId(HttpServletRequest request, @Parameter(description="rsId", required=true) @PathVariable(name = "rsId") String rsId) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return vdao.getAllVariantByRsId(rsId);
     }
 
     @RequestMapping(value="/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of variants on Gene rgdID", tags="Variants")
-    public List<VariantMapData> getVariantsByGeneAndMapKey(HttpServletRequest request,@Parameter(description="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
-                                                           @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<VariantMapData> getVariantsByGeneAndMapKey(HttpServletRequest request,@Parameter(description="RGD Id of the Gene", required=true) @PathVariable(name = "rgdId") int geneRgdId,
+                                                           @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Gene g = gdao.getGene(geneRgdId);
         MapData md = mdao.getMapData(g.getRgdId(),mapKey).get(0);
