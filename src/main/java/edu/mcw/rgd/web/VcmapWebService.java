@@ -45,11 +45,11 @@ public class VcmapWebService {
     @RequestMapping(value = "/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
     @Operation(summary = "Return all synteny blocks for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getBlocks2(HttpServletRequest request,
-                                           @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-                                           @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-                                           @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-                                           @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-                                           @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
+                                           @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+                                           @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+                                           @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+                                           @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+                                           @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
                                            @Parameter(description = "Minimum Backbone Block Size (optional)") @RequestParam(required = false) Integer threshold
     ) throws Exception {
 
@@ -64,12 +64,12 @@ public class VcmapWebService {
     @RequestMapping(value = "/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method = RequestMethod.GET)
     @Operation(summary = "Return all synteny blocks for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getBlocks(HttpServletRequest request,
-            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
-            @Parameter(description = "Chain Level (1, 2, etc or range: 1-2)", required = true) @PathVariable(value = "chainLevel") String chainLevel,
+            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
+            @Parameter(description = "Chain Level (1, 2, etc or range: 1-2)", required = true) @PathVariable(name = "chainLevel") String chainLevel,
             @Parameter(description = "Minimum Backbone Block Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -94,11 +94,11 @@ public class VcmapWebService {
     @RequestMapping(value = "/gaps/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
     @Operation(summary = "Return gaps for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getGaps(HttpServletRequest request,
-            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
+            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
             @Parameter(description = "Minimum Backbone Gap Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -112,12 +112,12 @@ public class VcmapWebService {
     @RequestMapping(value = "/gaps/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method = RequestMethod.GET)
     @Operation(summary = "Return gaps for given backbone region", tags = "VCMap")
     public List<SyntenicRegion> getGaps(HttpServletRequest request,
-            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
-            @Parameter(description = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(value = "chainLevel") String chainLevel,
+            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
+            @Parameter(description = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(name = "chainLevel") String chainLevel,
             @Parameter(description = "Minimum Backbone Gap Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -143,11 +143,11 @@ public class VcmapWebService {
     @RequestMapping(value = "/synteny/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method = RequestMethod.GET)
     @Operation(summary = "Return all synteny blocks and gaps for given backbone region", tags = "VCMap")
     public List<Map<String, Object>> getSynteny(HttpServletRequest request,
-            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
+            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
             @Parameter(description = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold,
             @Parameter(description = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdStart,
             @Parameter(description = "Maximum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer thresholdEnd,
@@ -207,12 +207,12 @@ public class VcmapWebService {
     @RequestMapping(value = "/synteny/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method = RequestMethod.GET)
     @Operation(summary = "Return all synteny blocks and gaps for given backbone region", tags = "VCMap")
     public List<Map<String, Object>> getSynteny(HttpServletRequest request,
-            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(value = "backboneChr") String backboneChr,
-            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(value = "backboneStart") int backboneStart,
-            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(value = "backboneStop") int backboneStop,
-            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(value = "mapKey") int mapKey,
-            @Parameter(description = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(value = "chainLevel") String chainLevel,
+            @Parameter(description = "Backbone Species Map Key (available through lookup service)", required = true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+            @Parameter(description = "Backbone Chromosome", required = true) @PathVariable(name = "backboneChr") String backboneChr,
+            @Parameter(description = "Backbone Start Position", required = true) @PathVariable(name = "backboneStart") int backboneStart,
+            @Parameter(description = "Backbone Stop Position", required = true) @PathVariable(name = "backboneStop") int backboneStop,
+            @Parameter(description = "Map Key for Comparative Species (available through lookup service)", required = true) @PathVariable(name = "mapKey") int mapKey,
+            @Parameter(description = "Chain Level (1, 2, etc, or range: '1-2')", required = true) @PathVariable(name = "chainLevel") String chainLevel,
             @Parameter(description = "Minimum Backbone Block/Gap Size (optional)") @RequestParam(required = false) Integer threshold
     ) throws Exception {
 
@@ -359,7 +359,7 @@ public class VcmapWebService {
 
     @RequestMapping(value="/maps/{mapKey}/chromosomes", method= RequestMethod.GET)
     @Operation(summary="Return chromosome hashmap for given map key", tags = "VCMap")
-    public Map<String, ChromosomeEx> getChrMaps(HttpServletRequest request,@Parameter(description="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception {
+    public Map<String, ChromosomeEx> getChrMaps(HttpServletRequest request,@Parameter(description="Map Key", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Map<String, ChromosomeEx> results = new HashMap<>();
@@ -376,7 +376,7 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/map/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return genes with position given symbol prefix, f.e. symbol=hox returns all HOXxxx genes", tags = "VCMap")
     public List<MappedGene> getGenesForSymbol(HttpServletRequest request,
-            @Parameter(description="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @Parameter(description="Map Key", required=true) @PathVariable(name = "mapKey") int mapKey,
             @Parameter(description="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -399,7 +399,7 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return genes with position given symbol prefix, f.e. symbol=hox returns all HOXxxx genes", tags = "VCMap")
     public List<MappedGeneEx> getGenesForSymbol2(HttpServletRequest request,
-            @Parameter(description="Map Key", required=true) @PathVariable(value = "mapKey") int mapKey,
+            @Parameter(description="Map Key", required=true) @PathVariable(name = "mapKey") int mapKey,
             @Parameter(description="Gene symbol prefix (optional, case insensitive)") @RequestParam(required = false) String symbolPrefix ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -424,10 +424,10 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of genes position and map key", tags="VCMap")
     public List<MappedGene> getMappedGenesByPosition(HttpServletRequest request,
-        @Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-        @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
-        @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-        @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
+        @Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+        @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
+        @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
+        @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey,
         @Parameter(description = "Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -451,10 +451,10 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/{mapKey}/{chr}/{start}/{stop}", method=RequestMethod.GET)
     @Operation(summary="Return a list of genes with positions in a given region", tags="VCMap")
     public List<MappedGeneEx> getMappedGenesByPosition2(HttpServletRequest request,
-            @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
-            @Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-            @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
-            @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+            @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey,
+            @Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+            @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
+            @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
             @Parameter(description="Minimum Gene Size (optional)") @RequestParam(required = false) Integer threshold,
             @Parameter(description="Include rgd ids for ortholog genes given a list of comma separated map keys (optional)") @RequestParam(required = false) String orthologMapKeys) throws Exception{
 
@@ -511,7 +511,7 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/{sourceGeneId}/orthologs", method=RequestMethod.GET)
     @Operation(summary="Return orthologs for a given source gene identified by gene rgd id", tags="VCMap")
     public Map<Integer, List<MappedGeneEx>> getGeneOrthologs(HttpServletRequest request,
-            @Parameter(description="RGD ID of source gene", required=true) @PathVariable(value = "sourceGeneId") int sourceGeneRgdId,
+            @Parameter(description="RGD ID of source gene", required=true) @PathVariable(name = "sourceGeneId") int sourceGeneRgdId,
             @Parameter(description = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -574,10 +574,10 @@ public class VcmapWebService {
     @RequestMapping(value="/genes/orthologs/{sourceMapKey}/{sourceChr}/{sourceStart}/{sourceStop}", method=RequestMethod.GET)
     @Operation(summary="Return array of source genes with orthologs in a given region", tags="VCMap")
     public List<Map<String, Object>>  getGenesWithOrthologs(HttpServletRequest request,
-            @Parameter(description="source map key", required=true) @PathVariable(value = "sourceMapKey") int sourceMapKey,
-            @Parameter(description="source chromosome", required=true) @PathVariable(value = "sourceChr") String sourceChr,
-            @Parameter(description="source start pos", required=true) @PathVariable(value = "sourceStart") int sourceStart,
-            @Parameter(description="source end pos", required=true) @PathVariable(value = "sourceStop") int sourceStop,
+            @Parameter(description="source map key", required=true) @PathVariable(name = "sourceMapKey") int sourceMapKey,
+            @Parameter(description="source chromosome", required=true) @PathVariable(name = "sourceChr") String sourceChr,
+            @Parameter(description="source start pos", required=true) @PathVariable(name = "sourceStart") int sourceStart,
+            @Parameter(description="source end pos", required=true) @PathVariable(name = "sourceStop") int sourceStop,
             @Parameter(description = "source gene size threshold (minimum gene size) (optional)") @RequestParam(required = false) Integer geneSizeThreshold,
             @Parameter(description = "comma separated list of map keys for ortholog genes (optional)") @RequestParam(required = false) String mapKeys) throws Exception{
 
@@ -670,18 +670,18 @@ public class VcmapWebService {
     }
     @RequestMapping(value="/variants/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of variants and map key", tags="VCMap")
-    public List<VariantMapData> getVariantsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                         @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
-                                                         @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-                                                         @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<VariantMapData> getVariantsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                                         @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
+                                                         @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
+                                                         @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
     }
     @RequestMapping(value="variants/gene/{rgdId}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of variants on Gene rgdID", tags="VCMap")
-    public List<VariantMapData> getVariantsByGeneAndMapKey(HttpServletRequest request,@Parameter(description="RGD Id of the Gene", required=true) @PathVariable(value = "rgdId") int geneRgdId,
-                                                           @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<VariantMapData> getVariantsByGeneAndMapKey(HttpServletRequest request,@Parameter(description="RGD Id of the Gene", required=true) @PathVariable(name = "rgdId") int geneRgdId,
+                                                           @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Gene g = geneDAO.getGene(geneRgdId);
         MapData md = mapDAO.getMapData(g.getRgdId(),mapKey).get(0);
@@ -690,10 +690,10 @@ public class VcmapWebService {
 
     @RequestMapping(value="/variants/position/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of positions for variants", tags="VCMap")
-    public List<Long> getVariantPositionsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                             @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
-                                                             @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-                                                             @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<Long> getVariantPositionsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                                             @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
+                                                             @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
+                                                             @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return vdao.getVariantStartPositionByPositionAndMapKey(mapKey, chr.toUpperCase(), start,stop);
@@ -702,10 +702,10 @@ public class VcmapWebService {
 
     @RequestMapping(value="/signal/position/{chr}/{start}/{stop}/{setId}", method= RequestMethod.GET)
     @Operation(summary="Return a list of signal values", tags="VCMap")
-    public List<Long> getSignalByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                   @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
-                                                   @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
-                                                   @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "setId") int setId) throws Exception{
+    public List<Long> getSignalByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                                   @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
+                                                   @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
+                                                   @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "setId") int setId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
 
