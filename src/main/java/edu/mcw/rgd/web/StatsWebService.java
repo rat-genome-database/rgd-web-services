@@ -8,10 +8,7 @@ import edu.mcw.rgd.stats.ScoreBoardManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +18,7 @@ import java.util.Map;
 /**
  * Created by mtutaj on 10/4/2016.
  */
+//@CrossOrigin(origins = "https://rgd.mcw.edu/")
 @RestController
 @Tag(name="Statistics")
 @RequestMapping(value = "/stats")
@@ -309,8 +307,8 @@ public class StatsWebService {
 
     @RequestMapping(value="/term/{accId}/{filterAccId}", method=RequestMethod.GET)
     @Operation(summary="",tags="Statistics")
-    public Map<String, Integer> getTermStats(HttpServletRequest request,@PathVariable(value = "accId") String accId,
-                                          @PathVariable(value = "filterAccId") String filterAccId) throws Exception{
+    public Map<String, Integer> getTermStats(HttpServletRequest request,@PathVariable(name = "accId") String accId,
+                                          @PathVariable(name = "filterAccId") String filterAccId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         //Map<String, Integer>
