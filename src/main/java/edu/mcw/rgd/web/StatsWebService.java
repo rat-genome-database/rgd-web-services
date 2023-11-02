@@ -8,10 +8,7 @@ import edu.mcw.rgd.stats.ScoreBoardManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +18,7 @@ import java.util.Map;
 /**
  * Created by mtutaj on 10/4/2016.
  */
+@CrossOrigin(origins = "*")
 @RestController
 @Tag(name="Statistics")
 @RequestMapping(value = "/stats")
