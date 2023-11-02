@@ -48,17 +48,17 @@ public class QTLWebService {
     public List<QTL> getQtlListByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
                                           @Parameter(description="Start Position", required=true) @PathVariable(name = "start") long start,
                                           @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") long stop,
-                                          @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+                                          @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return qdao.getActiveQTLs(chr.toUpperCase(), start,stop,mapKey);
     }
     @RequestMapping( value="/mapped/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Returns a list QTL for given position and assembly map", tags = "QTL")
-    public List<MappedQTL> getMappedQTLByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
-                                                @Parameter(description="Start Position", required=true) @PathVariable(value = "start") long start,
-                                                @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
-                                                @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
+    public List<MappedQTL> getMappedQTLByPosition(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
+                                                @Parameter(description="Start Position", required=true) @PathVariable(name = "start") long start,
+                                                @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") long stop,
+                                                @Parameter(description="A list of assembly map keys can be found using the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return qdao.getActiveMappedQTLs(chr.toUpperCase(), start,stop,mapKey);

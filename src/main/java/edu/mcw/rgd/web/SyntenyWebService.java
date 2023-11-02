@@ -31,9 +31,9 @@ public class SyntenyWebService {
     @Operation(summary="Return all synteny blocks for given backbone region", tags = "Synteny")
     public List<SyntenicRegion> getBlocks(HttpServletRequest request, @Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
                                           @Parameter(description="Backbone Chromosome", required=true) @PathVariable(name = "backboneChr") String backboneChr,
-                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
-                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
-                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {
+                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(name = "backboneStart") int backboneStart,
+                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(name = "backboneStop") int backboneStop,
+                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getBlocks(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
@@ -41,12 +41,12 @@ public class SyntenyWebService {
 
     @RequestMapping(value="/blocks/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method= RequestMethod.GET)
     @Operation(summary="Return all synteny blocks for given backbone region", tags = "Synteny")
-    public List<SyntenicRegion> getBlocks(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
-                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
-                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
-                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
-                                          @Parameter(description="Chain Level (1, 2, etc or range: 1-2)", required=true) @PathVariable(value = "chainLevel") String chainLevel ) throws Exception {
+    public List<SyntenicRegion> getBlocks(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(name = "backboneChr") String backboneChr,
+                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(name = "backboneStart") int backboneStart,
+                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(name = "backboneStop") int backboneStop,
+                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey,
+                                          @Parameter(description="Chain Level (1, 2, etc or range: 1-2)", required=true) @PathVariable(name = "chainLevel") String chainLevel ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int dashPos = chainLevel.indexOf('-');
@@ -61,11 +61,11 @@ public class SyntenyWebService {
 
     @RequestMapping(value="/gaps/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return gaps for given backbone region", tags = "Synteny")
-    public List<SyntenicRegion> getGaps(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
-                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
-                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
-                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey ) throws Exception {
+    public List<SyntenicRegion> getGaps(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(name = "backboneChr") String backboneChr,
+                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(name = "backboneStart") int backboneStart,
+                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(name = "backboneStop") int backboneStop,
+                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getGaps(backboneMapKey, backboneChr, backboneStart, backboneStop, mapKey);
@@ -73,12 +73,12 @@ public class SyntenyWebService {
 
     @RequestMapping(value="/gaps/{backboneMapKey}/{backboneChr}/{backboneStart}/{backboneStop}/{mapKey}/{chainLevel}", method= RequestMethod.GET)
     @Operation(summary="Return gaps for given backbone region", tags = "Synteny")
-    public List<SyntenicRegion> getGaps(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(value = "backboneMapKey") int backboneMapKey,
-                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(value = "backboneChr") String backboneChr,
-                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(value = "backboneStart") int backboneStart,
-                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(value = "backboneStop") int backboneStop,
-                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(value = "mapKey") int mapKey,
-                                          @Parameter(description="Chain Level (1, 2, etc, or range: '1-2')", required=true) @PathVariable(value = "chainLevel") String chainLevel ) throws Exception {
+    public List<SyntenicRegion> getGaps(HttpServletRequest request,@Parameter(description="Backbone Species Map Key (available through lookup service)", required=true) @PathVariable(name = "backboneMapKey") int backboneMapKey,
+                                          @Parameter(description="Backbone Chromosome", required=true) @PathVariable(name = "backboneChr") String backboneChr,
+                                          @Parameter(description="Backbone Start Position", required=true) @PathVariable(name = "backboneStart") int backboneStart,
+                                          @Parameter(description="Backbone Stop Position", required=true) @PathVariable(name = "backboneStop") int backboneStop,
+                                          @Parameter(description="Map Key for Comparative Species (available through lookup service)", required=true) @PathVariable(name = "mapKey") int mapKey,
+                                          @Parameter(description="Chain Level (1, 2, etc, or range: '1-2')", required=true) @PathVariable(name = "chainLevel") String chainLevel ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         int dashPos = chainLevel.indexOf('-');
