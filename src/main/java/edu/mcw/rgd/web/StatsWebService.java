@@ -307,8 +307,8 @@ public class StatsWebService {
 
     @RequestMapping(value="/term/{accId}/{filterAccId}", method=RequestMethod.GET)
     @Operation(summary="",tags="Statistics")
-    public Map<String, Integer> getTermStats(HttpServletRequest request,@PathVariable(value = "accId") String accId,
-                                          @PathVariable(value = "filterAccId") String filterAccId) throws Exception{
+    public Map<String, Integer> getTermStats(HttpServletRequest request,@PathVariable(name = "accId") String accId,
+                                          @PathVariable(name = "filterAccId") String filterAccId) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         //Map<String, Integer>
