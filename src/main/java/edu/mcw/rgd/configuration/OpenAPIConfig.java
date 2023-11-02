@@ -2,8 +2,10 @@ package edu.mcw.rgd.configuration;
 
 
 
+import java.net.UnknownHostException;
 import java.util.List;
 
+import edu.mcw.rgd.services.RgdContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,21 +19,23 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenAPIConfig {
 
-    @Value("${rgd.openapi.dev-url}")
-    private String devUrl;
-
-    @Value("${rgd.openapi.prod-url}")
-    private String prodUrl;
+//    @Value("${rgd.openapi.dev-url}")
+//    private String devUrl;
+//
+//    @Value("${rgd.openapi.prod-url}")
+//    private String prodUrl;
 
     @Bean
-    public OpenAPI myOpenAPI() {
-        Server devServer = new Server();
-        devServer.setUrl(devUrl);
-        devServer.setDescription("Server URL in Development environment");
+    public OpenAPI myOpenAPI() throws UnknownHostException {
+      Server server=new Server();
+        if(RgdContext.isProduction()){
+            server.setUrl("https://rest.rgd.mcw.edu/rgdws");
+            server.description("Production Server");
+        }else{
+            server.setUrl(RgdContext.getHostname()+"/rgdws");
+            server.description("Internal Server");
 
-        Server prodServer = new Server();
-        prodServer.setUrl(prodUrl);
-        prodServer.setDescription("Server URL in Production environment");
+        }
 
         Contact contact = new Contact();
         contact.setEmail("RGD.Data2@mcw.edu");
@@ -47,7 +51,7 @@ public class OpenAPIConfig {
                 .description("The RGD REST API provides programmatic access to information and annotation stored in the Rat Genome Database.").termsOfService("http://rgd.mcw.edu/wg/citing-rgd")
                 .license(creativeCommonsLicense);
 
-        return new OpenAPI().info(info).servers(List.of(devServer, prodServer));
+        return new OpenAPI().info(info).servers(List.of(server));
     }
 }
 
