@@ -41,7 +41,7 @@ public class MapWebService {
     @RequestMapping(value="/chr/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of chromosomes", tags="Chromosome")
     public Set<String> getChromosomesByAssembly(HttpServletRequest request,
-            @Parameter(description="mapKey", required=true) @PathVariable(name = "mapKey") int mapKey
+            @Parameter(description="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
     ) throws Exception{
 
@@ -52,7 +52,7 @@ public class MapWebService {
     @RequestMapping(value="/chrForSpecies/{speciesTypeKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of chromosomes for primary assembly of given species", tags="Chromosome")
     public Set<String> getChromosomesByPrimaryAssembly(HttpServletRequest request,
-            @Parameter(description="Species Type Key", required=true) @PathVariable(name = "speciesTypeKey") int speciesTypeKey
+            @Parameter(description="Species Type Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
 
     ) throws Exception{
 
@@ -69,8 +69,8 @@ public class MapWebService {
     @RequestMapping(value="/chr/{chromosome}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of chromosomes", tags="Chromosome")
     public Chromosome getChromosomeByAssembly(HttpServletRequest request,
-            @Parameter(description="chromosome", required=true) @PathVariable(name = "chromosome") String chromosome,
-            @Parameter(description="mapKey", required=true) @PathVariable(name = "mapKey") int mapKey
+            @Parameter(description="chromosome", required=true) @PathVariable(value = "chromosome") String chromosome,
+            @Parameter(description="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
 
 
     ) throws Exception{

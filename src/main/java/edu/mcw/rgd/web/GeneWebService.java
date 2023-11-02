@@ -137,45 +137,45 @@ public class GeneWebService {
     }
     @RequestMapping(value="/mapped/{chr}/{start}/{stop}/{mapKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of genes position and map key", tags="Gene")
-    public List<MappedGene> getMappedGenesByPosition(HttpServletRequest request, @Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
-                                                     @Parameter(description="Start Position", required=true) @PathVariable(name = "start") long start,
-                                                     @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") long stop,
-                                                     @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
+    public List<MappedGene> getMappedGenesByPosition(HttpServletRequest request, @Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                     @Parameter(description="Start Position", required=true) @PathVariable(value = "start") long start,
+                                                     @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") long stop,
+                                                     @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getActiveMappedGenes(chr.toUpperCase(), start,stop, mapKey);
     }
     @RequestMapping(value="/map/{mapKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of all genes with position information for an assembly", tags="Gene")
-    public List<MappedGene> getGeneByMapKey(HttpServletRequest request,@Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
+    public List<MappedGene> getGeneByMapKey(HttpServletRequest request,@Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getActiveMappedGenes(mapKey);
     }
 
     @RequestMapping(value="/species/{speciesTypeKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of all genes for a species in RGD", tags="Gene")
-    public List<Gene> getGenesBySpecies(HttpServletRequest request,@Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true) @PathVariable(name = "speciesTypeKey") int speciesTypeKey) throws Exception{
+    public List<Gene> getGenesBySpecies(HttpServletRequest request,@Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getActiveGenes(speciesTypeKey);
     }
 
     @RequestMapping(value="/alias/{aliasSymbol}/{speciesTypeKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of genes for an alias and species", tags="Gene")
-    public List<Gene> getGenesByAliasSymbol(HttpServletRequest request,@Parameter(description="Gene alias symbol", required=true) @PathVariable(name = "aliasSymbol") String alias, @Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true) @PathVariable(name = "speciesTypeKey") int speciesTypeKey) throws Exception{
+    public List<Gene> getGenesByAliasSymbol(HttpServletRequest request,@Parameter(description="Gene alias symbol", required=true) @PathVariable(value = "aliasSymbol") String alias, @Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getGenesByAlias(alias,speciesTypeKey);
     }
 
     @RequestMapping(value="/affyId/{affyId}/{speciesTypeKey}", method=RequestMethod.GET)
     @Operation(summary="Return a list of genes for an affymetrix ID", tags="Gene")
-    public List<Gene> getGenesByAffyId(HttpServletRequest request,@Parameter(description="Affymetrix ID", required=true) @PathVariable(name = "affyId") String affyId,@Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true)  @PathVariable(name = "speciesTypeKey") int speciesTypeKey) throws Exception{
+    public List<Gene> getGenesByAffyId(HttpServletRequest request,@Parameter(description="Affymetrix ID", required=true) @PathVariable(value = "affyId") String affyId,@Parameter(description="A list of RGD species type keys can be found in the lookup service", required=true)  @PathVariable(value = "speciesTypeKey") int speciesTypeKey) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getGenesForAffyId(affyId,speciesTypeKey);
     }
 
     @RequestMapping(value="/allele/{rgdId}", method=RequestMethod.GET)
     @Operation(summary="Return a list of gene alleles", tags="Gene")
-    public List<Gene> getGeneAlleles(HttpServletRequest request,@Parameter(description="RGD ID of gene", required=true) @PathVariable(name = "rgdId") int rgdId) throws Exception{
+    public List<Gene> getGeneAlleles(HttpServletRequest request,@Parameter(description="RGD ID of gene", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return geneDAO.getVariantFromGene(rgdId);
     }

@@ -57,8 +57,8 @@ public class VariantWebService {
 
     @RequestMapping(value="/strain/{rgdId}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of variants on Strain rgdID", tags="Variants")
-    public List<VariantMapData> getVariantsByStrainAndMapKey(HttpServletRequest request,@Parameter(description="RGD ID of the Strain", required=true) @PathVariable(name = "rgdId") int strainRgdId,
-                                                               @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
+    public List<VariantMapData> getVariantsByStrainAndMapKey(HttpServletRequest request,@Parameter(description="RGD ID of the Strain", required=true) @PathVariable(value = "rgdId") int strainRgdId,
+                                                               @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 //        Strain s = sdao.getStrain(strainRgdId);
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         MapData md = mdao.getMapData(strainRgdId,mapKey).get(0);
@@ -67,10 +67,10 @@ public class VariantWebService {
 
     @RequestMapping(value="/{chr}/{start}/{stop}/{mapKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of variants in a given position", tags="Variants")
-    public List<VariantMapData> getVariantsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(name = "chr") String chr,
-                                                               @Parameter(description="Start Position", required=true) @PathVariable(name = "start") int start,
-                                                               @Parameter(description="Stop Position", required=true) @PathVariable(name = "stop") int stop,
-                                                               @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception{
+    public List<VariantMapData> getVariantsByPositionAndMapKey(HttpServletRequest request,@Parameter(description="Chromosome", required=true) @PathVariable(value = "chr") String chr,
+                                                               @Parameter(description="Start Position", required=true) @PathVariable(value = "start") int start,
+                                                               @Parameter(description="Stop Position", required=true) @PathVariable(value = "stop") int stop,
+                                                               @Parameter(description="A list of RGD assembly map keys can be found in the lookup service", required=true) @PathVariable(value = "mapKey") int mapKey) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return vdao.getVariantsWithGeneLocation(mapKey, chr.toUpperCase(), start,stop);
