@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 //@Tag(name = "Rat Genome Database", description = "The RGD REST API provides programmatic access to data stored in the Rat Genome Database")
-@CrossOrigin(origins = "http://localhost:8081")
+//@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @Tag(name="Gene")
 @RequestMapping("/gene")
