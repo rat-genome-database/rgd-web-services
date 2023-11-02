@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by mtutaj on 10/4/2016.
  */
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @Tag(name="Statistics")
 @RequestMapping(value = "/stats")
