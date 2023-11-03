@@ -22,7 +22,7 @@ import java.util.List;
 //@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @Tag(name="Gene")
-@RequestMapping("/gene")
+@RequestMapping("/genes")
 public class GeneWebService {
     GeneDAO geneDAO=new GeneDAO();
     AccessLogDAO ald = new AccessLogDAO();
