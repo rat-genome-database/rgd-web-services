@@ -16,6 +16,7 @@ import edu.mcw.rgd.domain.EnrichmentGeneRequest;
 import edu.mcw.rgd.domain.EnrichmentRequest;
 import edu.mcw.rgd.process.enrichment.geneOntology.GeneOntologyEnrichmentProcess;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by hsnalabolu on 1/8/2019.
  */
 @RestController
+@Tag(name="Enrichment")
 @RequestMapping(value = "/enrichment")
 public class EnrichmentWebService {
 
