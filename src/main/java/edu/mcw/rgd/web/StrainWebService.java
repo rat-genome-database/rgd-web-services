@@ -2,6 +2,8 @@ package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
+import edu.mcw.rgd.dao.impl.AnnotationDAO;
+import edu.mcw.rgd.dao.spring.RatModelWebServiceQuery;
 import edu.mcw.rgd.datamodel.MappedStrain;
 import edu.mcw.rgd.datamodel.Strain;
 
@@ -27,6 +29,8 @@ public class StrainWebService {
 
     StrainDAO sdao = new StrainDAO();
     AccessLogDAO ald = new AccessLogDAO();
+
+    AnnotationDAO annotdao = new AnnotationDAO();
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @Operation(summary="Return a strain by RGD ID",tags = "Rat Strain")
@@ -62,5 +66,21 @@ public class StrainWebService {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);
     }
+
+    @RequestMapping(value="term/{term}",method = RequestMethod.GET)
+    @Operation(summary="Return a list of Rat strain models based on the disease/phenotype search term", tags="Rat Strain")
+    public List<RatModelWebServiceQuery.test> getRatStrainModelsByTerm(HttpServletRequest request, @Parameter(description = "Disease/Phenotype Search Term",required=true) @PathVariable(value="term")String term) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return annotdao.getAnnotationsByTermAndStrainType(term,null);
+    }
+
+    @RequestMapping(value="term/{term}/{strainType}",method=RequestMethod.GET)
+    @Operation(summary="Return a list of Rat strain models based on the disease/phenotype search term and Strain type", tags="Rat Strain")
+    public List<RatModelWebServiceQuery.test> getRatStrainModelsByTermAndStrainType(HttpServletRequest request,@Parameter(description = "Disease/Phenotype Search Term",required=true) @PathVariable(value="term")String term,
+                                                                                    @Parameter(description = "Strain type",required = true) @PathVariable(value = "strainType")String strainType)throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return annotdao.getAnnotationsByTermAndStrainType(term,strainType);
+    }
+
 
 }
