@@ -67,15 +67,15 @@ public class StrainWebService {
         return sdao.getActiveMappedStrainPositions(chr.toUpperCase(), start,stop, mapKey);
     }
 
-    @RequestMapping(value="term/{term}",method = RequestMethod.GET)
+    @RequestMapping(value="search/{term}",method = RequestMethod.GET)
     @Operation(summary="Return a list of Rat strain models based on the disease/phenotype search term", tags="Rat Strain")
     public List<RatModelWebServiceQuery.test> getRatStrainModelsByTerm(HttpServletRequest request, @Parameter(description = "Disease/Phenotype Search Term",required=true) @PathVariable(value="term")String term) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return annotdao.getAnnotationsByTermAndStrainType(term,null);
     }
 
-    @RequestMapping(value="term/{term}/{strainType}",method=RequestMethod.GET)
-    @Operation(summary="Return a list of Rat strain models based on the disease/phenotype search term and Strain type", tags="Rat Strain")
+    @RequestMapping(value="search/{term}/{strainType}",method=RequestMethod.GET)
+    @Operation(summary="Return a list of Rat strain models based on the disease/phenotype search term and Strain type(such as congenic,inbred,mutant,transgenic,consomic,outbred)", tags="Rat Strain")
     public List<RatModelWebServiceQuery.test> getRatStrainModelsByTermAndStrainType(HttpServletRequest request,@Parameter(description = "Disease/Phenotype Search Term",required=true) @PathVariable(value="term")String term,
                                                                                     @Parameter(description = "Strain type",required = true) @PathVariable(value = "strainType")String strainType)throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
