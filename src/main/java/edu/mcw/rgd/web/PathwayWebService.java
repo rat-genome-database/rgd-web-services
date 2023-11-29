@@ -30,14 +30,14 @@ public class PathwayWebService {
 
     @RequestMapping(value="/diagrams/search/{searchString}", method= RequestMethod.GET)
     @Operation(summary="Return a list of pathways based on search term", tags = "Pathway")
-    public List<Pathway> searchPathways(HttpServletRequest request, @Parameter(description="Free text search string", required=true) @PathVariable(value = "searchString") String searchString) throws Exception{
+    public List<Pathway> searchPathways(HttpServletRequest request, @Parameter(description="Free text search string", required=true) @PathVariable(name = "searchString") String searchString) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return pathwayDAO.searchPathways(searchString);
     }
 
     @RequestMapping(value="/diagramsForCategory/{category}", method= RequestMethod.GET)
     @Operation(summary="Return a list of pathways based on category provided", tags = "Pathway")
-    public List<Pathway> getPathwaysWithDiagramsForCategory(HttpServletRequest request,@Parameter(description="Pathway Category", required=true) @PathVariable(value = "category") String category) throws Exception{
+    public List<Pathway> getPathwaysWithDiagramsForCategory(HttpServletRequest request,@Parameter(description="Pathway Category", required=true) @PathVariable(name = "category") String category) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         if( Utils.NVL(category, "all").equals("all") ) {
             category = null;

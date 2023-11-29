@@ -24,7 +24,7 @@
 //    AccessLogDAO ald = new AccessLogDAO();
 //    @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
 //    @Operation(summary="Return a list of rgd object references", tags="Reference")
-//    public List<Reference> getGeneOrthologs(HttpServletRequest request, @Parameter(description="RGD ID of RGD object", required=true) @PathVariable(value = "rgdId") int rgdId) throws Exception{
+//    public List<Reference> getGeneOrthologs(HttpServletRequest request, @Parameter(description="RGD ID of RGD object", required=true) @PathVariable(name = "rgdId") int rgdId) throws Exception{
 //        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
 //        return referenceDAO.getReferencesForObject(rgdId);
 //    }

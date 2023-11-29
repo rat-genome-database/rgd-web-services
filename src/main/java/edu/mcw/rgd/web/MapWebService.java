@@ -29,7 +29,7 @@ public class MapWebService {
     @RequestMapping(value="/{speciesTypeKey}", method= RequestMethod.GET)
     @Operation(summary="Return a list of assemblies", tags="Map")
     public List<Map> getMapsBySpecies(HttpServletRequest request,
-                                      @Parameter(description="species Key", required=true) @PathVariable(value = "speciesTypeKey") int speciesTypeKey
+                                      @Parameter(description="species Key", required=true) @PathVariable(name = "speciesTypeKey") int speciesTypeKey
 
     ) throws Exception{
 
