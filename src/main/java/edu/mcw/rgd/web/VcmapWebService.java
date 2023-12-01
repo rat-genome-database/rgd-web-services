@@ -6,10 +6,7 @@ import edu.mcw.rgd.dao.impl.variants.VariantDAO;
 import edu.mcw.rgd.dao.spring.MappedGeneQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.variants.VariantMapData;
-import edu.mcw.rgd.domain.vcmap.ChromosomeEx;
-import edu.mcw.rgd.domain.vcmap.MappedGeneEx;
-import edu.mcw.rgd.domain.vcmap.MappedGeneQueryEx;
-import edu.mcw.rgd.domain.vcmap.SpeciesMaps;
+import edu.mcw.rgd.domain.vcmap.*;
 import edu.mcw.rgd.process.Utils;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -723,4 +720,59 @@ public class VcmapWebService {
         return lst;
     }
 
+    @RequestMapping(value="/species/pairs/{mapKey}", method= RequestMethod.GET)
+    @Operation(summary="Return a list of comparable species", tags="VCMap")
+    public List<ComparableSpecies> getComparableSpecies(HttpServletRequest request,
+           @Parameter(description="Assembly Map Key", required=true) @PathVariable(name = "mapKey") int mapKey) throws Exception {
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        List<ComparableSpecies> lst = getComparableSpecies(mapKey);
+        return lst;
+    }
+
+    private List<ComparableSpecies> getComparableSpecies( int mapKey ) throws Exception {
+
+        synchronized( _comparableSpeciesMap ) {
+
+            if( _comparableSpeciesMap.isEmpty() ) {
+
+                String sql = """
+                    select map_key1,map_key2,s2.species_type_key species_type_key2,s2.common_name species2,m2.map_name mapName2
+                    from (select distinct map_key1,map_key2 from synteny_ucsc) x, maps m1, maps m2, rgd_ids i2, species_types s2
+                      where
+                      x.map_key1=m1.map_key 
+                      and x.map_key2=m2.map_key and m2.rgd_id=i2.rgd_id and i2.species_type_key=s2.species_type_key
+                    """;
+                try( PreparedStatement ps = mapDAO.getConnection().prepareStatement(sql) ) {
+
+                    ResultSet rs = ps.executeQuery();
+                    while( rs.next() ) {
+
+                        int mapKey1 = rs.getInt(1);
+                        int mapKey2 = rs.getInt(2);
+                        int speciesTypeKey2 = rs.getInt(3);
+                        String speciesName2 = rs.getString(4);
+                        String mapName2 = rs.getString(5);
+
+                        ComparableSpecies cs = new ComparableSpecies();
+                        cs.mapKey = mapKey2;
+                        cs.speciesTypeKey = speciesTypeKey2;
+                        cs.speciesCommonName = speciesName2;
+                        cs.mapName = mapName2;
+
+                        List<ComparableSpecies> list = _comparableSpeciesMap.get(mapKey1);
+                        if( list==null ) {
+                            list = new ArrayList<>();
+                            _comparableSpeciesMap.put(mapKey1, list);
+                        }
+                        list.add(cs);
+                    }
+                }
+            }
+
+            return _comparableSpeciesMap.get(mapKey);
+        }
+    }
+    private static HashMap<Integer, List<ComparableSpecies>> _comparableSpeciesMap = new HashMap<>();
 }
