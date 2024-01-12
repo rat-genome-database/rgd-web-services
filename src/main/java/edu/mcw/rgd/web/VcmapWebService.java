@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by mtutaj on 11/18/2021
@@ -775,4 +777,15 @@ public class VcmapWebService {
         }
     }
     private static HashMap<Integer, List<ComparableSpecies>> _comparableSpeciesMap = new HashMap<>();
+
+    @RequestMapping(value="/maps_with_variants", method= RequestMethod.GET)
+    @Operation(summary="Return a list of assembly maps having variants", tags="VCMap")
+    public List<Integer> getMapsWithVariants(HttpServletRequest request) throws Exception {
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        // result of query: 'select distinct map_key from variant_map_data order by map_key' -- as of Jan 12, 2024
+        List<Integer> mapKeys = java.util.stream.Stream.of(17,35,38,60,70,239,360,372,631,911).collect(java.util.stream.Collectors.toList());
+        return mapKeys;
+    }
 }
