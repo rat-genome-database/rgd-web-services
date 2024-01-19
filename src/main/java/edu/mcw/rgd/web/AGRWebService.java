@@ -77,6 +77,11 @@ public class AGRWebService {
         List<Gene> genes = geneDAO.getActiveGenes(speciesTypeKey);
         for (Gene g: genes ) {
 
+            // sanity check
+            if( g.getSoAccId()==null ) {
+                continue;
+            }
+
             // do not submit genes without positions on primary assembly
             List<MapData> mds = getLoci(g.getRgdId(), mapKey1, mapKey2, mdao);
             if( mds.isEmpty() ) {
@@ -559,53 +564,75 @@ public class AGRWebService {
 
                 for( Gene g: geneList ) {
                     String alleleId = "RGD:" + g.getRgdId();
-					String type = var.getType();
-					String assembly = map.getName();
-					String chromosome = md.getChromosome();
-					int start = md.getStartPos();
-					int end = md.getStopPos();
-					String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
-					String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
+                    String type = var.getType();
+                    String assembly = map.getName();
+                    String chromosome = md.getChromosome();
+                    int start = md.getStartPos();
+                    int end = md.getStopPos();
+                    String genomicReferenceSequence = Utils.NVL(var.getRefNuc(), "N/A");
+                    String genomicVariantSequence = Utils.NVL(var.getVarNuc(), "N/A");
 
-					String paddedBase = null;
+                    String paddedBase = null;
                     Integer insertionLength = null;
+                    String consequence = null;
 
-					// emit 'paddedBase' for insertions and deletions
-					if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
-						int paddedBasePos = 0;
-						if( type.equals("SO:0000159") ) { // deletion
-							paddedBasePos = start - 1;
-						} else if( type.equals("SO:0000667") ) { // insertion: ref nuc is the padding base
-							paddedBasePos = start;
+                    switch(type) {
+                        // types directly supported by AGR schema
+                        case "SO:1000008": System.out.println("snv"); break;
+                        case "SO:0000667": System.out.println("ins"); break;
+                        case "SO:0000159": System.out.println("del"); break;
+                        case "SO:0002007": System.out.println("mnv"); break;
+                        case "SO:1000032": System.out.println("delin"); break;
+
+                        // types to be converted
+                        case "SO:1000011": System.out.println("C_to_T_transition");
+                            consequence = type;
+                            type = "SO:1000008"; // SNV
+                            break;
+
+                        // types not covered yet
+                        default: System.out.println("problem");
+                    }
+
+                    // emit 'paddedBase' for insertions and deletions
+                    if( type.equals("SO:0000667") || type.equals("SO:0000159") ) {
+                        int paddedBasePos = 0;
+                        if( type.equals("SO:0000159") ) { // deletion
+                            paddedBasePos = start - 1;
+                        } else if( type.equals("SO:0000667") ) { // insertion: ref nuc is the padding base
+                            paddedBasePos = start;
                             insertionLength = genomicVariantSequence.length();
-						}
-						String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
-								"&chr=" + chromosome + "&startPos=" + paddedBasePos + "&stopPos=" + paddedBasePos + "&format=text";
-						fd.setExternalFile(url);
-						paddedBase = fd.download();
-					}
+                        }
+                        String url = "https://pipelines.rgd.mcw.edu/rgdweb/seqretrieve/retrieve.html?mapKey=" + map.getKey() +
+                                "&chr=" + chromosome + "&startPos=" + paddedBasePos + "&stopPos=" + paddedBasePos + "&format=text";
+                        fd.setExternalFile(url);
+                        paddedBase = fd.download();
+                    }
 
-					Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
+                    Chromosome c = mdao.getChromosome(map.getKey(), chromosome);
 
-					HashMap rec = new HashMap();
-					rec.put("alleleId", alleleId);
-					rec.put("type", type);
-					rec.put("assembly", assembly);
-					rec.put("chromosome", chromosome);
-					rec.put("start", start);
-					rec.put("end", end);
-					rec.put("genomicReferenceSequence", genomicReferenceSequence);
-					rec.put("genomicVariantSequence", genomicVariantSequence);
-					if( paddedBase!=null ) {
-						rec.put("paddedBase", paddedBase);
-					}
+                    HashMap rec = new HashMap();
+                    rec.put("alleleId", alleleId);
+                    rec.put("type", type);
+                    rec.put("assembly", assembly);
+                    rec.put("chromosome", chromosome);
+                    rec.put("start", start);
+                    rec.put("end", end);
+                    rec.put("genomicReferenceSequence", genomicReferenceSequence);
+                    rec.put("genomicVariantSequence", genomicVariantSequence);
+                    if( paddedBase!=null ) {
+                        rec.put("paddedBase", paddedBase);
+                    }
+                    if( consequence!=null ) {
+                        rec.put("consequence", consequence);
+                    }
                     if( insertionLength!=null ) { // added in schema 1.0.0.9
                         rec.put("insertionLength", insertionLength);
                     }
-					rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
+                    rec.put("sequenceOfReferenceAccessionNumber", "RefSeq:"+c.getRefseqId());
 
-					variantList.add(rec);
-				}
+                    variantList.add(rec);
+                }
             }
         }
 
