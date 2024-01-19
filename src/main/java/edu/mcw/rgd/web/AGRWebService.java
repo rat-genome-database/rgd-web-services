@@ -77,6 +77,11 @@ public class AGRWebService {
         List<Gene> genes = geneDAO.getActiveGenes(speciesTypeKey);
         for (Gene g: genes ) {
 
+            // sanity check
+            if( g.getSoAccId()==null ) {
+                continue;
+            }
+
             // do not submit genes without positions on primary assembly
             List<MapData> mds = getLoci(g.getRgdId(), mapKey1, mapKey2, mdao);
             if( mds.isEmpty() ) {
