@@ -369,7 +369,9 @@ public class AGRWebService {
                     desc += "; "+g.getDescription();
                 }
             }
-            map.put("description", desc);
+            if( !Utils.isStringEmpty(desc) ) {
+                map.put("description", desc);
+            }
 
             // 'symbolText'
             // the symbol in text format, replacing all html tags with <>.
@@ -851,6 +853,7 @@ public class AGRWebService {
                     continue;
                 }
                 qualifier = "RO:0002325";
+
             }
 
             // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
