@@ -6,6 +6,7 @@ import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.datamodel.pheno.Experiment;
 import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecord;
 import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecordValue;
+import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.datamodel.pheno.Study;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,7 +53,7 @@ public class ExpressionWebService {
         return pdao.getStudy(studyId);
     }
 
-    @RequestMapping(value = "/ExpressionRecord/{ontTerm}/{rgdId}/{unit}", method = RequestMethod.GET)
+    @RequestMapping(value = "/expressionRecord/{ontTerm}/{rgdId}/{unit}", method = RequestMethod.GET)
     @Operation(summary = "return a list of Gene Expression Records", tags = "Expression")
     public List<GeneExpressionRecord> getGeneExpressionRecordsByExpressionValues(HttpServletRequest request,
                                                                                  @Parameter(description = "Ontology Term Id", required = true) @PathVariable(name = "ontTerm") String ontTerm,
@@ -60,6 +61,22 @@ public class ExpressionWebService {
                                                                                  @Parameter(description = "Associated unit: TPM|FPKM",required = true) @PathVariable(name = "unit") String unit) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return gdao.getGeneExpressionRecordsByRecordValues(rgdId,unit.toUpperCase(),ontTerm);
+    }
+
+    @RequestMapping(value = "record/{expId}", method = RequestMethod.GET)
+    @Operation(summary = "return a record object associated with experiment", tags = "Expression")
+    public List<Record> getExpressionRecords(HttpServletRequest request,
+                                             @Parameter(description = "Experiment Id", required = true) @PathVariable(name = "expId") int expId) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return pdao.getRecordsForGeneExpressionExpRecord(expId);
+    }
+
+    @RequestMapping(value = "/expressionRecord/{expRecId}", method = RequestMethod.GET)
+    @Operation(summary = "return a Gene Expression Record", tags = "Expression")
+    public GeneExpressionRecord getGeneExpressionRecordsById(HttpServletRequest request,
+                                                                                 @Parameter(description = "Gene Expression Record Id", required = true) @PathVariable(name = "expRecId") int expRecId) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return gdao.getGeneExpressionRecordById(expRecId);
     }
 
 }
