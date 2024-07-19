@@ -78,4 +78,15 @@ public class MapWebService {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         return mdao.getChromosome(mapKey,chromosome);
     }
+
+    @RequestMapping(value="/assembly/{mapKey}", method= RequestMethod.GET)
+    @Operation(summary="Return a mapped assembly", tags="Map")
+    public Map getMapByAssembly(HttpServletRequest request,
+                                                @Parameter(description="mapKey", required=true) @PathVariable(value = "mapKey") int mapKey
+
+    ) throws Exception{
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return mdao.getMap(mapKey);
+    }
 }
