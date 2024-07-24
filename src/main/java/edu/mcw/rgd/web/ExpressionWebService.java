@@ -3,6 +3,7 @@ package edu.mcw.rgd.web;
 import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
+import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.pheno.Experiment;
 import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecord;
 import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecordValue;
@@ -29,12 +30,12 @@ public class ExpressionWebService {
 
     @RequestMapping(value="/{ontTerm}/{rgdId}/{unit}", method = RequestMethod.GET)
     @Operation(summary="return a list of Expression Values", tags="Expression")
-    public List<GeneExpressionRecordValue> getGeneExpressionValuesByOntTermRgdIdUnit(HttpServletRequest request,
-                                                                                     @Parameter(description = "Ontology Term Id", required = true) @PathVariable(name = "ontTerm") String ontTerm,
-                                                                                     @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "rgdId") int rgdId,
-                                                                                     @Parameter(description = "Associated unit: TPM|FPKM",required = true) @PathVariable(name = "unit") String unit) throws Exception{
+    public List<GeneExpression> getGeneExpressionValuesByOntTermRgdIdUnit(HttpServletRequest request,
+                                                                          @Parameter(description = "Ontology Term Id", required = true) @PathVariable(name = "ontTerm") String ontTerm,
+                                                                          @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "rgdId") int rgdId,
+                                                                          @Parameter(description = "Associated unit: TPM|FPKM",required = true) @PathVariable(name = "unit") String unit) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-        return gdao.getGeneExprRecordValuesForGeneByTermRgdIdUnit(rgdId,unit.toUpperCase(),ontTerm);
+        return gdao.getGeneExpressionObjectsByTermRgdIdUnit(ontTerm,rgdId,unit.toUpperCase());
     }
 
     @RequestMapping(value = "/experiment/{expId}", method = RequestMethod.GET)
