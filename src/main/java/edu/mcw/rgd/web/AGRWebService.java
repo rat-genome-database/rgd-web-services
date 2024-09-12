@@ -846,15 +846,9 @@ public class AGRWebService {
             if( !(a.getEvidence().equals("IDA") || a.getEvidence().equals("IMP") || a.getEvidence().equals("IPI")) ) {
                 continue;
             }
-            // the only qualifier we support is 'colocalizes_with'
-            String qualifier = a.getQualifier();
-            if( !Utils.isStringEmpty(qualifier) ) {
-                if( !qualifier.equals("colocalizes_with") ) {
-                    continue;
-                }
-                qualifier = "RO:0002325";
 
-            }
+            // as of Sep 2024, we don't submit RGD qualifiers; AGR qualifiers have different semantics
+            String qualifier = null;
 
             // special rule: if NOTES field contains an MMO:xxxxxxx term acc id, it should be used to override
             // the default assay term
@@ -939,7 +933,7 @@ public class AGRWebService {
 
         metadata.put("dateProduced", date);
         metadata.put("dataProvider", getDataProviderForMetaData());
-        metadata.put("release", "RGD-1.0.1.4");
+        metadata.put("release", "RGD-2024-SEP-12");
         return metadata;
     }
 
