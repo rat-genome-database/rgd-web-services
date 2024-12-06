@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -340,21 +341,68 @@ public class VcmapWebService {
     public List<SpeciesMaps> getSpeciesMaps(HttpServletRequest request) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-        List<SpeciesMaps> results = new ArrayList<>();
 
-        for( int speciesTypeKey: SpeciesType.getSpeciesTypeKeys() ) {
-            if( SpeciesType.isSearchable(speciesTypeKey) ) {
-
-                SpeciesMaps sm = new SpeciesMaps();
-                sm.speciesTypeKey = speciesTypeKey;
-                sm.name = SpeciesType.getCommonName(speciesTypeKey);
-                sm.maps = mapDAO.getMaps(speciesTypeKey, "bp", "NCBI");
-                results.add(sm);
-            }
-        }
+        List<SpeciesMaps> results = _getSpeciesMaps();
 
         return results;
     }
+
+    private List<SpeciesMaps> _getSpeciesMaps() throws Exception {
+
+        synchronized ( _vcmapSpeciesMap ) {
+
+            if( _vcmapSpeciesMap.isEmpty() ) {
+
+                List<SpeciesMaps> results = new ArrayList<>();
+
+                // call it to ensure _comparableSpeciesMap is populated
+                getComparableSpecies(372);
+
+                for( Integer mapKey: _comparableSpeciesMap.keySet() ) {
+
+                    edu.mcw.rgd.datamodel.Map map = mapDAO.getMap(mapKey);
+                    if( map==null ) {
+                        continue;
+                    }
+                    int speciesTypeKey = map.getSpeciesTypeKey();
+
+                    SpeciesMaps found = null;
+                    for( SpeciesMaps m: results ) {
+                        if( m.speciesTypeKey==speciesTypeKey ) {
+                            found = m;
+                            break;
+                        }
+                    }
+                    if( found==null ) {
+                        SpeciesMaps sm = new SpeciesMaps();
+                        sm.speciesTypeKey = speciesTypeKey;
+                        sm.name = SpeciesType.getCommonName(speciesTypeKey);
+                        sm.maps = new ArrayList<>();
+                        results.add(sm);
+                        found = sm;
+                    }
+
+                    List<edu.mcw.rgd.datamodel.Map> maps = found.maps;
+                    boolean isMapKeyInMaps = false;
+                    for( edu.mcw.rgd.datamodel.Map map1: maps ) {
+                        if( map1.getKey() == mapKey ) {
+                            isMapKeyInMaps = true;
+                            break;
+                        }
+                    }
+                    if( !isMapKeyInMaps ) {
+                        maps.add( map );
+                    }
+                }
+
+                _vcmapSpeciesMap = results;
+            }
+        }
+
+        return _vcmapSpeciesMap;
+    }
+
+    private static List<SpeciesMaps> _vcmapSpeciesMap = new ArrayList<>();
 
     @RequestMapping(value="/maps/{mapKey}/chromosomes", method= RequestMethod.GET)
     @Operation(summary="Return chromosome hashmap for given map key", tags = "VCMap")
