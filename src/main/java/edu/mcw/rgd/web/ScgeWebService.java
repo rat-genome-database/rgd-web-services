@@ -26,6 +26,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/scge")
 public class ScgeWebService {
 
+    AccessLogDAO ald = new AccessLogDAO();
+
+    GeneDAO geneDAO = new GeneDAO();
+    MapDAO mapDAO = new MapDAO();
+    TranscriptDAO trDAO = new TranscriptDAO();
+
+
     @RequestMapping(value="/gene/{searchString}", method= RequestMethod.GET)
     @Operation(summary="Return a a full gene model given gene coordinates, f.e. 19:55090918..55117637", tags = "SCGE")
     public Object getGeneModel(HttpServletRequest request, @Parameter(description="Gene coordinates, f.e. 19:55090918..55117637", required=true) @PathVariable(name = "geneCoordinates") String geneCoordinates) throws Exception{
@@ -212,9 +219,4 @@ public class ScgeWebService {
         public int fmin; // start pos
         public int fmax; // stop pos
     }
-
-    GeneDAO geneDAO = new GeneDAO();
-    MapDAO mapDAO = new MapDAO();
-    TranscriptDAO trDAO = new TranscriptDAO();
-
 }
