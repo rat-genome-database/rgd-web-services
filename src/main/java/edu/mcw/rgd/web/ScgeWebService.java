@@ -33,7 +33,7 @@ public class ScgeWebService {
     TranscriptDAO trDAO = new TranscriptDAO();
 
 
-    @RequestMapping(value="/gene/{searchString}", method= RequestMethod.GET)
+    @RequestMapping(value="/gene/{geneCoordinates}", method= RequestMethod.GET)
     @Operation(summary="Return a a full gene model given gene coordinates, f.e. 19:55090918..55117637", tags = "SCGE")
     public Object getGeneModel(HttpServletRequest request, @Parameter(description="Gene coordinates, f.e. 19:55090918..55117637", required=true) @PathVariable(name = "geneCoordinates") String geneCoordinates) throws Exception{
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
