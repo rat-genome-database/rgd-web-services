@@ -1,12 +1,11 @@
 package edu.mcw.rgd.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.mcw.rgd.dao.impl.AccessLogDAO;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.TranscriptDAO;
@@ -15,7 +14,16 @@ import edu.mcw.rgd.datamodel.MapData;
 import edu.mcw.rgd.datamodel.Transcript;
 import edu.mcw.rgd.process.Utils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
+
+@RestController
+@Tag(name="SCGE")
+@RequestMapping(value = "/scge")
 public class ScgeWebService {
 
     @RequestMapping(value="/gene/{searchString}", method= RequestMethod.GET)
