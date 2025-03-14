@@ -117,7 +117,8 @@ public class ScgeWebService {
             TrInfo info = new TrInfo();
             obj.children.add(info);
 
-            info.type = tr.getType();
+            //info.type = tr.getType();
+            info.type = "mRNA";
             info.name = tr.getAccId();
             info.source = tr.getAccId().startsWith("ENS") ? "ENSEMBL" : "NCBI";
             info.strand = trmd.getStrand().equals("-") ? -1 : +1;
