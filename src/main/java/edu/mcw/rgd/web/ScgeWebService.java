@@ -36,10 +36,10 @@ public class ScgeWebService {
     @Operation(summary="Return a a full gene model given gene coordinates, f.e. human  19:55090918..55117637", tags = "SCGE")
     public Object getApollo(HttpServletRequest request,
                             @Parameter(description="Species, f.e human", required=true) @PathVariable(name = "species") String species,
-                            @Parameter(description="Chromosome, f.e 19", required=true) @PathVariable(name = "chromosome") String chr,
-                            @Parameter(description="Start Pos, f.e. 55090918", required=true) @PathVariable(name = "startPos") Integer startPos,
-                            @Parameter(description="Stop Pos, f.e. 55117637", required=true) @PathVariable(name = "stopPos") Integer stopPos,
-                            @Parameter(description="Ignore cache", required=false) @PathVariable(name = "ignoreCache") Boolean ignoreCache
+                            @Parameter(description="Chromosome, f.e 19", required=true) @PathVariable(name = "chr") String chr,
+                            @Parameter(description="Start pos, f.e. 55090918", required=true) @PathVariable(name = "startPos") Integer startPos,
+                            @Parameter(description="Stop pos, f.e. 55117637", required=true) @PathVariable(name = "stopPos") Integer stopPos,
+                            @Parameter(description="Ignore cache (optional)") @RequestParam(required = false) String ignoreCache
                             ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(), request);
