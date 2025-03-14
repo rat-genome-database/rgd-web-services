@@ -33,7 +33,7 @@ public class ScgeWebService {
     TranscriptDAO trDAO = new TranscriptDAO();
 
     @RequestMapping(value="/track/{species}/All Genes/{chr}:{startPos}..{stopPos}.json", method= RequestMethod.GET)
-    @Operation(summary="Return a a full gene model given gene coordinates, f.e. human  19:55090918..55117637", tags = "SCGE")
+    @Operation(summary="Return a list of gene models given gene coordinates, f.e. human  19:55090918..55117637", tags = "SCGE")
     public Object getApollo(HttpServletRequest request,
                             @Parameter(description="Species, f.e human", required=true) @PathVariable(name = "species") String species,
                             @Parameter(description="Chromosome, f.e 19", required=true) @PathVariable(name = "chr") String chr,
@@ -45,7 +45,9 @@ public class ScgeWebService {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(), request);
 
         JsonObj obj = getGeneModel( chr, startPos, stopPos );
-        return obj;
+        ArrayList<JsonObj> result = new ArrayList<>();
+        result.add(obj);
+        return result;
     }
 
     @RequestMapping(value="/gene/{geneCoordinates}", method= RequestMethod.GET)
@@ -97,7 +99,7 @@ public class ScgeWebService {
         List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), MAP_KEY);
 
         JsonObj obj = new JsonObj();
-        obj.sourceUrl = "http://www.alliancegenome.org/apollo/track/human/All Genes/"+chr+"/"+gene.getSymbol()+".json";
+        obj.sourceUrl = "https://dev.rgd.mcw.edu/rgdws/track/human/All Genes/"+chr+"/"+gene.getSymbol()+".json";
         obj.strand = Utils.NVL(md.getStrand(), "+").equals("-") ? -1 : +1;
 
         obj.name = gene.getSymbol();
