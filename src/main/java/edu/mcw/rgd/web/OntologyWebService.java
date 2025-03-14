@@ -71,4 +71,23 @@ public class OntologyWebService {
         data.put("parentTerms",parentTerms);
         return data;
     }
+    @RequestMapping(value="/parentTerms/{accId}", method=RequestMethod.GET)
+    @Operation(summary="Returns parent terms for Accession ID", tags="Ontology")
+    public HashMap<String,String > getOntParentTerms(HttpServletRequest request,
+                                                   @Parameter(description="Accession ID", required=true)
+                                                   @PathVariable(name = "accId") String accId
+
+    ) throws Exception{
+
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        List<String> parentTermIdss = oDAO.getAllActiveTermAncestorAccIds(accId);
+        HashMap<String,String > data = new HashMap<>();
+        for(String id:parentTermIdss) {
+            Term term = oDAO.getTerm(id);
+            data.put(id, term.getTerm());
+        }
+        return data;
+    }
 }
