@@ -107,6 +107,7 @@ public class ScgeWebService {
         obj.fmin = startPos;
         obj.fmax = stopPos;
         obj.seqId = chr;
+        obj.type = "gene";
 
         CdsUtils utils = new CdsUtils(this.trDAO, MAP_KEY);
 
