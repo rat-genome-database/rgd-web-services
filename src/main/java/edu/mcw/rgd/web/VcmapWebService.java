@@ -582,37 +582,41 @@ public class VcmapWebService {
 
         Map<Integer, List<MappedGeneEx>> results = new HashMap<>();
 
-        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection() ) {
+        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);) {
 
-            PreparedStatement ps = conn.prepareStatement(sql);
+
             ps.setInt(1, srcGeneRgdId);
-            ResultSet rs = ps.executeQuery();
 
-            while (rs.next()) {
-                MappedGeneEx mg = new MappedGeneEx();
-                mg.geneRgdId = rs.getInt("rgd_id");
-                mg.geneSymbol = rs.getString("gene_symbol");
-                mg.geneName = rs.getString("full_name");
-                mg.geneType = rs.getString("gene_type_lc");
+            try(ResultSet rs = ps.executeQuery();) {
 
-                mg.mapKey = rs.getInt("map_key");
-                mg.chr = rs.getString("chromosome");
-                mg.startPos = rs.getInt("start_pos");
-                mg.stopPos = rs.getInt("stop_pos");
-                mg.strand = rs.getString("strand");
+                while (rs.next()) {
+                    MappedGeneEx mg = new MappedGeneEx();
+                    mg.geneRgdId = rs.getInt("rgd_id");
+                    mg.geneSymbol = rs.getString("gene_symbol");
+                    mg.geneName = rs.getString("full_name");
+                    mg.geneType = rs.getString("gene_type_lc");
 
-                // skip rows with missing chr, start or stop pos
-                if( Utils.isStringEmpty(mg.chr) || mg.startPos<=0 || mg.stopPos<=0 ) {
-                    continue;
+                    mg.mapKey = rs.getInt("map_key");
+                    mg.chr = rs.getString("chromosome");
+                    mg.startPos = rs.getInt("start_pos");
+                    mg.stopPos = rs.getInt("stop_pos");
+                    mg.strand = rs.getString("strand");
+
+                    // skip rows with missing chr, start or stop pos
+                    if (Utils.isStringEmpty(mg.chr) || mg.startPos <= 0 || mg.stopPos <= 0) {
+                        continue;
+                    }
+
+                    List<MappedGeneEx> genesForMapKey = results.get(mg.mapKey);
+                    if (genesForMapKey == null) {
+                        genesForMapKey = new ArrayList<>();
+                        results.put(mg.mapKey, genesForMapKey);
+                    }
+                    genesForMapKey.add(mg);
                 }
-
-                List<MappedGeneEx> genesForMapKey = results.get(mg.mapKey);
-                if( genesForMapKey==null ) {
-                    genesForMapKey = new ArrayList<>();
-                    results.put(mg.mapKey, genesForMapKey);
-                }
-                genesForMapKey.add(mg);
             }
+
         }
 
         return results;
@@ -652,9 +656,10 @@ public class VcmapWebService {
         MappedGeneEx g = null;
         Map<Integer, List<MappedGeneEx>> orthologs = new HashMap<>();
 
-        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection() ) {
+        try( Connection conn = DataSourceFactory.getInstance().getDataSource().getConnection() ;
+             PreparedStatement ps = conn.prepareStatement(sql);) {
 
-            PreparedStatement ps = conn.prepareStatement(sql);
+
             ps.setInt(1, mapKey);
             ps.setString(2, chr);
             ps.setInt(3, startPos);
@@ -663,53 +668,54 @@ public class VcmapWebService {
                 ps.setInt(5, minGeneSize);
             }
 
-            ResultSet rs = ps.executeQuery();
+            try(ResultSet rs = ps.executeQuery();) {
 
-            while (rs.next()) {
-                MappedGeneEx o = new MappedGeneEx();
-                o.geneRgdId = rs.getInt("id2");
-                o.geneSymbol = rs.getString("symbol2");
-                o.geneName = rs.getString("name2");
-                o.geneType = rs.getString("type2");
+                while (rs.next()) {
+                    MappedGeneEx o = new MappedGeneEx();
+                    o.geneRgdId = rs.getInt("id2");
+                    o.geneSymbol = rs.getString("symbol2");
+                    o.geneName = rs.getString("name2");
+                    o.geneType = rs.getString("type2");
 
-                o.mapKey = rs.getInt("mapkey2");
-                o.chr = rs.getString("chr2");
-                o.startPos = rs.getInt("start2");
-                o.stopPos = rs.getInt("stop2");
-                o.strand = rs.getString("strand2");
+                    o.mapKey = rs.getInt("mapkey2");
+                    o.chr = rs.getString("chr2");
+                    o.startPos = rs.getInt("start2");
+                    o.stopPos = rs.getInt("stop2");
+                    o.strand = rs.getString("strand2");
 
-                // skip rows with missing chr, start or stop pos
-                if( Utils.isStringEmpty(o.chr) || o.startPos<=0 || o.stopPos<=0 ) {
-                    continue;
+                    // skip rows with missing chr, start or stop pos
+                    if (Utils.isStringEmpty(o.chr) || o.startPos <= 0 || o.stopPos <= 0) {
+                        continue;
+                    }
+
+                    int id1 = rs.getInt("id1");
+                    if (g == null || g.geneRgdId != id1) {
+                        g = new MappedGeneEx();
+                        g.geneRgdId = rs.getInt("id1");
+                        g.geneSymbol = rs.getString("symbol1");
+                        g.geneName = rs.getString("name1");
+                        g.geneType = rs.getString("type1");
+
+                        g.mapKey = rs.getInt("mapkey1");
+                        g.chr = rs.getString("chr1");
+                        g.startPos = rs.getInt("start1");
+                        g.stopPos = rs.getInt("stop1");
+                        g.strand = rs.getString("strand1");
+
+                        orthologs = new HashMap<>();
+                        Map<String, Object> entry = new HashMap<>();
+                        entry.put("gene", g);
+                        entry.put("orthologs", orthologs);
+                        results.add(entry);
+                    }
+
+                    List<MappedGeneEx> genesForMapKey = orthologs.get(o.mapKey);
+                    if (genesForMapKey == null) {
+                        genesForMapKey = new ArrayList<>();
+                        orthologs.put(o.mapKey, genesForMapKey);
+                    }
+                    genesForMapKey.add(o);
                 }
-
-                int id1 = rs.getInt("id1");
-                if( g==null || g.geneRgdId!=id1 ) {
-                    g = new MappedGeneEx();
-                    g.geneRgdId = rs.getInt("id1");
-                    g.geneSymbol = rs.getString("symbol1");
-                    g.geneName = rs.getString("name1");
-                    g.geneType = rs.getString("type1");
-
-                    g.mapKey = rs.getInt("mapkey1");
-                    g.chr = rs.getString("chr1");
-                    g.startPos = rs.getInt("start1");
-                    g.stopPos = rs.getInt("stop1");
-                    g.strand = rs.getString("strand1");
-
-                    orthologs = new HashMap<>();
-                    Map<String, Object> entry = new HashMap<>();
-                    entry.put("gene", g);
-                    entry.put("orthologs", orthologs);
-                    results.add(entry);
-                }
-
-                List<MappedGeneEx> genesForMapKey = orthologs.get(o.mapKey);
-                if( genesForMapKey==null ) {
-                    genesForMapKey = new ArrayList<>();
-                    orthologs.put(o.mapKey, genesForMapKey);
-                }
-                genesForMapKey.add(o);
             }
         }
 
@@ -794,29 +800,33 @@ public class VcmapWebService {
                       x.map_key1=m1.map_key 
                       and x.map_key2=m2.map_key and m2.rgd_id=i2.rgd_id and i2.species_type_key=s2.species_type_key
                     """;
-                try( PreparedStatement ps = mapDAO.getConnection().prepareStatement(sql) ) {
+                try(
+                        Connection connection=mapDAO.getConnection();
+                        PreparedStatement ps = connection.prepareStatement(sql); ) {
 
-                    ResultSet rs = ps.executeQuery();
-                    while( rs.next() ) {
+                    try(ResultSet rs = ps.executeQuery();) {
+                        while (rs.next()) {
 
-                        int mapKey1 = rs.getInt(1);
-                        int mapKey2 = rs.getInt(2);
-                        int speciesTypeKey2 = rs.getInt(3);
-                        String speciesName2 = rs.getString(4);
-                        String mapName2 = rs.getString(5);
+                            int mapKey1 = rs.getInt(1);
+                            int mapKey2 = rs.getInt(2);
+                            int speciesTypeKey2 = rs.getInt(3);
+                            String speciesName2 = rs.getString(4);
+                            String mapName2 = rs.getString(5);
 
-                        ComparableSpecies cs = new ComparableSpecies();
-                        cs.mapKey = mapKey2;
-                        cs.speciesTypeKey = speciesTypeKey2;
-                        cs.speciesCommonName = speciesName2;
-                        cs.mapName = mapName2;
+                            ComparableSpecies cs = new ComparableSpecies();
+                            cs.mapKey = mapKey2;
+                            cs.speciesTypeKey = speciesTypeKey2;
+                            cs.speciesCommonName = speciesName2;
+                            cs.mapName = mapName2;
 
-                        List<ComparableSpecies> list = _comparableSpeciesMap.get(mapKey1);
-                        if( list==null ) {
-                            list = new ArrayList<>();
-                            _comparableSpeciesMap.put(mapKey1, list);
+                            List<ComparableSpecies> list = _comparableSpeciesMap.get(mapKey1);
+                            if (list == null) {
+                                list = new ArrayList<>();
+                                _comparableSpeciesMap.put(mapKey1, list);
+                            }
+                            list.add(cs);
+
                         }
-                        list.add(cs);
                     }
                 }
             }
