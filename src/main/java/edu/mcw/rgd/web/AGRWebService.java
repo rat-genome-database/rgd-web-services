@@ -750,18 +750,20 @@ public class AGRWebService {
             String[] omimOrphaIds = a.getXrefSource().split("[|,\\s]");
             for( String omimOrphaId: omimOrphaIds ) {
 
-                HashMap evidence = new HashMap<>();
-                evidenceList.add(evidence);
+                if( omimOrphaId.startsWith("MIM:") || omimOrphaId.startsWith("PMID:") || omimOrphaId.startsWith("ORPHA:") ) {
+                    HashMap evidence = new HashMap<>();
+                    evidenceList.add(evidence);
 
-                evidence.put("publicationId", omimOrphaId);
+                    evidence.put("publicationId", omimOrphaId);
 
-                HashMap crossRef = new HashMap<>();
-                crossRef.put("id", omimOrphaId);
-                List<String> pages = new ArrayList<>();
-                pages.add("disease");
-                crossRef.put("pages", pages);
+                    HashMap crossRef = new HashMap<>();
+                    crossRef.put("id", omimOrphaId);
+                    List<String> pages = new ArrayList<>();
+                    pages.add("disease");
+                    crossRef.put("pages", pages);
 
-                evidence.put("crossReference", crossRef);
+                    evidence.put("crossReference", crossRef);
+                }
             }
             return evidenceList;
         }
