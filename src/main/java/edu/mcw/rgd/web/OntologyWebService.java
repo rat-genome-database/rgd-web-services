@@ -5,6 +5,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
 
+import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -74,8 +75,8 @@ public class OntologyWebService {
     @RequestMapping(value="/parentTerms/{accId}", method=RequestMethod.GET)
     @Operation(summary="Returns parent terms for Accession ID", tags="Ontology")
     public HashMap<String,String > getOntParentTerms(HttpServletRequest request,
-                                                   @Parameter(description="Accession ID", required=true)
-                                                   @PathVariable(name = "accId") String accId
+                                                     @Parameter(description="Accession ID", required=true)
+                                                     @PathVariable(name = "accId") String accId
 
     ) throws Exception{
 
@@ -87,6 +88,29 @@ public class OntologyWebService {
         for(String id:parentTermIdss) {
             Term term = oDAO.getTerm(id);
             data.put(id, term.getTerm());
+        }
+        return data;
+    }
+    @RequestMapping(value="/parentTermsWithSynonyms/{accId}", method=RequestMethod.GET)
+    @Operation(summary="Returns parent terms for Accession ID", tags="Ontology")
+    public HashMap<String,String > getOntParentTermsNSynonyms(HttpServletRequest request,
+                                                   @Parameter(description="Accession ID", required=true)
+                                                   @PathVariable(name = "accId") String accId
+
+    ) throws Exception{
+
+
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        List<String> parentTermIdss = oDAO.getAllActiveTermAncestorAccIds(accId);
+        List<TermSynonym> synonyms=oDAO.getSynonyms(parentTermIdss);
+        HashMap<String,String > data = new HashMap<>();
+        for(String id:parentTermIdss) {
+            Term term = oDAO.getTerm(id);
+            data.put(id, term.getTerm());
+        }
+        for(TermSynonym synonym:synonyms){
+            data.put(synonym.getTermAcc(), synonym.getName());
         }
         return data;
     }
