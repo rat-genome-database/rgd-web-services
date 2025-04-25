@@ -79,35 +79,38 @@ public class MappedGeneEx implements Cloneable {
                     "AND md.chromosome=? AND md.stop_pos>=? AND md.start_pos<=? AND md.map_key=? "+
                     "ORDER BY md.start_pos";
 
-            try( Connection conn = dao.getConnection() ) {
-                PreparedStatement ps = conn.prepareStatement(sql);
+            try( Connection conn = dao.getConnection() ;
+             PreparedStatement ps = conn.prepareStatement(sql);){
+
                 ps.setString(1, chr);
                 ps.setInt(2, startPos);
                 ps.setInt(3, stopPos);
                 ps.setInt(4, mapKey);
 
-                ResultSet rs = ps.executeQuery();
+               try( ResultSet rs = ps.executeQuery();) {
 
-                while (rs.next()) {
-                    MappedGeneEx mg = new MappedGeneEx();
-                    mg.geneRgdId = rs.getInt("rgd_id");
-                    mg.geneSymbol = rs.getString("gene_symbol");
-                    mg.geneName = rs.getString("gene_name");
-                    mg.geneType = rs.getString("gene_type");
+                   while (rs.next()) {
+                       MappedGeneEx mg = new MappedGeneEx();
+                       mg.geneRgdId = rs.getInt("rgd_id");
+                       mg.geneSymbol = rs.getString("gene_symbol");
+                       mg.geneName = rs.getString("gene_name");
+                       mg.geneType = rs.getString("gene_type");
 
-                    mg.mapKey = mapKey;
-                    mg.chr = chr;
-                    mg.startPos = rs.getInt("start_pos");
-                    mg.stopPos = rs.getInt("stop_pos");
-                    mg.strand = rs.getString("strand");
+                       mg.mapKey = mapKey;
+                       mg.chr = chr;
+                       mg.startPos = rs.getInt("start_pos");
+                       mg.stopPos = rs.getInt("stop_pos");
+                       mg.strand = rs.getString("strand");
 
-                    // skip rows with missing chr, start or stop pos
-                    if (Utils.isStringEmpty(mg.chr) || mg.startPos <= 0 || mg.stopPos <= 0) {
-                        continue;
-                    }
+                       // skip rows with missing chr, start or stop pos
+                       if (Utils.isStringEmpty(mg.chr) || mg.startPos <= 0 || mg.stopPos <= 0) {
+                           continue;
+                       }
 
-                    results.add(mg);
-                }
+                       results.add(mg);
+                   }
+               }
+
             }
             _geneLruCache.put(key, results);
 
@@ -147,23 +150,25 @@ public class MappedGeneEx implements Cloneable {
 
         Map<Integer, List<Integer>> result = new HashMap<>();
 
-        try( Connection conn = dao.getConnection() ) {
-            PreparedStatement ps = conn.prepareStatement(sql);
+        try( Connection conn = dao.getConnection() ;
+             PreparedStatement ps = conn.prepareStatement(sql);) {
+
             ps.setInt(1, mapKey1);
             ps.setInt(2, mapKey2);
 
-            ResultSet rs = ps.executeQuery();
+           try( ResultSet rs = ps.executeQuery();) {
 
-            while (rs.next()) {
-                int geneRgd1 = rs.getInt(1);
-                int geneRgd2 = rs.getInt(2);
-                List<Integer> geneRgdIds = result.get(geneRgd1);
-                if (geneRgdIds == null) {
-                    geneRgdIds = new ArrayList<>();
-                    result.put(geneRgd1, geneRgdIds);
-                }
-                geneRgdIds.add(geneRgd2);
-            }
+               while (rs.next()) {
+                   int geneRgd1 = rs.getInt(1);
+                   int geneRgd2 = rs.getInt(2);
+                   List<Integer> geneRgdIds = result.get(geneRgd1);
+                   if (geneRgdIds == null) {
+                       geneRgdIds = new ArrayList<>();
+                       result.put(geneRgd1, geneRgdIds);
+                   }
+                   geneRgdIds.add(geneRgd2);
+               }
+           }
         }
         return result;
     }
