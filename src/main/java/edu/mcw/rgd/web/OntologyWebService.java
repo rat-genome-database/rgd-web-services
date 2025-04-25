@@ -91,9 +91,9 @@ public class OntologyWebService {
         }
         return data;
     }
-    @RequestMapping(value="/parentTermsWithSynonyms/{accId}", method=RequestMethod.GET)
+    @RequestMapping(value="/termNparentTermSynonyms/{accId}", method=RequestMethod.GET)
     @Operation(summary="Returns parent terms for Accession ID", tags="Ontology")
-    public HashMap<String,String > getOntParentTermsNSynonyms(HttpServletRequest request,
+    public List<String> getOntParentTermsNSynonyms(HttpServletRequest request,
                                                    @Parameter(description="Accession ID", required=true)
                                                    @PathVariable(name = "accId") String accId
 
@@ -102,15 +102,13 @@ public class OntologyWebService {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
 
-        List<String> parentTermIdss = oDAO.getAllActiveTermAncestorAccIds(accId);
-        List<TermSynonym> synonyms=oDAO.getSynonyms(parentTermIdss);
-        HashMap<String,String > data = new HashMap<>();
-        for(String id:parentTermIdss) {
-            Term term = oDAO.getTerm(id);
-            data.put(id, term.getTerm());
-        }
+        List<String> parentTermIds = oDAO.getAllActiveTermAncestorAccIds(accId);
+        parentTermIds.add(accId);
+        List<TermSynonym> synonyms=oDAO.getSynonymsByTermAccIdList(parentTermIds);
+        List<String> data=new ArrayList<>();
+
         for(TermSynonym synonym:synonyms){
-            data.put(synonym.getTermAcc(), synonym.getName());
+            data.add( synonym.getName());
         }
         return data;
     }
