@@ -34,8 +34,6 @@ public class StrainWebService {
     AnnotationDAO annotdao = new AnnotationDAO();
 
 
-    AnnotationDAO annotdao = new AnnotationDAO();
-
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @Operation(summary="Return a strain by RGD ID",tags = "Rat Strain")
     public Strain getStrainByRgdId(HttpServletRequest request, @Parameter(name="rgdId", description="RGD ID of the strain", required=true) @PathVariable(name = "rgdId") int rgdId ) throws Exception{
