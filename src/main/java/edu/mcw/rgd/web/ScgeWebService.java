@@ -11,6 +11,7 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.TranscriptDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.MapData;
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.Transcript;
 import edu.mcw.rgd.process.Utils;
 
@@ -48,10 +49,10 @@ public class ScgeWebService {
         int mapKey = 0;
         try {
             mapKey = mapDAO.getPrimaryRefAssembly(speciesTypeKey, "NCBI").getKey();
-        } catch( Exxception e ) {
+        } catch( Exception e ) {
             return null;
         }
-        
+
         JsonObj obj = getGeneModel( mapKey, chr, startPos, stopPos );
         ArrayList<JsonObj> result = new ArrayList<>();
         result.add(obj);
