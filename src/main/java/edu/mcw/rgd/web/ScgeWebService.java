@@ -44,7 +44,15 @@ public class ScgeWebService {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(), request);
 
-        JsonObj obj = getGeneModel( chr, startPos, stopPos );
+        int speciesTypeKey = SpeciesType.parse(species);
+        int mapKey = 0;
+        try {
+            mapKey = mapDAO.getPrimaryRefAssembly(speciesTypeKey, "NCBI").getKey();
+        } catch( Exxception e ) {
+            return null;
+        }
+        
+        JsonObj obj = getGeneModel( mapKey, chr, startPos, stopPos );
         ArrayList<JsonObj> result = new ArrayList<>();
         result.add(obj);
         return result;
@@ -72,16 +80,15 @@ public class ScgeWebService {
         }
 
         if( chr!=null && startPos>0 && stopPos>0 ) {
-            JsonObj jsonObj = getGeneModel(chr, startPos, stopPos);
+            int MAP_KEY = 38;
+            JsonObj jsonObj = getGeneModel(MAP_KEY, chr, startPos, stopPos);
             return jsonObj;
         }
         return null;
     }
 
 
-    JsonObj getGeneModel( String chr, int startPos, int stopPos ) throws Exception {
-
-        int MAP_KEY = 38;
+    JsonObj getGeneModel( int MAP_KEY, String chr, int startPos, int stopPos ) throws Exception {
 
         List<Gene> genes = geneDAO.getActiveGenes( chr, startPos, stopPos, MAP_KEY );
         genes.removeIf( g -> Utils.NVL(g.getType(),"").equals("biological-region") );
