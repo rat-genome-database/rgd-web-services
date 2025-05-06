@@ -99,25 +99,25 @@ public class ScgeWebService {
     }
 
 
-    JsonObj getGeneModel( int MAP_KEY, String chr, int startPos, int stopPos, String speciesName ) throws Exception {
+    JsonObj getGeneModel( int mapKey, String chr, int startPos, int stopPos, String speciesName ) throws Exception {
 
-        List<Gene> genes = geneDAO.getActiveGenes( chr, startPos, stopPos, MAP_KEY );
+        List<Gene> genes = geneDAO.getActiveGenes( chr, startPos, stopPos, mapKey );
         genes.removeIf( g -> Utils.NVL(g.getType(),"").equals("biological-region") );
         if( genes.isEmpty() ) {
             return null;
         }
         Gene gene = genes.get(0);
 
-        List<MapData> mds = mapDAO.getMapData( gene.getRgdId(), MAP_KEY );
+        List<MapData> mds = mapDAO.getMapData( gene.getRgdId(), mapKey );
         if( mds.isEmpty() ) {
             return null;
         }
         MapData md = mds.get(0);
 
-        List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), MAP_KEY);
+        List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), mapKey);
 
         JsonObj obj = new JsonObj();
-        obj.sourceUrl = "https://rest.rgd.mcw.edu/rgdws/track/"+speciesName+"/All Genes/"+chr+"/"+gene.getSymbol()+".json";
+        obj.sourceUrl = "https://rest.rgd.mcw.edu/rgdws/track/"+speciesName+"/All Genes/"+chr+"/"+gene.getSymbol()+".json?mapKey="+mapKey;
         obj.strand = Utils.NVL(md.getStrand(), "+").equals("-") ? -1 : +1;
 
         obj.name = gene.getSymbol();
@@ -127,7 +127,7 @@ public class ScgeWebService {
         obj.seqId = chr;
         obj.type = "gene";
 
-        CdsUtils utils = new CdsUtils(this.trDAO, MAP_KEY);
+        CdsUtils utils = new CdsUtils(this.trDAO, mapKey);
 
         for( Transcript tr: trs ) {
             MapData trmd = tr.getGenomicPositions().get(0);
@@ -150,7 +150,7 @@ public class ScgeWebService {
 
             for (MapData trMd : tr.getGenomicPositions()) {
                 // skip positions from other assemblies
-                if( !(trMd.getMapKey()==MAP_KEY) ) {
+                if( !(trMd.getMapKey()==mapKey) ) {
                     continue;
                 }
 
