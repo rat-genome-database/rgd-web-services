@@ -40,20 +40,29 @@ public class ScgeWebService {
                             @Parameter(description="Chromosome, f.e 19", required=true) @PathVariable(name = "chr") String chr,
                             @Parameter(description="Start pos, f.e. 55090918", required=true) @PathVariable(name = "startPos") Integer startPos,
                             @Parameter(description="Stop pos, f.e. 55117637", required=true) @PathVariable(name = "stopPos") Integer stopPos,
-                            @Parameter(description="Ignore cache (optional)") @RequestParam(required = false) String ignoreCache
+                            @Parameter(description="Ignore cache (optional)") @RequestParam(required = false) String ignoreCache,
+                            @Parameter(description="Species map key (optional)") @RequestParam(required = false) Integer mapKey
                             ) throws Exception {
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(), request);
 
         int speciesTypeKey = SpeciesType.parse(species);
-        int mapKey = 0;
-        try {
-            mapKey = mapDAO.getPrimaryRefAssembly(speciesTypeKey, "NCBI").getKey();
-        } catch( Exception e ) {
-            return null;
+        int speciesMapKey = 0;
+        String speciesName = SpeciesType.getShortName(speciesTypeKey).toLowerCase();
+
+        // map key override
+        if( mapKey!=null ) {
+            speciesMapKey = mapKey;
+        } else {
+            // no map key override given: use map key for the species primary assembly
+            try {
+                speciesMapKey = mapDAO.getPrimaryRefAssembly(speciesTypeKey, "NCBI").getKey();
+            } catch (Exception e) {
+                return null;
+            }
         }
 
-        JsonObj obj = getGeneModel( mapKey, chr, startPos, stopPos );
+        JsonObj obj = getGeneModel( speciesMapKey, chr, startPos, stopPos, speciesName );
         ArrayList<JsonObj> result = new ArrayList<>();
         result.add(obj);
         return result;
@@ -82,14 +91,15 @@ public class ScgeWebService {
 
         if( chr!=null && startPos>0 && stopPos>0 ) {
             int MAP_KEY = 38;
-            JsonObj jsonObj = getGeneModel(MAP_KEY, chr, startPos, stopPos);
+            String speciesName = "human";
+            JsonObj jsonObj = getGeneModel(MAP_KEY, chr, startPos, stopPos, speciesName);
             return jsonObj;
         }
         return null;
     }
 
 
-    JsonObj getGeneModel( int MAP_KEY, String chr, int startPos, int stopPos ) throws Exception {
+    JsonObj getGeneModel( int MAP_KEY, String chr, int startPos, int stopPos, String speciesName ) throws Exception {
 
         List<Gene> genes = geneDAO.getActiveGenes( chr, startPos, stopPos, MAP_KEY );
         genes.removeIf( g -> Utils.NVL(g.getType(),"").equals("biological-region") );
@@ -107,7 +117,7 @@ public class ScgeWebService {
         List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), MAP_KEY);
 
         JsonObj obj = new JsonObj();
-        obj.sourceUrl = "https://pipelines.rgd.mcw.edu/rgdws/track/human/All Genes/"+chr+"/"+gene.getSymbol()+".json";
+        obj.sourceUrl = "https://rest.rgd.mcw.edu/rgdws/track/"+speciesName+"/All Genes/"+chr+"/"+gene.getSymbol()+".json";
         obj.strand = Utils.NVL(md.getStrand(), "+").equals("-") ? -1 : +1;
 
         obj.name = gene.getSymbol();
