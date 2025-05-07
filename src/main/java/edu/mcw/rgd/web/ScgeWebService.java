@@ -68,118 +68,90 @@ public class ScgeWebService {
         return result;
     }
 
-    @RequestMapping(value="/gene/{geneCoordinates}", method= RequestMethod.GET)
-    @Operation(summary="Return a a full gene model given gene coordinates, f.e. 19:55090918..55117637", tags = "SCGE")
-    public Object getGeneModel(HttpServletRequest request, @Parameter(description="Gene coordinates, f.e. 19:55090918..55117637", required=true) @PathVariable(name = "geneCoordinates") String geneCoordinates) throws Exception{
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+    List<JsonObj> getGeneModel( int mapKey, String chr, int startPos, int stopPos, String speciesName ) throws Exception {
 
-        String args = geneCoordinates;
-        String chr = null;
-        int startPos = 0;
-        int stopPos = 0;
-
-        int colonPos = geneCoordinates.indexOf(':');
-        if( colonPos > 0 ) {
-            chr = geneCoordinates.substring(0, colonPos);
-
-            int doubleDotPos = args.indexOf("..");
-            if( doubleDotPos > 0 ) {
-                startPos = Integer.parseInt(args.substring(colonPos+1, doubleDotPos));
-                stopPos = Integer.parseInt(args.substring(doubleDotPos+2));
-            }
-        }
-
-        if( chr!=null && startPos>0 && stopPos>0 ) {
-            int MAP_KEY = 38;
-            String speciesName = "human";
-            JsonObj jsonObj = getGeneModel(MAP_KEY, chr, startPos, stopPos, speciesName);
-            return jsonObj;
-        }
-        return null;
-    }
-
-
-    JsonObj getGeneModel( int mapKey, String chr, int startPos, int stopPos, String speciesName ) throws Exception {
+        List<JsonObj> result = new ArrayList<>();
 
         List<Gene> genes = geneDAO.getActiveGenes( chr, startPos, stopPos, mapKey );
         genes.removeIf( g -> Utils.NVL(g.getType(),"").equals("biological-region") );
-        if( genes.isEmpty() ) {
-            return null;
-        }
-        Gene gene = genes.get(0);
 
-        List<MapData> mds = mapDAO.getMapData( gene.getRgdId(), mapKey );
-        if( mds.isEmpty() ) {
-            return null;
-        }
-        MapData md = mds.get(0);
+        for( Gene gene: genes ) {
 
-        List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), mapKey);
+            List<MapData> mds = mapDAO.getMapData(gene.getRgdId(), mapKey);
+            if (mds.isEmpty()) {
+                continue;
+            }
+            MapData md = mds.get(0);
 
-        JsonObj obj = new JsonObj();
-        obj.sourceUrl = "https://rest.rgd.mcw.edu/rgdws/track/"+speciesName+"/All Genes/"+chr+"/"+gene.getSymbol()+".json?mapKey="+mapKey;
-        obj.strand = Utils.NVL(md.getStrand(), "+").equals("-") ? -1 : +1;
+            List<Transcript> trs = trDAO.getTranscriptsForGene(gene.getRgdId(), mapKey);
 
-        obj.name = gene.getSymbol();
-        obj.id = "RGD:"+gene.getRgdId();
-        obj.fmin = startPos;
-        obj.fmax = stopPos;
-        obj.seqId = chr;
-        obj.type = "gene";
+            JsonObj obj = new JsonObj();
+            obj.sourceUrl = "https://rest.rgd.mcw.edu/rgdws/track/" + speciesName + "/All Genes/" + chr + "/" + gene.getSymbol() + ".json?mapKey=" + mapKey;
+            obj.strand = Utils.NVL(md.getStrand(), "+").equals("-") ? -1 : +1;
 
-        CdsUtils utils = new CdsUtils(this.trDAO, mapKey);
+            obj.name = gene.getSymbol();
+            obj.id = "RGD:" + gene.getRgdId();
+            obj.fmin = startPos;
+            obj.fmax = stopPos;
+            obj.seqId = chr;
+            obj.type = "gene";
 
-        for( Transcript tr: trs ) {
-            MapData trmd = tr.getGenomicPositions().get(0);
+            CdsUtils utils = new CdsUtils(this.trDAO, mapKey);
 
-            TrInfo info = new TrInfo();
-            obj.children.add(info);
+            for (Transcript tr : trs) {
+                MapData trmd = tr.getGenomicPositions().get(0);
 
-            //info.type = tr.getType();
-            info.type = "mRNA";
-            info.name = tr.getAccId();
-            info.source = tr.getAccId().startsWith("ENS") ? "ENSEMBL" : "NCBI";
-            info.strand = trmd.getStrand().equals("-") ? -1 : +1;
-            info.id = "RGD:"+tr.getRgdId();
-            info.seqId = trmd.getChromosome();
-            info.fmin = trmd.getStartPos();
-            info.fmax = trmd.getStopPos();
+                TrInfo info = new TrInfo();
+                obj.children.add(info);
 
-            List<TrFeature> trFeatures = new ArrayList<>();
-            info.children = trFeatures;
+                //info.type = tr.getType();
+                info.type = "mRNA";
+                info.name = tr.getAccId();
+                info.source = tr.getAccId().startsWith("ENS") ? "ENSEMBL" : "NCBI";
+                info.strand = trmd.getStrand().equals("-") ? -1 : +1;
+                info.id = "RGD:" + tr.getRgdId();
+                info.seqId = trmd.getChromosome();
+                info.fmin = trmd.getStartPos();
+                info.fmax = trmd.getStopPos();
 
-            for (MapData trMd : tr.getGenomicPositions()) {
-                // skip positions from other assemblies
-                if( !(trMd.getMapKey()==mapKey) ) {
-                    continue;
-                }
+                List<TrFeature> trFeatures = new ArrayList<>();
+                info.children = trFeatures;
 
-                if( !positionsOverlap(trMd, md))
-                    continue;
-
-                List<CodingFeature> cfList = utils.buildCfList(trMd);
-
-                for (CodingFeature cf : cfList) {
-
-                    TrFeature tf = new TrFeature();
-                    tf.type = cf.getCanonicalName();
-                    if( tf.type.equals("CDS") ) {
-                        tf.phase = cf.getCodingPhase();
+                for (MapData trMd : tr.getGenomicPositions()) {
+                    // skip positions from other assemblies
+                    if (!(trMd.getMapKey() == mapKey)) {
+                        continue;
                     }
-                    tf.seqId = cf.getChromosome();
-                    tf.fmin = cf.getStartPos();
-                    tf.fmax = cf.getStopPos();
-                    tf.strand = cf.getStrand().equals("-")?-1:1;
-                    tf.source = info.source;
 
-                    trFeatures.add(tf);
+                    if (!positionsOverlap(trMd, md))
+                        continue;
+
+                    List<CodingFeature> cfList = utils.buildCfList(trMd);
+
+                    for (CodingFeature cf : cfList) {
+
+                        TrFeature tf = new TrFeature();
+                        tf.type = cf.getCanonicalName();
+                        if (tf.type.equals("CDS")) {
+                            tf.phase = cf.getCodingPhase();
+                        }
+                        tf.seqId = cf.getChromosome();
+                        tf.fmin = cf.getStartPos();
+                        tf.fmax = cf.getStopPos();
+                        tf.strand = cf.getStrand().equals("-") ? -1 : 1;
+                        tf.source = info.source;
+
+                        trFeatures.add(tf);
+                    }
+
                 }
 
             }
 
+            result.add(obj);
         }
 
-        return obj;
+        return result;
     }
 
     boolean positionsOverlap(MapData md1, MapData md2) {
