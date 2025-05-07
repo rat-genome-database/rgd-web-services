@@ -62,9 +62,7 @@ public class ScgeWebService {
             }
         }
 
-        JsonObj obj = getGeneModel( speciesMapKey, chr, startPos, stopPos, speciesName );
-        ArrayList<JsonObj> result = new ArrayList<>();
-        result.add(obj);
+        List<JsonObj> result = getGeneModel( speciesMapKey, chr, startPos, stopPos, speciesName );
         return result;
     }
 
