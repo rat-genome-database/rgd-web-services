@@ -54,6 +54,14 @@ public class ExpressionWebService {
         return pdao.getStudy(studyId);
     }
 
+    @RequestMapping(value = "/study/references/{studyId}", method = RequestMethod.GET)
+    @Operation(summary = "return a study's references", tags = "Expression")
+    public List<Integer> getStudyReferences(HttpServletRequest request,
+                                            @Parameter(description = "Study Id", required = true) @PathVariable(name = "studyId") int studyId) throws Exception{
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return pdao.getStudyReferences(studyId);
+    }
+
     @RequestMapping(value = "/expressionRecord/{ontTerm}/{rgdId}/{unit}", method = RequestMethod.GET)
     @Operation(summary = "return a list of Gene Expression Records", tags = "Expression")
     public List<GeneExpressionRecord> getGeneExpressionRecordsByExpressionValues(HttpServletRequest request,
