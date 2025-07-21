@@ -149,7 +149,7 @@ public class AnnotationWebService {
     @RequestMapping(value="/rgdId/{rgdId}/{ontologyPrefix}", method=RequestMethod.GET)
     @Operation(summary="Returns a list of annotations by RGD ID and ontology prefix",tags = "Annotation")
     public List<Annotation> getAnnotationsByRgdIdAndOntology(HttpServletRequest request,@Parameter(description="RGD ID", required=true) @PathVariable(value = "rgdId") int rgdId,
-                                                             @Parameter(description="Ontology Prefix.  The prefix can be found left of the semicolon in an ontology term accession ID.  As an example, term accession PW:0000034 has the ontology prefix PW", required=true) @PathVariable(value = "ontologyPrefix") String prefix) throws Exception{
+                                                             @Parameter(description="Ontology Prefix.  The prefix can be found left of the colon in an ontology term accession ID.  As an example, term accession PW:0000034 has the ontology prefix PW", required=true) @PathVariable(value = "ontologyPrefix") String prefix) throws Exception{
 
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         AnnotationDAO adao = new AnnotationDAO();
