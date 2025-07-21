@@ -17,7 +17,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by jdepons on 5/31/2016.
@@ -158,5 +162,21 @@ public class AnnotationWebService {
 
     }
 
+    @Operation(summary = "Returns a list of annotations based on the RGD IDs List provided and ontology prefix",
+            description = "Returns a list of annotations based on the RGD IDs List provided and ontology prefix",tags = "Annotation")
+    @RequestMapping(value="/rgdIdList/{rgdIdList}/{ontologyPrefix}", method=RequestMethod.GET)
+    public List<Annotation> getAnnotationsByRgdIdListAndOntology(HttpServletRequest request,@Parameter(description = "Comma-separated list of item RGD IDs", required = true)
+                                         @PathVariable String rgdIdList, @Parameter(description="Ontology Prefix.  The prefix can be found left of the colon in an ontology term accession ID.  As an example, term accession PW:0000034 has the ontology prefix PW", required=true) @PathVariable(value = "ontologyPrefix") String prefix) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
 
+        AnnotationDAO adao = new AnnotationDAO();
+       try {
+           List<Integer> idList = Stream.of(rgdIdList.split(",")).map(id -> Integer.parseInt(id.toString().trim())).toList();
+           return adao.getAnnotationsForRgdIdListAndOntology(idList,prefix.toUpperCase());
+
+       }catch (Exception e){
+           String errorMessage= "Verify input list for missing commas .."+ rgdIdList.toString() ;
+           throw new RuntimeException(errorMessage);
+       }
+    }
 }
