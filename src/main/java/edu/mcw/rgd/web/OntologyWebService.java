@@ -40,6 +40,17 @@ public class OntologyWebService {
         return oDAO.getTermByAccId(accId);
 
     }
+
+    @RequestMapping(value = "/term/ont/{termName}/{prefix}", method = RequestMethod.GET)
+    @Operation(summary = "Returns an ontology tern based on the name and prefix", tags = "Ontology")
+    public Term getTermByNameAndPrefix(HttpServletRequest request,
+                                       @Parameter(description = "Term Name", required = true) @PathVariable(name = "termName") String termName,
+                                       @Parameter(description = "Ontology Prefix", required = true) @PathVariable(name = "prefix") String prefix) throws Exception
+    {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return oDAO.getTermLikeNameAndAccPrefix(termName,prefix);
+    }
+
     @RequestMapping(value="/term/{accId1}/{accId2}", method=RequestMethod.GET)
     @Operation(summary="Returns true or false for terms", tags="Ontology")
     public boolean isDescendantOf(HttpServletRequest request,
