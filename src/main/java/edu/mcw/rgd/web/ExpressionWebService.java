@@ -108,76 +108,7 @@ public class ExpressionWebService {
                                                                              @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                              @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-
-        if (page < 0) {
-            page = 0;
-        }
-        if (size < 1) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        int from = page * size;
-        if (from + size > MAX_RESULT_WINDOW) {
-            throw new IllegalArgumentException("Requested page is beyond the maximum result window: page*size + size ("
-                    + (from + size) + ") must not exceed " + MAX_RESULT_WINDOW + ". Use a smaller page/size.");
-        }
-
-        final int fromOffset = from;
-        final int pageSize = size;
-        ElasticsearchClient client = ClientInit.getClient();
-        SearchResponse<ExpressionDataIndexObject> response = client.search(s -> s
-                        .index(EXPRESSION_INDEX)
-                        .from(fromOffset)
-                        .size(pageSize)
-                        .query(q -> q.term(t -> t.field("tissueAcc.keyword").value(tissueId))),
-                ExpressionDataIndexObject.class);
-
-        List<ExpressionDataIndexObject> records = new ArrayList<>();
-        for (Hit<ExpressionDataIndexObject> hit : response.hits().hits()) {
-            if (hit.source() != null) {
-                records.add(hit.source());
-            }
-        }
-        return records;
-    }
-
-    @RequestMapping(value = "/index/records/gene/{geneRgdId}", method = RequestMethod.GET)
-    @Operation(summary = "return a page of expression records for a gene from the Elasticsearch expression index", tags = "Expression")
-    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGene(HttpServletRequest request,
-                                                                           @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
-                                                                           @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
-                                                                           @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
-        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-
-        if (page < 0) {
-            page = 0;
-        }
-        if (size < 1) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        int from = page * size;
-        if (from + size > MAX_RESULT_WINDOW) {
-            throw new IllegalArgumentException("Requested page is beyond the maximum result window: page*size + size ("
-                    + (from + size) + ") must not exceed " + MAX_RESULT_WINDOW + ". Use a smaller page/size.");
-        }
-
-        final int fromOffset = from;
-        final int pageSize = size;
-        final String geneRgdIdValue = String.valueOf(geneRgdId);
-        ElasticsearchClient client = ClientInit.getClient();
-        SearchResponse<ExpressionDataIndexObject> response = client.search(s -> s
-                        .index(EXPRESSION_INDEX)
-                        .from(fromOffset)
-                        .size(pageSize)
-                        .query(q -> q.term(t -> t.field("geneRgdId.keyword").value(geneRgdIdValue))),
-                ExpressionDataIndexObject.class);
-
-        List<ExpressionDataIndexObject> records = new ArrayList<>();
-        for (Hit<ExpressionDataIndexObject> hit : response.hits().hits()) {
-            if (hit.source() != null) {
-                records.add(hit.source());
-            }
-        }
-        return records;
+        return searchExpressionIndex(termQuery("tissueAcc.keyword", tissueId), page, size);
     }
 
     @RequestMapping(value = "/index/records/strain/{strainAcc}", method = RequestMethod.GET)
@@ -187,36 +118,17 @@ public class ExpressionWebService {
                                                                              @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                              @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return searchExpressionIndex(termQuery("strainAcc.keyword", strainAcc), page, size);
+    }
 
-        if (page < 0) {
-            page = 0;
-        }
-        if (size < 1) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        int from = page * size;
-        if (from + size > MAX_RESULT_WINDOW) {
-            throw new IllegalArgumentException("Requested page is beyond the maximum result window: page*size + size ("
-                    + (from + size) + ") must not exceed " + MAX_RESULT_WINDOW + ". Use a smaller page/size.");
-        }
-
-        final int fromOffset = from;
-        final int pageSize = size;
-        ElasticsearchClient client = ClientInit.getClient();
-        SearchResponse<ExpressionDataIndexObject> response = client.search(s -> s
-                        .index(EXPRESSION_INDEX)
-                        .from(fromOffset)
-                        .size(pageSize)
-                        .query(q -> q.term(t -> t.field("strainAcc.keyword").value(strainAcc))),
-                ExpressionDataIndexObject.class);
-
-        List<ExpressionDataIndexObject> records = new ArrayList<>();
-        for (Hit<ExpressionDataIndexObject> hit : response.hits().hits()) {
-            if (hit.source() != null) {
-                records.add(hit.source());
-            }
-        }
-        return records;
+    @RequestMapping(value = "/index/records/gene/{geneRgdId}", method = RequestMethod.GET)
+    @Operation(summary = "return a page of expression records for a gene from the Elasticsearch expression index", tags = "Expression")
+    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGene(HttpServletRequest request,
+                                                                           @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
+                                                                           @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                           @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        return searchExpressionIndex(termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)), page, size);
     }
 
     @RequestMapping(value = "/index/records/{tissueId}/{strainAcc}", method = RequestMethod.GET)
@@ -227,7 +139,28 @@ public class ExpressionWebService {
                                                                                       @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                       @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        Query query = boolFilter(
+                termQuery("tissueAcc.keyword", tissueId),
+                termQuery("strainAcc.keyword", strainAcc));
+        return searchExpressionIndex(query, page, size);
+    }
 
+    @RequestMapping(value = "/index/records/gene/{geneRgdId}/tissue/{tissueId}", method = RequestMethod.GET)
+    @Operation(summary = "return a page of expression records for a gene and tissue from the Elasticsearch expression index", tags = "Expression")
+    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGeneAndTissue(HttpServletRequest request,
+                                                                                    @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
+                                                                                    @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
+                                                                                    @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                                    @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        Query query = boolFilter(
+                termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)),
+                termQuery("tissueAcc.keyword", tissueId));
+        return searchExpressionIndex(query, page, size);
+    }
+
+    /** Run a paged term/bool query against the expression index and return the page of source documents. */
+    private List<ExpressionDataIndexObject> searchExpressionIndex(Query query, int page, int size) throws Exception {
         if (page < 0) {
             page = 0;
         }
@@ -242,10 +175,6 @@ public class ExpressionWebService {
 
         final int fromOffset = from;
         final int pageSize = size;
-        Query query = Query.of(q -> q.bool(b -> b
-                .filter(f -> f.term(t -> t.field("tissueAcc.keyword").value(tissueId)))
-                .filter(f -> f.term(t -> t.field("strainAcc.keyword").value(strainAcc)))));
-
         ElasticsearchClient client = ClientInit.getClient();
         SearchResponse<ExpressionDataIndexObject> response = client.search(s -> s
                         .index(EXPRESSION_INDEX)
@@ -261,6 +190,16 @@ public class ExpressionWebService {
             }
         }
         return records;
+    }
+
+    /** Exact-match term query on a keyword field. */
+    private static Query termQuery(String field, String value) {
+        return Query.of(q -> q.term(t -> t.field(field).value(value)));
+    }
+
+    /** Combine term queries as filter clauses (exact match, no scoring). */
+    private static Query boolFilter(Query... filters) {
+        return Query.of(q -> q.bool(b -> b.filter(List.of(filters))));
     }
 
 }
