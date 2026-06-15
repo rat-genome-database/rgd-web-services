@@ -140,6 +140,45 @@ public class ExpressionWebService {
         return records;
     }
 
+    @RequestMapping(value = "/index/records/strain/{strainAcc}", method = RequestMethod.GET)
+    @Operation(summary = "return a page of expression records for a strain from the Elasticsearch expression index", tags = "Expression")
+    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByStrain(HttpServletRequest request,
+                                                                             @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
+                                                                             @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                             @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+
+        if (page < 0) {
+            page = 0;
+        }
+        if (size < 1) {
+            size = DEFAULT_PAGE_SIZE;
+        }
+        int from = page * size;
+        if (from + size > MAX_RESULT_WINDOW) {
+            throw new IllegalArgumentException("Requested page is beyond the maximum result window: page*size + size ("
+                    + (from + size) + ") must not exceed " + MAX_RESULT_WINDOW + ". Use a smaller page/size.");
+        }
+
+        final int fromOffset = from;
+        final int pageSize = size;
+        ElasticsearchClient client = ClientInit.getClient();
+        SearchResponse<ExpressionDataIndexObject> response = client.search(s -> s
+                        .index(EXPRESSION_INDEX)
+                        .from(fromOffset)
+                        .size(pageSize)
+                        .query(q -> q.term(t -> t.field("strainAcc.keyword").value(strainAcc))),
+                ExpressionDataIndexObject.class);
+
+        List<ExpressionDataIndexObject> records = new ArrayList<>();
+        for (Hit<ExpressionDataIndexObject> hit : response.hits().hits()) {
+            if (hit.source() != null) {
+                records.add(hit.source());
+            }
+        }
+        return records;
+    }
+
     @RequestMapping(value = "/index/records/{tissueId}/{strainAcc}", method = RequestMethod.GET)
     @Operation(summary = "return a page of expression records for a tissue and strain from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByTissueAndStrain(HttpServletRequest request,
