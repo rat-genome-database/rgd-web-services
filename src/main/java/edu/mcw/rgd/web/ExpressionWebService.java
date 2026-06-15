@@ -107,36 +107,40 @@ public class ExpressionWebService {
     @Operation(summary = "return a page of expression records for a tissue from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByTissue(HttpServletRequest request,
                                                                              @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
+                                                                             @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                              @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                              @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-        return searchExpressionIndex(termQuery("tissueAcc.keyword", tissueId), page, size);
+        return searchExpressionIndex(termQuery("tissueAcc.keyword", tissueId), expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/strain/{strainAcc}", method = RequestMethod.GET)
     @Operation(summary = "return a page of expression records for a strain from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByStrain(HttpServletRequest request,
                                                                              @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
+                                                                             @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                              @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                              @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-        return searchExpressionIndex(termQuery("strainAcc.keyword", strainAcc), page, size);
+        return searchExpressionIndex(termQuery("strainAcc.keyword", strainAcc), expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/gene/{geneRgdId}", method = RequestMethod.GET)
     @Operation(summary = "return a page of expression records for a gene from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGene(HttpServletRequest request,
                                                                            @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
+                                                                           @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                            @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                            @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
-        return searchExpressionIndex(termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)), page, size);
+        return searchExpressionIndex(termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)), expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/genes", method = RequestMethod.GET)
     @Operation(summary = "return a page of expression records for a list of genes from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGenes(HttpServletRequest request,
                                                                             @Parameter(description = "Comma-separated list of Gene RGD IDs (e.g. 2004,1303,69417)", required = true) @RequestParam(name = "rgdIds") List<Integer> rgdIds,
+                                                                            @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                             @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                             @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -144,7 +148,7 @@ public class ExpressionWebService {
         for (Integer rgdId : rgdIds) {
             values.add(String.valueOf(rgdId));
         }
-        return searchExpressionIndex(termsQuery("geneRgdId.keyword", values), page, size);
+        return searchExpressionIndex(termsQuery("geneRgdId.keyword", values), expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/{tissueId}/{strainAcc}", method = RequestMethod.GET)
@@ -152,13 +156,14 @@ public class ExpressionWebService {
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByTissueAndStrain(HttpServletRequest request,
                                                                                       @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
                                                                                       @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
+                                                                                      @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                                       @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                       @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Query query = boolFilter(
                 termQuery("tissueAcc.keyword", tissueId),
                 termQuery("strainAcc.keyword", strainAcc));
-        return searchExpressionIndex(query, page, size);
+        return searchExpressionIndex(query, expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/gene/{geneRgdId}/tissue/{tissueId}", method = RequestMethod.GET)
@@ -166,13 +171,14 @@ public class ExpressionWebService {
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGeneAndTissue(HttpServletRequest request,
                                                                                     @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
                                                                                     @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
+                                                                                    @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                                     @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                     @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Query query = boolFilter(
                 termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)),
                 termQuery("tissueAcc.keyword", tissueId));
-        return searchExpressionIndex(query, page, size);
+        return searchExpressionIndex(query, expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/gene/{geneRgdId}/strain/{strainAcc}", method = RequestMethod.GET)
@@ -180,13 +186,14 @@ public class ExpressionWebService {
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGeneAndStrain(HttpServletRequest request,
                                                                                     @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
                                                                                     @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
+                                                                                    @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                                     @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                     @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
         Query query = boolFilter(
                 termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)),
                 termQuery("strainAcc.keyword", strainAcc));
-        return searchExpressionIndex(query, page, size);
+        return searchExpressionIndex(query, expressionLevel, page, size);
     }
 
     @RequestMapping(value = "/index/records/gene/{geneRgdId}/strain/{strainAcc}/tissue/{tissueId}", method = RequestMethod.GET)
@@ -195,6 +202,7 @@ public class ExpressionWebService {
                                                                                           @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
                                                                                           @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
                                                                                           @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
+                                                                                          @Parameter(description = "Optional expression level filter (e.g. high|medium|low)") @RequestParam(name = "expressionLevel", required = false) String expressionLevel,
                                                                                           @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
                                                                                           @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
         ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
@@ -202,6 +210,17 @@ public class ExpressionWebService {
                 termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)),
                 termQuery("strainAcc.keyword", strainAcc),
                 termQuery("tissueAcc.keyword", tissueId));
+        return searchExpressionIndex(query, expressionLevel, page, size);
+    }
+
+    /**
+     * Combine the base query with an optional expression-level filter, then run the paged search.
+     * When expressionLevel is null or blank, the base query is used unchanged.
+     */
+    private List<ExpressionDataIndexObject> searchExpressionIndex(Query query, String expressionLevel, int page, int size) throws Exception {
+        if (expressionLevel != null && !expressionLevel.isBlank()) {
+            query = boolFilter(query, termQuery("expressionLevel.keyword", expressionLevel));
+        }
         return searchExpressionIndex(query, page, size);
     }
 
