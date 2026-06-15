@@ -173,6 +173,22 @@ public class ExpressionWebService {
         return searchExpressionIndex(query, page, size);
     }
 
+    @RequestMapping(value = "/index/records/gene/{geneRgdId}/strain/{strainAcc}/tissue/{tissueId}", method = RequestMethod.GET)
+    @Operation(summary = "return a page of expression records for a gene, strain and tissue from the Elasticsearch expression index", tags = "Expression")
+    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGeneStrainAndTissue(HttpServletRequest request,
+                                                                                          @Parameter(description = "Gene RGD ID", required = true) @PathVariable(name = "geneRgdId") int geneRgdId,
+                                                                                          @Parameter(description = "Strain ontology term accession id (e.g. RS:0000029)", required = true) @PathVariable(name = "strainAcc") String strainAcc,
+                                                                                          @Parameter(description = "Tissue ontology term accession id (e.g. UBERON:0002107)", required = true) @PathVariable(name = "tissueId") String tissueId,
+                                                                                          @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                                          @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        Query query = boolFilter(
+                termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)),
+                termQuery("strainAcc.keyword", strainAcc),
+                termQuery("tissueAcc.keyword", tissueId));
+        return searchExpressionIndex(query, page, size);
+    }
+
     /** Run a paged term/bool query against the expression index and return the page of source documents. */
     private List<ExpressionDataIndexObject> searchExpressionIndex(Query query, int page, int size) throws Exception {
         if (page < 0) {
