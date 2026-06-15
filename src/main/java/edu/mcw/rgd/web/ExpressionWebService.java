@@ -1,7 +1,9 @@
 package edu.mcw.rgd.web;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import edu.mcw.rgd.dao.impl.AccessLogDAO;
@@ -131,6 +133,20 @@ public class ExpressionWebService {
         return searchExpressionIndex(termQuery("geneRgdId.keyword", String.valueOf(geneRgdId)), page, size);
     }
 
+    @RequestMapping(value = "/index/records/genes", method = RequestMethod.GET)
+    @Operation(summary = "return a page of expression records for a list of genes from the Elasticsearch expression index", tags = "Expression")
+    public List<ExpressionDataIndexObject> getExpressionIndexRecordsByGenes(HttpServletRequest request,
+                                                                            @Parameter(description = "Comma-separated list of Gene RGD IDs (e.g. 2004,1303,69417)", required = true) @RequestParam(name = "rgdIds") List<Integer> rgdIds,
+                                                                            @Parameter(description = "Zero-based page number") @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                            @Parameter(description = "Page size (max 10000)") @RequestParam(name = "size", defaultValue = "1000") int size) throws Exception {
+        ald.log("RESTAPI", this.getClass().getName() + ":" + new Throwable().getStackTrace()[0].getMethodName(),request);
+        List<String> values = new ArrayList<>();
+        for (Integer rgdId : rgdIds) {
+            values.add(String.valueOf(rgdId));
+        }
+        return searchExpressionIndex(termsQuery("geneRgdId.keyword", values), page, size);
+    }
+
     @RequestMapping(value = "/index/records/{tissueId}/{strainAcc}", method = RequestMethod.GET)
     @Operation(summary = "return a page of expression records for a tissue and strain from the Elasticsearch expression index", tags = "Expression")
     public List<ExpressionDataIndexObject> getExpressionIndexRecordsByTissueAndStrain(HttpServletRequest request,
@@ -225,6 +241,16 @@ public class ExpressionWebService {
     /** Exact-match term query on a keyword field. */
     private static Query termQuery(String field, String value) {
         return Query.of(q -> q.term(t -> t.field(field).value(value)));
+    }
+
+    /** Exact-match terms query on a keyword field (matches any of the supplied values). */
+    private static Query termsQuery(String field, List<String> values) {
+        List<FieldValue> fieldValues = new ArrayList<>();
+        for (String value : values) {
+            fieldValues.add(FieldValue.of(value));
+        }
+        TermsQueryField terms = TermsQueryField.of(t -> t.value(fieldValues));
+        return Query.of(q -> q.terms(t -> t.field(field).terms(terms)));
     }
 
     /** Combine term queries as filter clauses (exact match, no scoring). */
