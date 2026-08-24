@@ -24,7 +24,7 @@ public class OpenAPIConfig {
 
     @Value("${rgd.openapi.prod-url}")
     private String prodUrl;
-    @Value("${rgd.openapi.prod-url}")
+    @Value("${rgd.openapi.pipelines-url}")
     private String pipelinesUrl;
 
     @Bean
