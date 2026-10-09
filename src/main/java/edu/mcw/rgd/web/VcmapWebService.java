@@ -431,13 +431,13 @@ public class VcmapWebService {
         if( Utils.isStringEmpty(symbolPrefix) ) {
             sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
                     "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
-                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND COALESCE(gene_type_lc,'*') NOT IN('splice','allele') " +
                     " AND r.rgd_id=g.rgd_id";
             return MappedGeneQuery.run(mapDAO, sql, mapKey);
         } else {
             sql = "SELECT g.*,m.*,r.species_type_key FROM genes g, rgd_ids r, maps_data m " +
                     "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
-                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND COALESCE(gene_type_lc,'*') NOT IN('splice','allele') " +
                     " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
             return MappedGeneQuery.run(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
         }
@@ -455,14 +455,14 @@ public class VcmapWebService {
             sql = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
                     "FROM genes g, rgd_ids r, maps_data m " +
                     "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
-                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND COALESCE(gene_type_lc,'*') NOT IN('splice','allele') " +
                     " AND r.rgd_id=g.rgd_id";
             return MappedGeneQueryEx.execute(mapDAO, sql, mapKey);
         } else {
             sql = "SELECT g.rgd_id,g.gene_symbol,g.full_name,g.gene_type_lc,m.map_key,m.chromosome,m.start_pos,m.stop_pos,m.strand "+
                     "FROM genes g, rgd_ids r, maps_data m " +
                     "WHERE r.object_status='ACTIVE' AND g.rgd_id=m.rgd_id AND m.map_key=? " +
-                    " AND NVL(gene_type_lc,'*') NOT IN('splice','allele') " +
+                    " AND COALESCE(gene_type_lc,'*') NOT IN('splice','allele') " +
                     " AND r.rgd_id=g.rgd_id AND g.gene_symbol_lc LIKE ?";
             return MappedGeneQueryEx.execute(mapDAO, sql, mapKey, symbolPrefix.toLowerCase()+"%");
         }
