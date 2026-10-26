@@ -1,11 +1,13 @@
 package edu.mcw.rgd.web;
 
 import edu.mcw.rgd.dao.impl.AccessLogDAO;
+import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
 import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.spring.RatModelWebServiceQuery;
 import edu.mcw.rgd.datamodel.MappedStrain;
 import edu.mcw.rgd.datamodel.Strain;
+import edu.mcw.rgd.dao.spring.RatModelWebServiceQuery;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,8 +31,8 @@ public class StrainWebService {
 
     StrainDAO sdao = new StrainDAO();
     AccessLogDAO ald = new AccessLogDAO();
-
     AnnotationDAO annotdao = new AnnotationDAO();
+
 
     @RequestMapping(value="/{rgdId}", method= RequestMethod.GET)
     @Operation(summary="Return a strain by RGD ID",tags = "Rat Strain")
