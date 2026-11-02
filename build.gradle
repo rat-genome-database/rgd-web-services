@@ -30,8 +30,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
 
-	// https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc11
-	implementation 'com.oracle.database.jdbc:ojdbc11:23.3.0.23.09'
+	implementation 'org.postgresql:postgresql:42.7.7'
 // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jdbc
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: '3.1.4'
 // https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2
