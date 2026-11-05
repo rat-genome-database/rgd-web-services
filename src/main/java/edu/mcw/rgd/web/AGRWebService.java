@@ -550,7 +550,7 @@ public class AGRWebService {
         HashMap returnMap = new HashMap();
         ArrayList variantList = new ArrayList();
 
-        final int mapKey = 372;
+        final int mapKey = 380;
         Map map = MapManager.getInstance().getMap(mapKey);
         RgdVariantDAO vdao = new RgdVariantDAO();
         MapDAO mdao = new MapDAO();

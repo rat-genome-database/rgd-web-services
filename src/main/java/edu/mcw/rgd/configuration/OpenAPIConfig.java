@@ -19,22 +19,29 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenAPIConfig {
 
-//    @Value("${rgd.openapi.dev-url}")
-//    private String devUrl;
-//
-//    @Value("${rgd.openapi.prod-url}")
-//    private String prodUrl;
+    // Defaults keep the application starting when a deployed application.properties
+    // does not define these keys (the previous production URL and the local host name are used then).
+    @Value("${rgd.openapi.dev-url:}")
+    private String devUrl;
+
+    @Value("${rgd.openapi.prod-url:https://rest.rgd.mcw.edu/rgdws}")
+    private String prodUrl;
+    @Value("${rgd.openapi.pipelines-url:}")
+    private String pipelinesUrl;
 
     @Bean
     public OpenAPI myOpenAPI() throws UnknownHostException {
       Server server=new Server();
         if(RgdContext.isProduction()){
-            server.setUrl("https://rest.rgd.mcw.edu/rgdws");
+            server.setUrl(prodUrl);
             server.description("Production Server");
-        }else{
-            server.setUrl(RgdContext.getHostname()+"/rgdws");
-            server.description("Internal Server");
+        }else if(RgdContext.isPipelines()){
+            server.setUrl(pipelinesUrl.isEmpty() ? RgdContext.getHostname()+"/rgdws" : pipelinesUrl);
+            server.description("Pipelines Server");
 
+        }else {
+            server.setUrl(devUrl.isEmpty() ? RgdContext.getHostname()+"/rgdws" : devUrl);
+            server.description("Dev Server");
         }
 
         Contact contact = new Contact();
